@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { METACOGNITION_QUESTIONS, type Domain } from "../../../lib/questions";
-import type { DiagnosisPayload, Profile } from "../../../lib/types";
+import type { DiagnosisPayload } from "../../../lib/types";
+import { buildAiReportFromResult } from "../../../lib/aiReport";
 
 function avg(sum: number, count: number): number {
   if (count === 0) return 0;
@@ -47,32 +48,29 @@ export async function POST(req: Request) {
   }
 
   const { profile, answers } = payload ?? ({} as DiagnosisPayload);
-  if (!profile || typeof profile !== "object") {
-    return NextResponse.json({ ok: false, error: "프로필이 누락되었습니다." }, { status: 400 });
-  }
-  if (!Array.isArray(answers) || answers.length !== 20 || answers.some((v) => !(v >= 1 && v <= 5))) {
-    return NextResponse.json({ ok: false, error: "답변은 1~5 사이 값의 20개여야 합니다." }, { status: 400 });
+  
+  // 데이터 검증
+  if (!profile || !Array.isArray(answers) || answers.length !== 20) {
+    return NextResponse.json({ ok: false, error: "데이터가 누락되었습니다." }, { status: 400 });
   }
 
   const result = computeResult(answers);
 
-  // profile은 익명 처리를 가정하고(서버 저장 없이) 해석에만 참고한다는 전제의 예시.
-  // 실제 서비스에서는 개인정보 정책에 맞게 서버 저장/마스킹 로직을 추가하세요.
-  return NextResponse.json(
-    {
-      ok: true,
-      result: {
-        profile: {
-          age: (profile as Profile).age,
-          job: (profile as Profile).job,
-          interests: (profile as Profile).interests,
-        },
-        overallAverage: result.overallAverage,
-        domainAverages: result.domainAverages,
-        answeredCount: 20,
-      },
-    },
-    { status: 200 },
-  );
-}
+  const aiReport = buildAiReportFromResult({
+    profile,
+    overallAverage: result.overallAverage,
+    domainAverages: result.domainAverages,
+    answeredCount: 20,
+  });
 
+  return NextResponse.json({
+    ok: true,
+    result: {
+      profile,
+      overallAverage: result.overallAverage,
+      domainAverages: result.domainAverages,
+      answeredCount: 20,
+      aiReport,
+    },
+  });
+}

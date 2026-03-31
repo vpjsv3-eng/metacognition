@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Profile, DiagnosisPayload } from "../lib/types";
+import type { Profile, DiagnosisPayload, DiagnosisResult } from "../lib/types";
 import { MC_5POINT_OPTIONS, METACOGNITION_QUESTIONS, type ScaleValue } from "../lib/questions";
 
 type Props = {
@@ -80,8 +80,9 @@ export default function SurveyForm({ profile }: Props) {
         throw new Error(text || `제출 실패 (HTTP ${res.status})`);
       }
 
-      const data = (await res.json()) as { ok: true; result: unknown };
-      localStorage.setItem("mc_last_result", JSON.stringify(data.result));
+      const data = (await res.json()) as { ok: true; result: DiagnosisResult };
+      // 요청사항: 응답의 result 전체를 'diagnosis_result' 키로 저장
+      localStorage.setItem("diagnosis_result", JSON.stringify(data.result));
       router.push("/survey/complete");
     } catch (e) {
       setError(e instanceof Error ? e.message : "제출 중 오류가 발생했습니다.");
