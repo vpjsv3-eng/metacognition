@@ -1,6 +1,17 @@
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import type { AiReport } from "../lib/aiReport";
 import type { DiagnosisResult } from "../lib/types";
+
+// 한국어 폰트 등록: 브라우저 환경(PDFDownloadLink)에서만 실행되도록 lazily 처리
+let _fontRegistered = false;
+function ensureFontRegistered() {
+  if (_fontRegistered || typeof window === "undefined") return;
+  _fontRegistered = true;
+  Font.register({
+    family: "NotoSansKR",
+    src: `${window.location.origin}/fonts/NotoSansKR.ttf`,
+  });
+}
 
 const styles = StyleSheet.create({
   page: {
@@ -9,6 +20,7 @@ const styles = StyleSheet.create({
     color: "#e5e7eb",
     fontSize: 11,
     lineHeight: 1.4,
+    fontFamily: "NotoSansKR",
   },
   title: {
     fontSize: 18,
@@ -71,6 +83,7 @@ export default function DiagnosisReportPdf({
   aiReport: AiReport;
   result: DiagnosisResult;
 }) {
+  ensureFontRegistered();
   const d = result.domainAverages;
 
   return (
