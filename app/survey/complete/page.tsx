@@ -66,9 +66,12 @@ export default function CompletePage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.ok) {
+        if (data.ok && !data.skipped) {
           setEmailStatus("sent");
           console.log("[이메일 발송 완료]", email);
+        } else if (data.skipped) {
+          setEmailStatus("failed");
+          console.warn("[이메일 발송 건너뜀] RESEND_API_KEY 미설정");
         } else {
           setEmailStatus("failed");
           console.error("[이메일 발송 실패]", data.error);
@@ -165,6 +168,13 @@ export default function CompletePage() {
             style={{ margin: "8px 0 0", fontSize: 13, color: "var(--accent)" }}
           >
             ✅ 이메일 발송 완료!
+          </p>
+        )}
+        {emailStatus === "failed" && (
+          <p
+            style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}
+          >
+            이메일 발송에 실패했어요. 아래 &quot;결과지 다시 받기&quot; 버튼을 눌러주세요.
           </p>
         )}
       </div>
