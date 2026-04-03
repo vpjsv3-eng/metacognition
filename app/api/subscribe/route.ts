@@ -1,17 +1,26 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "../../lib/supabase";
-
-// ⚠️ Vercel 배포 시 SUPABASE_URL, SUPABASE_KEY를 환경변수에 추가하세요.
+import { isRateLimited, getClientIp, isValidPhone, isValidEmail } from "../../lib/rateLimit";
 
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { ok: false, error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
+      { status: 429 },
+    );
+  }
+
   try {
     const body = (await req.json()) as {
       name: string;
       phone: string;
+      email?: string;
       surveyId?: string;
+      source?: string;
       timestamp: string;
     };
-    const { name, phone, surveyId, timestamp } = body;
+    const { name, phone, email, surveyId, source, timestamp } = body;
 
     if (!name?.trim() || !phone?.trim()) {
       return NextResponse.json(
@@ -20,21 +29,41 @@ export async function POST(req: Request) {
       );
     }
 
-    // Supabase 저장
+    if (!isValidPhone(phone)) {
+      return NextResponse.json(
+        { ok: false, error: "올바른 휴대폰 번호를 입력해 주세요. (010으로 시작하는 11자리)" },
+        { status: 400 },
+      );
+    }
+
+    if (email && !isValidEmail(email)) {
+      return NextResponse.json(
+        { ok: false, error: "올바른 이메일 형식이 아닙니다." },
+        { status: 400 },
+      );
+    }
+
     const sb = getSupabase();
     if (sb) {
-      const { error } = await sb.from("waitlist").insert({
+      const insertData: Record<string, unknown> = {
         name: name.trim(),
         phone: phone.trim(),
-        survey_id: surveyId || null,
-      });
+        source: source || "nadocoding_page",
+      };
+      if (email?.trim()) {
+        insertData.email = email.trim();
+      }
+      if (surveyId) {
+        insertData.survey_id = surveyId;
+      }
+
+      const { error } = await sb.from("waitlist").insert(insertData);
 
       if (error) {
         console.error("[Supabase waitlist 저장 실패]", error);
       }
     } else {
-      // Supabase 미설정 시 콘솔 로그
-      console.log("[나도코딩 1기 사전신청]", { name, phone, surveyId, timestamp });
+      console.log("[나도코딩 1기 사전신청]", { name, phone, email, source, surveyId, timestamp });
     }
 
     return NextResponse.json({ ok: true });

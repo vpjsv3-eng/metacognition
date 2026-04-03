@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import type { ServiceIdea, Persona, FirstStep } from "../../lib/types";
+import { isRateLimited, getClientIp, isValidEmail } from "../../lib/rateLimit";
 
 type SendResultBody = {
   email: string;
@@ -116,7 +117,7 @@ function buildEmailHtml(
         </p>
         <a href="https://metacognition-r6lc.vercel.app/nadocoding"
            style="display:inline-block;padding:14px 32px;background:#00C471;color:#FFFFFF;text-decoration:none;border-radius:8px;font-weight:700;font-size:16px;">
-          나도 코딩 1기 얼리버드 신청하기
+          나도 코딩 1기 자세히 보기
         </a>
       </div>
 
@@ -131,6 +132,14 @@ function buildEmailHtml(
 }
 
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { ok: false, error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." },
+      { status: 429 },
+    );
+  }
+
   let body: SendResultBody;
   try {
     body = (await req.json()) as SendResultBody;
@@ -150,7 +159,16 @@ export async function POST(req: Request) {
     );
   }
 
+  if (!isValidEmail(email)) {
+    return NextResponse.json(
+      { ok: false, error: "올바른 이메일 형식이 아닙니다." },
+      { status: 400 },
+    );
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
+  console.log("RESEND_API_KEY 존재:", !!apiKey);
+
   if (!apiKey) {
     console.log("[send-result] RESEND_API_KEY 미설정 — 이메일 발송 건너뜀");
     return NextResponse.json({ ok: true, skipped: true });
@@ -168,17 +186,17 @@ export async function POST(req: Request) {
     });
 
     if (error) {
-      console.error("[send-result] 이메일 발송 실패", error);
+      console.error("[send-result] 이메일 발송 실패:", JSON.stringify(error, null, 2));
       return NextResponse.json(
         { ok: false, error: "이메일 발송에 실패했습니다." },
         { status: 500 },
       );
     }
 
-    console.log("[send-result] 이메일 발송 성공", data);
+    console.log("[send-result] 이메일 발송 성공:", JSON.stringify(data));
     return NextResponse.json({ ok: true, data });
   } catch (e) {
-    console.error("[send-result] Resend 오류", e);
+    console.error("[send-result] Resend 오류:", e);
     return NextResponse.json(
       { ok: false, error: "이메일 발송 중 오류가 발생했습니다." },
       { status: 500 },

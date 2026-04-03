@@ -22,9 +22,13 @@ export default function CompletePage() {
   const [emailStatus, setEmailStatus] = useState<
     "idle" | "sending" | "sent" | "failed"
   >("idle");
-  const [resending, setResending] = useState(false);
   const emailSentRef = useRef(false);
   const router = useRouter();
+
+  const [resendModalOpen, setResendModalOpen] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
 
   useEffect(() => {
     const savedData = localStorage.getItem("diagnosis_result");
@@ -39,6 +43,7 @@ export default function CompletePage() {
         throw new Error("결과 포맷 오류");
       }
       setResult(parsed);
+      setResendEmail(parsed.profile?.email || "");
     } catch {
       alert("진단 데이터가 손상되었습니다. 다시 시작하세요.");
       localStorage.removeItem("diagnosis_result");
@@ -68,30 +73,31 @@ export default function CompletePage() {
       .then((data) => {
         if (data.ok && !data.skipped) {
           setEmailStatus("sent");
-          console.log("[이메일 발송 완료]", email);
         } else if (data.skipped) {
           setEmailStatus("failed");
-          console.warn("[이메일 발송 건너뜀] RESEND_API_KEY 미설정");
         } else {
           setEmailStatus("failed");
-          console.error("[이메일 발송 실패]", data.error);
         }
       })
-      .catch((e) => {
+      .catch(() => {
         setEmailStatus("failed");
-        console.error("[이메일 발송 오류]", e);
       });
   }, [result]);
 
-  async function resendEmail() {
-    if (!result?.profile?.email || resending) return;
+  async function handleResend() {
+    if (!result || resending) return;
+    const trimmed = resendEmail.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      alert("올바른 이메일을 입력해주세요.");
+      return;
+    }
     setResending(true);
     try {
       const res = await fetch("/api/send-result", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: result.profile.email,
+          email: trimmed,
           persona: result.persona,
           ideas: result.ideas,
           first_step: result.first_step,
@@ -99,7 +105,11 @@ export default function CompletePage() {
       });
       const data = await res.json();
       if (data.ok) {
-        alert("결과지가 이메일로 재발송되었어요!");
+        setResendDone(true);
+        setTimeout(() => {
+          setResendModalOpen(false);
+          setResendDone(false);
+        }, 2500);
       } else {
         alert("발송에 실패했어요. 잠시 후 다시 시도해주세요.");
       }
@@ -126,6 +136,8 @@ export default function CompletePage() {
   const email = result.profile?.email || "";
   const persona = result.persona;
   const firstStep = result.first_step;
+  const firstIdea = result.ideas[0];
+  const otherIdeas = result.ideas.slice(1);
 
   return (
     <main className="resultContainer">
@@ -157,23 +169,17 @@ export default function CompletePage() {
           </p>
         )}
         {emailStatus === "sending" && (
-          <p
-            style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}
-          >
+          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}>
             📧 진단 결과를 이메일로 보내는 중...
           </p>
         )}
         {emailStatus === "sent" && (
-          <p
-            style={{ margin: "8px 0 0", fontSize: 13, color: "var(--accent)" }}
-          >
+          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--accent)" }}>
             ✅ 이메일 발송 완료!
           </p>
         )}
         {emailStatus === "failed" && (
-          <p
-            style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}
-          >
+          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}>
             이메일 발송에 실패했어요. 아래 &quot;결과지 다시 받기&quot; 버튼을 눌러주세요.
           </p>
         )}
@@ -185,17 +191,13 @@ export default function CompletePage() {
           <h2 className="personaTitle">{persona.title}</h2>
           <p className="personaSummary">{persona.summary}</p>
           <div className="personaTags">
-            <span className="personaTag">
-              💪 강점: {persona.strength}
-            </span>
-            <span className="personaTag">
-              🎯 핵심 니즈: {persona.painpoint}
-            </span>
+            <span className="personaTag">💪 강점: {persona.strength}</span>
+            <span className="personaTag">🎯 핵심 니즈: {persona.painpoint}</span>
           </div>
         </div>
       )}
 
-      {/* ═══ PART 2: 맞춤 아이디어 5가지 ═══ */}
+      {/* ═══ PART 2: 맞춤 아이디어 ═══ */}
       <h2
         style={{
           fontSize: 20,
@@ -207,85 +209,144 @@ export default function CompletePage() {
         맞춤 아이디어 {result.ideas.length}가지
       </h2>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {result.ideas.map((idea, i) => {
-          const isFirst = idea.rank === 1 || i === 0;
-          return (
-            <div
-              key={i}
-              className="ideaCard"
-              style={
-                isFirst
-                  ? { borderColor: "var(--accent)", borderWidth: 2 }
-                  : undefined
-              }
+      {/* 1순위: 전체 공개 */}
+      {firstIdea && (
+        <div
+          className="ideaCard"
+          style={{ borderColor: "var(--accent)", borderWidth: 2, marginBottom: 14 }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+            <span
+              className="rankBadge"
+              style={{ background: "var(--accent)", color: "#fff" }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  marginBottom: 6,
-                }}
-              >
-                <span
-                  className="rankBadge"
-                  style={
-                    isFirst
-                      ? { background: "var(--accent)", color: "#fff" }
-                      : undefined
-                  }
-                >
-                  추천 {idea.rank ?? i + 1}순위
-                </span>
+              추천 1순위
+            </span>
+          </div>
+          <strong style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
+            {firstIdea.name}
+          </strong>
+          <p style={{ margin: "0 0 14px", color: "var(--textSecondary)", fontSize: 15, lineHeight: 1.5 }}>
+            {firstIdea.oneline}
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="ideaDetail">
+              <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
+              <span>{firstIdea.reason}</span>
+            </div>
+            <div className="ideaDetail">
+              <span className="ideaLabel">핵심 기능</span>
+              <span>{firstIdea.core_feature}</span>
+            </div>
+            <div className="ideaDetail">
+              <span className="ideaLabel">실제 작동 방식</span>
+              <span>{firstIdea.how_it_works}</span>
+            </div>
+          </div>
+          <div className="ideaMetaTags">
+            <span className="ideaMetaTag">🎯 {firstIdea.difficulty}</span>
+            <span className="ideaMetaTag">⏱ {firstIdea.period}</span>
+            <span className="ideaMetaTag">🛠 {firstIdea.tool}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ 나도코딩 유입 섹션 ═══ */}
+      <div className="promoSection">
+        <h3
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            margin: "0 0 8px",
+            color: "var(--text)",
+          }}
+        >
+          이 아이디어, 직접 만들어볼 수 있어요
+        </h3>
+        <p
+          style={{
+            margin: "0 0 20px",
+            fontSize: 14,
+            lineHeight: 1.7,
+            color: "var(--textSecondary)",
+          }}
+        >
+          코딩 몰라도 괜찮아요.
+          <br />
+          2주 안에 기획 → 구현 → 배포까지
+          <br />
+          나도 코딩 1기에서 함께해요.
+        </p>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            alignItems: "center",
+            marginBottom: 20,
+            fontSize: 14,
+            color: "var(--text)",
+          }}
+        >
+          <span>✅ 코딩 지식 0이어도 OK</span>
+          <span>✅ 2주 안에 실제 배포까지</span>
+          <span>✅ 선착순 10명 · 얼리버드 신청 중</span>
+        </div>
+        <button
+          className="btn"
+          type="button"
+          onClick={() => router.push("/nadocoding")}
+          style={{ fontSize: 16, background: "var(--accent)" }}
+        >
+          나도 코딩 1기 자세히 보기 →
+        </button>
+      </div>
+
+      {/* 2~5순위: 블러 처리 */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {otherIdeas.map((idea, i) => (
+          <div key={i} className="ideaCard ideaBlurred">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+              <span className="rankBadge">추천 {idea.rank ?? i + 2}순위</span>
+            </div>
+            <strong style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
+              {idea.name}
+            </strong>
+            <p style={{ margin: "0 0 14px", color: "var(--textSecondary)", fontSize: 15, lineHeight: 1.5 }}>
+              {idea.oneline}
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div className="ideaDetail">
+                <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
+                <span>{idea.reason}</span>
               </div>
-
-              <strong
-                style={{
-                  fontSize: 18,
-                  color: "var(--text)",
-                  display: "block",
-                  marginBottom: 4,
-                }}
-              >
-                {idea.name}
-              </strong>
-              <p
-                style={{
-                  margin: "0 0 14px",
-                  color: "var(--textSecondary)",
-                  fontSize: 15,
-                  lineHeight: 1.5,
-                }}
-              >
-                {idea.oneline}
-              </p>
-
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 8 }}
-              >
-                <div className="ideaDetail">
-                  <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
-                  <span>{idea.reason}</span>
-                </div>
-                <div className="ideaDetail">
-                  <span className="ideaLabel">핵심 기능</span>
-                  <span>{idea.core_feature}</span>
-                </div>
-                <div className="ideaDetail">
-                  <span className="ideaLabel">실제 작동 방식</span>
-                  <span>{idea.how_it_works}</span>
-                </div>
-              </div>
-
-              <div className="ideaMetaTags">
-                <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
-                <span className="ideaMetaTag">⏱ {idea.period}</span>
-                <span className="ideaMetaTag">🛠 {idea.tool}</span>
+              <div className="ideaDetail">
+                <span className="ideaLabel">핵심 기능</span>
+                <span>{idea.core_feature}</span>
               </div>
             </div>
-          );
-        })}
+            <div className="ideaMetaTags">
+              <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
+              <span className="ideaMetaTag">⏱ {idea.period}</span>
+              <span className="ideaMetaTag">🛠 {idea.tool}</span>
+            </div>
+
+            <div className="ideaLockedOverlay">
+              <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--textSecondary)" }}>
+                🔒 나도 코딩 1기에서 이 아이디어로 직접 만들어보세요
+              </p>
+              <button
+                className="btnAccent"
+                type="button"
+                onClick={() => router.push("/nadocoding")}
+                style={{ fontSize: 13, padding: "8px 16px" }}
+              >
+                자세히 보기
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* ═══ PART 3: 지금 당장 시작하는 법 ═══ */}
@@ -301,17 +362,9 @@ export default function CompletePage() {
           >
             ✅ 지금 바로 시작해보세요
           </h2>
-          <p
-            style={{
-              margin: "0 0 6px",
-              fontSize: 15,
-              color: "var(--text)",
-            }}
-          >
+          <p style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text)" }}>
             가장 추천하는 아이디어:{" "}
-            <strong style={{ color: "var(--accent)" }}>
-              {firstStep.idea_name}
-            </strong>
+            <strong style={{ color: "var(--accent)" }}>{firstStep.idea_name}</strong>
           </p>
           <p
             style={{
@@ -323,7 +376,6 @@ export default function CompletePage() {
           >
             {firstStep.reason}
           </p>
-
           <div className="stepsContainer">
             {firstStep.steps.map((step, i) => (
               <div key={i} className="stepItem">
@@ -332,7 +384,6 @@ export default function CompletePage() {
               </div>
             ))}
           </div>
-
           <div className="encourageBox">
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
               {firstStep.encouragement}
@@ -341,7 +392,7 @@ export default function CompletePage() {
         </div>
       )}
 
-      {/* 하단 CTA 버튼 */}
+      {/* 하단 버튼 */}
       <div
         style={{
           display: "flex",
@@ -360,78 +411,66 @@ export default function CompletePage() {
         >
           나도 코딩 1기 자세히 보기
         </button>
-
         <button
           className="btnSecondary"
           type="button"
-          onClick={resendEmail}
-          disabled={resending}
+          onClick={() => {
+            setResendDone(false);
+            setResendModalOpen(true);
+          }}
           style={{ fontSize: 14 }}
         >
-          {resending ? "발송 중..." : "결과지 다시 받기"}
+          결과지 다시 받기
         </button>
       </div>
 
-      {/* CTA 섹션 */}
-      <div style={{ marginTop: 48 }}>
-        <hr
-          style={{
-            border: "none",
-            borderTop: "1px solid var(--border)",
-            marginBottom: 32,
-          }}
-        />
-        <div style={{ textAlign: "center" }}>
-          <span className="earlybirdBadge">🎉 얼리버드 특가 진행 중</span>
-          <h2
-            style={{
-              margin: "0 0 8px",
-              fontSize: 22,
-              fontWeight: 700,
-              color: "var(--text)",
-            }}
-          >
-            내 아이디어, 직접 만들어보고 싶다면?
-          </h2>
-          <p
-            style={{
-              margin: "0 0 4px",
-              fontSize: 15,
-              lineHeight: 1.6,
-              color: "var(--textSecondary)",
-            }}
-          >
-            코딩 몰라도 괜찮아요. 나도 코딩 1기에서
-            <br />
-            아이디어 발굴부터 배포까지 함께합니다.
-          </p>
-
-          <div style={{ margin: "20px 0" }}>
-            <span className="priceOriginal">299,000원</span>
-            <span className="priceEarlybird">99,000원</span>
-            <p
-              style={{
-                margin: "8px 0 0",
-                fontSize: 13,
-                color: "var(--textHint)",
-              }}
-            >
-              지금 신청하신 분께만 적용되는 특별 할인가예요
-            </p>
-          </div>
-
-          <div style={{ maxWidth: 400, margin: "0 auto" }}>
-            <button
-              className="btn"
-              type="button"
-              onClick={() => router.push("/nadocoding")}
-              style={{ fontSize: 16 }}
-            >
-              나도 코딩 1기 얼리버드 신청하기
-            </button>
+      {/* 결과지 다시 받기 모달 */}
+      {resendModalOpen && (
+        <div className="modalOverlay" onClick={() => !resending && setResendModalOpen(false)}>
+          <div className="modalContent" onClick={(e) => e.stopPropagation()}>
+            {resendDone ? (
+              <>
+                <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>✅</span>
+                <p style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>
+                  발송됐어요! 스팸함도 확인해주세요 📩
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 style={{ fontSize: 18, fontWeight: 700, margin: "0 0 6px", color: "var(--text)" }}>
+                  결과지를 다시 보내드릴게요
+                </h3>
+                <p style={{ margin: "0 0 20px", fontSize: 14, color: "var(--textSecondary)" }}>
+                  이메일 주소를 확인하거나 수정해주세요
+                </p>
+                <input
+                  type="email"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  placeholder="result@example.com"
+                  style={{ marginBottom: 14 }}
+                />
+                <button
+                  className="btnPrimary"
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resending}
+                >
+                  {resending ? "발송 중..." : "다시 받기"}
+                </button>
+                <button
+                  className="btnGhost"
+                  type="button"
+                  onClick={() => setResendModalOpen(false)}
+                  style={{ marginTop: 8, display: "block", width: "100%", textAlign: "center" }}
+                >
+                  닫기
+                </button>
+              </>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
 
 const TARGET_LIST = [
@@ -211,10 +211,43 @@ const FAQ_DATA: FaqCategory[] = [
   },
 ];
 
+const DEADLINE = new Date("2026-04-18T00:00:00+09:00").getTime();
+
+function useCountdown() {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const diff = DEADLINE - now;
+  if (diff <= 0) return null;
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  return { days, hours, minutes, seconds };
+}
+
 export default function NadocodingPage() {
   const formRef = useRef<HTMLDivElement>(null);
   const curriculumRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<Set<number>>(new Set());
+  const [showSticky, setShowSticky] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+
+  const countdown = useCountdown();
+
+  useEffect(() => {
+    function handleScroll() {
+      setShowSticky(window.scrollY > 600);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   function scrollToForm() {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -235,10 +268,28 @@ export default function NadocodingPage() {
 
   let faqFlatIdx = 0;
 
+  const dDayText = countdown
+    ? `D-${countdown.days}`
+    : "종료";
+
   return (
-    <main className="container" style={{ maxWidth: 600 }}>
+    <main className="container" style={{ maxWidth: 600, paddingBottom: showSticky ? 140 : 80 }}>
+      {/* 카운트다운 타이머 */}
+      <div className="countdownTimer">
+        {countdown ? (
+          <>
+            🔥 얼리버드 마감까지{" "}
+            {countdown.days}일 {String(countdown.hours).padStart(2, "0")}시간{" "}
+            {String(countdown.minutes).padStart(2, "0")}분{" "}
+            {String(countdown.seconds).padStart(2, "0")}초
+          </>
+        ) : (
+          "얼리버드가 종료됐어요"
+        )}
+      </div>
+
       {/* ① 히어로 섹션 */}
-      <section className="heroSection">
+      <section ref={heroRef} className="heroSection">
         <div className="recruitBadge">🔥 1기 모집 중 · 선착순 10명</div>
 
         <h1
@@ -278,7 +329,7 @@ export default function NadocodingPage() {
           📅 2026년 4월 오픈 예정 | 👥 1기 모집 선착순 10명 한정
         </p>
 
-        <div style={{ margin: "0 0 28px" }}>
+        <div style={{ margin: "0 0 24px" }}>
           <span className="priceOriginal">299,000원</span>
           <span className="priceEarlybird">99,000원</span>
           <p
@@ -308,6 +359,31 @@ export default function NadocodingPage() {
           >
             과정 자세히 보기
           </button>
+        </div>
+
+        {/* 히어로 미니 신청 폼 */}
+        <div
+          style={{
+            marginTop: 28,
+            padding: "20px",
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
+            textAlign: "left",
+          }}
+        >
+          <p
+            style={{
+              margin: "0 0 12px",
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text)",
+              textAlign: "center",
+            }}
+          >
+            지금 바로 자리 맡기
+          </p>
+          <CtaForm source="nadocoding_page" compact />
         </div>
       </section>
 
@@ -554,9 +630,19 @@ export default function NadocodingPage() {
           <br />
           얼리버드 할인가 99,000원도 자동으로 적용돼요 🎉
         </p>
+
+        <div style={{ margin: "12px 0 8px", textAlign: "center" }}>
+          <span className="priceOriginal" style={{ color: "rgba(255,255,255,0.6)" }}>
+            299,000원
+          </span>
+          <span style={{ fontSize: 28, fontWeight: 800, color: "white" }}>
+            99,000원
+          </span>
+        </div>
+
         <div
           style={{
-            margin: "16px auto 20px",
+            margin: "12px auto 20px",
             maxWidth: 380,
             padding: "12px 16px",
             borderRadius: 10,
@@ -571,9 +657,25 @@ export default function NadocodingPage() {
           신청만 해두시면 오픈 알림 + 얼리버드 혜택이 자동 적용돼요
         </div>
         <div style={{ maxWidth: 400, margin: "0 auto" }}>
-          <CtaForm onGreenBg />
+          <CtaForm onGreenBg source="nadocoding_page" />
         </div>
       </section>
+
+      {/* 스크롤 sticky 바 */}
+      {showSticky && (
+        <div className="stickyBar">
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
+            🔥 얼리버드 마감 {dDayText}
+          </span>
+          <button
+            className="btnPrimary"
+            type="button"
+            onClick={scrollToForm}
+          >
+            사전 무료 신청하기
+          </button>
+        </div>
+      )}
     </main>
   );
 }

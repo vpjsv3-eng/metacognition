@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type {
   Profile,
@@ -21,7 +21,7 @@ type AnswerState = {
   skipped?: boolean;
 };
 
-type Phase = "survey" | "encouragement" | "loading";
+type Phase = "survey" | "email_input" | "email_confirm" | "loading";
 
 function isCustomOption(text: string) {
   return text.startsWith("기타");
@@ -45,21 +45,36 @@ export default function SurveyForm({ profile }: Props) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [apiDone, setApiDone] = useState(false);
 
+  const [email, setEmail] = useState("");
+  const [emailConsent, setEmailConsent] = useState(false);
+  const [emailConsentOpen, setEmailConsentOpen] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const pulseTriggered = useRef(false);
+  const [showPulse, setShowPulse] = useState(false);
+
   const visibleQuestions = useMemo(() => {
     const result: SurveyQuestion[] = [];
     for (const q of SURVEY_QUESTIONS) {
-      const parent = SURVEY_QUESTIONS.find(
-        (pq) => pq.subQuestionId === q.id,
-      );
-      if (parent) {
-        const parentAnswer = answers[parent.id];
-        const triggerIndices =
-          parent.branchTriggerIndices ??
-          (parent.branchTriggerIndex !== undefined
-            ? [parent.branchTriggerIndex]
-            : []);
-        if (!triggerIndices.includes(parentAnswer?.selectedIndex ?? -1)) {
+      if (q.parentQuestionId) {
+        const parentAnswer = answers[q.parentQuestionId];
+        if (parentAnswer?.selectedIndex !== q.parentTriggerIndex) {
           continue;
+        }
+      } else {
+        const parent = SURVEY_QUESTIONS.find(
+          (pq) => pq.subQuestionId === q.id,
+        );
+        if (parent) {
+          const parentAnswer = answers[parent.id];
+          const triggerIndices =
+            parent.branchTriggerIndices ??
+            (parent.branchTriggerIndex !== undefined
+              ? [parent.branchTriggerIndex]
+              : []);
+          if (!triggerIndices.includes(parentAnswer?.selectedIndex ?? -1)) {
+            continue;
+          }
         }
       }
       result.push(q);
@@ -101,22 +116,14 @@ export default function SurveyForm({ profile }: Props) {
 
   const progress = total > 0 ? ((safeStep + 1) / total) * 100 : 0;
 
-  const isQ6Step = useMemo(() => {
-    if (!currentQ) return false;
-    const mainQs = visibleQuestions.filter((q) => !q.id.includes("-"));
-    const currentMainQ = currentQ.id.includes("-")
-      ? visibleQuestions[safeStep - 1]
-      : currentQ;
-    const mainIndex = mainQs.findIndex((q) => q.id === currentMainQ?.id);
-    return mainIndex === 5;
-  }, [currentQ, visibleQuestions, safeStep]);
-
-  const currentQMainIndex = useMemo(() => {
-    if (!currentQ) return 0;
-    const baseId = currentQ.id.split("-")[0];
-    const num = parseInt(baseId.replace("Q", ""), 10);
-    return isNaN(num) ? 0 : num;
-  }, [currentQ]);
+  useEffect(() => {
+    if (progress > 50 && !pulseTriggered.current) {
+      pulseTriggered.current = true;
+      setShowPulse(true);
+      const t = setTimeout(() => setShowPulse(false), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [progress]);
 
   useEffect(() => {
     if (phase !== "loading") return;
@@ -203,20 +210,6 @@ export default function SurveyForm({ profile }: Props) {
     if (safeStep > 0) navigate(safeStep - 1);
   }
 
-  const shouldShowEncouragement = useCallback(() => {
-    if (!currentQ) return false;
-    const currentId = currentQ.id;
-    if (currentId === "Q6" || currentId === "Q6-1") {
-      const nextStepIdx = safeStep + 1;
-      if (nextStepIdx < total) {
-        const nextQ = visibleQuestions[nextStepIdx];
-        return nextQ && nextQ.id !== "Q6-1";
-      }
-      return true;
-    }
-    return false;
-  }, [currentQ, safeStep, total, visibleQuestions]);
-
   function goNext() {
     setError(null);
     const a = currentAnswer;
@@ -259,18 +252,6 @@ export default function SurveyForm({ profile }: Props) {
       }
     }
 
-    if (shouldShowEncouragement()) {
-      setPhase("encouragement");
-      return;
-    }
-
-    if (safeStep < total - 1) {
-      navigate(safeStep + 1);
-    }
-  }
-
-  function onEncouragementContinue() {
-    setPhase("survey");
     if (safeStep < total - 1) {
       navigate(safeStep + 1);
     }
@@ -288,14 +269,56 @@ export default function SurveyForm({ profile }: Props) {
     }));
     setError(null);
 
-    if (shouldShowEncouragement()) {
-      setPhase("encouragement");
-      return;
-    }
-
     if (safeStep < total - 1) {
       navigate(safeStep + 1);
     }
+  }
+
+  function startEmailFlow() {
+    setError(null);
+    const a = currentAnswer;
+
+    if (currentQ.type === "text") {
+      if (!a?.textValue?.trim() && !a?.skipped) {
+        setError("내용을 입력하거나 건너뛰기를 눌러주세요.");
+        return;
+      }
+    } else if (currentQ.type === "multi") {
+      if (!a?.selectedIndices?.length && !a?.skipped) {
+        setError("최소 1개를 선택해 주세요.");
+        return;
+      }
+    } else {
+      if (a?.selectedIndex === undefined || a.selectedIndex < 0) {
+        setError("하나를 선택해 주세요.");
+        return;
+      }
+    }
+
+    if (!isComplete()) {
+      setError("모든 문항을 선택한 뒤 제출해 주세요.");
+      return;
+    }
+
+    setPhase("email_input");
+  }
+
+  function handleEmailSubmit() {
+    setEmailError(null);
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setEmailError("이메일을 입력해 주세요.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailError("올바른 이메일 형식을 입력해 주세요.");
+      return;
+    }
+    if (!emailConsent) {
+      setEmailError("개인정보 수집 동의가 필요해요.");
+      return;
+    }
+    setPhase("email_confirm");
   }
 
   function buildAnswerList(): SurveyAnswer[] {
@@ -386,13 +409,11 @@ export default function SurveyForm({ profile }: Props) {
 
   async function onSubmit() {
     setError(null);
-    if (!isComplete()) {
-      setError("모든 문항을 선택한 뒤 제출해 주세요.");
-      return;
-    }
+
+    const updatedProfile = { ...profile, email: email.trim() };
 
     const payload: DiagnosisPayload = {
-      profile,
+      profile: updatedProfile,
       answers: buildAnswerList(),
       answersMap: buildAnswersMap(),
     };
@@ -424,47 +445,203 @@ export default function SurveyForm({ profile }: Props) {
     }
   }
 
-  // ── Encouragement screen ──
-  if (phase === "encouragement") {
+  // ── Email input screen ──
+  if (phase === "email_input") {
     return (
       <>
         <div className="progressBar">
-          <div className="progressFill" style={{ width: `${progress}%` }} />
+          <div className="progressFill" style={{ width: "100%" }} />
         </div>
-        <div className="encouragementWrap">
-          <div className="encouragementContent">
-            <span style={{ fontSize: 48, display: "block", marginBottom: 16 }}>
-              👏
-            </span>
-            <h2
-              style={{
-                fontSize: 22,
-                fontWeight: 800,
-                margin: "0 0 12px",
-                color: "var(--text)",
-              }}
-            >
-              절반 왔어요
-            </h2>
-            <p
-              style={{
-                fontSize: 15,
-                color: "var(--textSecondary)",
-                lineHeight: 1.6,
-                margin: "0 0 28px",
-              }}
-            >
-              답변이 구체적일수록
-              <br />
-              더 정확한 아이디어를 추천받을 수 있어요
-            </p>
+        <div className="surveyWrap">
+          <div className="questionBlock" key="email-input">
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <span style={{ fontSize: 44, display: "block", marginBottom: 12 }}>
+                📋
+              </span>
+              <h2
+                style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  margin: "0 0 8px",
+                  color: "var(--text)",
+                }}
+              >
+                결과지를 받을 이메일을 입력해주세요
+              </h2>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 15,
+                  color: "var(--textSecondary)",
+                  lineHeight: 1.6,
+                }}
+              >
+                분석 결과를 이메일로 보내드려요 📋
+              </p>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError(null);
+                }}
+                placeholder="result@example.com"
+                style={{
+                  borderColor: emailError ? "var(--error)" : undefined,
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 8,
+                  fontSize: 14,
+                  color: "var(--text)",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={emailConsent}
+                  onChange={(e) => setEmailConsent(e.target.checked)}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    marginTop: 2,
+                    accentColor: "var(--accent)",
+                    flexShrink: 0,
+                  }}
+                />
+                <span>
+                  개인정보 수집 및 이용에 동의합니다.{" "}
+                  <span style={{ color: "var(--error)" }}>(필수)</span>
+                </span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setEmailConsentOpen((v) => !v)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--textSecondary)",
+                  fontSize: 13,
+                  cursor: "pointer",
+                  marginTop: 4,
+                  marginLeft: 26,
+                  padding: 0,
+                }}
+              >
+                {emailConsentOpen ? "내용 닫기 ▲" : "내용 보기 ▼"}
+              </button>
+              {emailConsentOpen && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    marginLeft: 26,
+                    padding: "12px 14px",
+                    borderRadius: 8,
+                    background: "var(--surface)",
+                    fontSize: 13,
+                    color: "var(--textSecondary)",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  · 수집 항목: 이메일
+                  <br />
+                  · 수집 목적: AI 서비스 아이디어 진단 결과 발송
+                  <br />
+                  · 보유 기간: 서비스 오픈 후 1년
+                  <br />· 위 동의를 거부할 권리가 있으나, 거부 시 결과지를 받을
+                  수 없어요.
+                </div>
+              )}
+            </div>
+
+            {emailError && <p className="errorText">{emailError}</p>}
+
             <button
               className="btnPrimary"
               type="button"
-              onClick={onEncouragementContinue}
+              onClick={handleEmailSubmit}
+              style={{ marginTop: 8 }}
             >
-              계속하기
+              결과 받기
             </button>
+            <button
+              className="btnGhost"
+              type="button"
+              onClick={() => {
+                setPhase("survey");
+                setEmailError(null);
+              }}
+              style={{ marginTop: 8, display: "block", width: "100%", textAlign: "center" }}
+            >
+              ← 설문으로 돌아가기
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── Email confirmation ──
+  if (phase === "email_confirm") {
+    return (
+      <>
+        <div className="progressBar">
+          <div className="progressFill" style={{ width: "100%" }} />
+        </div>
+        <div className="modalOverlay">
+          <div className="modalContent">
+            <h3
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                margin: "0 0 16px",
+                color: "var(--text)",
+              }}
+            >
+              입력하신 이메일이 맞나요?
+            </h3>
+            <p
+              style={{
+                margin: "0 0 8px",
+                fontSize: 16,
+                fontWeight: 600,
+                color: "var(--accent)",
+                wordBreak: "break-all",
+              }}
+            >
+              {email.trim()}
+            </p>
+            <p
+              style={{
+                margin: "0 0 24px",
+                fontSize: 14,
+                color: "var(--textSecondary)",
+              }}
+            >
+              이 주소로 결과지가 발송돼요 📩
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button className="btnPrimary" type="button" onClick={onSubmit}>
+                맞아요
+              </button>
+              <button
+                className="btnGhost"
+                type="button"
+                onClick={() => setPhase("email_input")}
+                style={{ textAlign: "center" }}
+              >
+                수정할게요
+              </button>
+            </div>
           </div>
         </div>
       </>
@@ -567,7 +744,10 @@ export default function SurveyForm({ profile }: Props) {
   return (
     <>
       <div className="progressBar">
-        <div className="progressFill" style={{ width: `${progress}%` }} />
+        <div
+          className={`progressFill${showPulse ? " pulse" : ""}`}
+          style={{ width: `${progress}%` }}
+        />
       </div>
 
       <div className="surveyWrap">
@@ -601,6 +781,20 @@ export default function SurveyForm({ profile }: Props) {
           <h2 className="questionTitle">
             {currentQ.id.replace("-", "-")}. {currentQ.text}
           </h2>
+
+          {currentQ.hint && (
+            <p
+              style={{
+                margin: "4px 0 12px",
+                fontSize: 13,
+                color: "var(--textHint)",
+                lineHeight: 1.65,
+                whiteSpace: "pre-line",
+              }}
+            >
+              {currentQ.hint}
+            </p>
+          )}
 
           {currentQ.type === "multi" && (
             <span className="multiBadge">복수 선택 가능</span>
@@ -680,10 +874,10 @@ export default function SurveyForm({ profile }: Props) {
               <button
                 className="btnPrimary"
                 type="button"
-                onClick={onSubmit}
+                onClick={startEmailFlow}
                 disabled={submitting}
               >
-                {submitting ? "AI 분석 중..." : "결과 보기"}
+                결과 보기
               </button>
             )}
 

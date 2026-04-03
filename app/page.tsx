@@ -30,23 +30,13 @@ export default function LandingPage() {
   const router = useRouter();
   const [jobIndex, setJobIndex] = useState(-1);
   const [jobCustom, setJobCustom] = useState("");
-  const [email, setEmail] = useState("");
-  const [emailConfirm, setEmailConfirm] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const isCustomJob =
     jobIndex >= 0 && JOB_OPTIONS[jobIndex].startsWith("기타");
 
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const emailsMatch =
-    email.trim().length > 0 &&
-    emailConfirm.trim().length > 0 &&
-    email.trim() === emailConfirm.trim();
-  const emailMismatch =
-    emailConfirm.trim().length > 0 && email.trim() !== emailConfirm.trim();
-
-  const canSubmit = emailValid && emailsMatch && jobIndex >= 0;
+  const canSubmit = jobIndex >= 0;
 
   function toggleKeyword(kw: string) {
     setSelectedKeywords((prev) => {
@@ -71,40 +61,42 @@ export default function LandingPage() {
       return;
     }
 
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !emailValid) {
-      setError("이메일 주소를 정확히 입력해 주세요.");
-      return;
-    }
-
-    if (!emailsMatch) {
-      setError("이메일이 일치하지 않아요.");
-      return;
-    }
-
-    const profile: Profile = { job, keywords: selectedKeywords, email: trimmedEmail };
+    const profile: Profile = { job, keywords: selectedKeywords };
     localStorage.setItem("mc_profile", JSON.stringify(profile));
     router.push("/survey");
   }
 
   return (
     <main className="container" style={{ paddingTop: 48 }}>
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
+      {/* ── 진단 배지 ── */}
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
         <span
           style={{
             display: "inline-block",
-            padding: "6px 16px",
+            padding: "8px 18px",
             borderRadius: 999,
             background: "var(--accentSoft)",
             color: "var(--accent)",
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 700,
-            marginBottom: 20,
+            marginBottom: 6,
           }}
         >
-          ✨ 유료 AI 컨설팅 50,000원 상당 · 지금 무료로 받아보세요
+          🔬 AI 서비스 적합도 진단
         </span>
+        <p
+          style={{
+            margin: "6px 0 0",
+            fontSize: 13,
+            color: "var(--textSecondary)",
+          }}
+        >
+          총 13문항 · 약 3분 소요
+        </p>
+      </div>
 
+      {/* ── 헤더 ── */}
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
         <h1
           style={{
             fontSize: 26,
@@ -133,105 +125,59 @@ export default function LandingPage() {
         </p>
       </div>
 
+      {/* ── 신뢰도 지표 ── */}
       <div
         style={{
-          background: "#E8FAF2",
+          display: "flex",
+          justifyContent: "center",
+          gap: 16,
+          marginBottom: 24,
+          flexWrap: "wrap",
+        }}
+      >
+        {[
+          { icon: "📊", label: "GPT-4o 기반 분석" },
+          { icon: "🎯", label: "맞춤 아이디어 5가지 제공" },
+          { icon: "📩", label: "결과지 이메일 발송" },
+        ].map((item) => (
+          <div
+            key={item.label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13,
+              color: "var(--textSecondary)",
+              fontWeight: 500,
+            }}
+          >
+            <span style={{ fontSize: 16 }}>{item.icon}</span>
+            <span>{item.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── 안내 문구 ── */}
+      <div
+        style={{
+          background: "var(--surface)",
           borderRadius: 12,
           padding: "14px 18px",
           marginBottom: 28,
-          fontSize: 12,
+          fontSize: 13,
           lineHeight: 1.7,
-          color: "var(--text)",
+          color: "var(--textSecondary)",
+          textAlign: "center",
         }}
       >
-        📋 진단 결과지를 이메일로 보내드려요
+        이 진단은 실제 AI 서비스 기획 전문가의
         <br />
-        결과지에는 맞춤 아이디어 5가지 + 시작 로드맵이 담겨 있어요
+        분석 프레임워크를 기반으로 설계됐어요.
         <br />
-        스팸함도 꼭 확인해주세요 🙂
+        답변이 구체적일수록 더 정확한 아이디어를 받을 수 있어요.
       </div>
 
       <form onSubmit={onSubmit}>
-        {/* 이메일 입력 */}
-        <div style={{ marginBottom: 20 }}>
-          <label
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--text)",
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            결과지를 받을 이메일{" "}
-            <span style={{ color: "var(--error)" }}>*</span>
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="result@example.com"
-          />
-        </div>
-
-        {/* 이메일 확인 */}
-        <div style={{ marginBottom: 28 }}>
-          <label
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--text)",
-              display: "block",
-              marginBottom: 6,
-            }}
-          >
-            이메일 확인{" "}
-            <span style={{ color: "var(--error)" }}>*</span>
-          </label>
-          <div style={{ position: "relative" }}>
-            <input
-              type="email"
-              value={emailConfirm}
-              onChange={(e) => setEmailConfirm(e.target.value)}
-              placeholder="이메일을 한 번 더 입력해주세요"
-              style={{
-                borderColor: emailMismatch
-                  ? "var(--error)"
-                  : emailsMatch
-                    ? "var(--accent)"
-                    : undefined,
-                paddingRight: 40,
-              }}
-            />
-            {emailsMatch && (
-              <span
-                style={{
-                  position: "absolute",
-                  right: 14,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "var(--accent)",
-                  fontSize: 18,
-                  fontWeight: 700,
-                }}
-              >
-                ✓
-              </span>
-            )}
-          </div>
-          {emailMismatch && (
-            <p
-              style={{
-                margin: "6px 0 0",
-                fontSize: 13,
-                color: "var(--error)",
-              }}
-            >
-              이메일이 일치하지 않아요
-            </p>
-          )}
-        </div>
-
         {/* 직업 선택 */}
         <div style={{ marginBottom: 28 }}>
           <label
