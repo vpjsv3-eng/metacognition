@@ -19,10 +19,19 @@ body {
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
-    "Segoe UI Emoji";
-  background: radial-gradient(1200px 600px at 20% 10%, rgba(124, 92, 255, 0.35), transparent 55%),
-    radial-gradient(900px 500px at 85% 10%, rgba(25, 211, 255, 0.25), transparent 50%), var(--bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: radial-gradient(
+      1200px 600px at 20% 10%,
+      rgba(124, 92, 255, 0.35),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px 500px at 85% 10%,
+      rgba(25, 211, 255, 0.25),
+      transparent 50%
+    ),
+    var(--bg);
   color: var(--text);
 }
 
@@ -87,7 +96,11 @@ textarea {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: linear-gradient(90deg, rgba(124, 92, 255, 0.92), rgba(25, 211, 255, 0.68));
+  background: linear-gradient(
+    90deg,
+    rgba(124, 92, 255, 0.92),
+    rgba(25, 211, 255, 0.68)
+  );
   color: #0b1220;
   font-weight: 700;
   cursor: pointer;
@@ -111,7 +124,7 @@ textarea {
   font-size: 13px;
 }
 
-/* 객관식 옵션 리스트 */
+/* 객관식 옵션 */
 .optionList {
   display: flex;
   flex-direction: column;
@@ -160,6 +173,70 @@ textarea {
 .radioOption[data-selected="true"] .optionNum {
   background: var(--accent);
   color: #fff;
+}
+
+/* 기타 직접 입력 */
+.customInput {
+  margin-top: 10px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(124, 92, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  outline: none;
+  font-size: 14px;
+}
+
+.customInput:focus {
+  border-color: rgba(124, 92, 255, 0.6);
+}
+
+/* 키워드 칩 선택 */
+.keywordGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.keywordChip {
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--cardBorder);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.keywordChip:hover {
+  border-color: rgba(124, 92, 255, 0.35);
+}
+
+.keywordChip[data-selected="true"] {
+  border-color: rgba(124, 92, 255, 0.6);
+  background: rgba(124, 92, 255, 0.15);
+  color: #c4b5fd;
+}
+
+.keywordChip[data-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* 섹션 라벨 */
+.sectionLabel {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(124, 92, 255, 0.15);
+  color: #a78bfa;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .help {

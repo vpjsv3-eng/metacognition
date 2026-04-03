@@ -17,7 +17,12 @@ export default function SurveyPage() {
         setProfile(null);
         return;
       }
-      setProfile(JSON.parse(raw) as Profile);
+      const parsed = JSON.parse(raw) as Profile;
+      if (!parsed.job || !parsed.keywords?.length) {
+        setProfile(null);
+        return;
+      }
+      setProfile(parsed);
     } catch {
       setProfile(null);
     } finally {
@@ -39,7 +44,7 @@ export default function SurveyPage() {
         <div className="card">
           <h1 style={{ margin: 0, fontSize: 18 }}>프로필 정보가 없습니다.</h1>
           <p className="help">
-            설문을 시작하려면 먼저 메인 페이지에서 나이/직업/관심사를 입력해
+            진단을 시작하려면 먼저 메인 페이지에서 직업과 키워드를 선택해
             주세요.
           </p>
           <button

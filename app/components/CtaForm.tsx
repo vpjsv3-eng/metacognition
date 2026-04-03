@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
-export default function CtaForm() {
+type Props = {
+  surveyId?: string;
+};
+
+export default function CtaForm({ surveyId }: Props) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -18,6 +22,7 @@ export default function CtaForm() {
         body: JSON.stringify({
           name: name.trim(),
           phone: phone.trim(),
+          surveyId: surveyId || undefined,
           timestamp: new Date().toISOString(),
         }),
       });
@@ -40,7 +45,7 @@ export default function CtaForm() {
           lineHeight: 1.6,
         }}
       >
-        신청이 완료됐어요!
+        신청 완료됐어요!
         <br />
         오픈하면 가장 먼저 연락드릴게요 😊
       </p>

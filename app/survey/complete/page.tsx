@@ -18,7 +18,6 @@ export default function CompletePage() {
       router.push("/");
       return;
     }
-
     try {
       const parsed = JSON.parse(savedData) as DiagnosisResult;
       if (!parsed?.ideas || !Array.isArray(parsed.ideas)) {
@@ -35,7 +34,7 @@ export default function CompletePage() {
   if (!result) {
     return (
       <main className="container">
-        <div className="card">분석 결과를 불러오는 중...</div>
+        <div className="card">AI가 아이디어를 분석하는 중...</div>
       </main>
     );
   }
@@ -47,31 +46,58 @@ export default function CompletePage() {
           <div className="brand">
             <strong>AI 서비스 아이디어 진단 결과</strong>
             <span className="muted" style={{ fontSize: 13 }}>
-              10문항 분석 기반 맞춤 추천
+              12문항 분석 기반 맞춤 추천
             </span>
           </div>
           <span className="pill">
-            생성: {new Date().toLocaleString("ko-KR")}
+            {new Date().toLocaleString("ko-KR")}
           </span>
         </div>
+
+        {/* 한 줄 코멘트 */}
+        {result.comment && (
+          <div
+            className="card"
+            style={{
+              background: "rgba(124, 92, 255, 0.08)",
+              borderColor: "rgba(124, 92, 255, 0.3)",
+              marginBottom: 22,
+              textAlign: "center",
+              padding: "18px 20px",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: 16,
+                fontWeight: 700,
+                lineHeight: 1.65,
+                color: "rgba(255,255,255,0.92)",
+              }}
+            >
+              {result.comment}
+            </p>
+          </div>
+        )}
 
         <div style={{ textAlign: "center", marginBottom: 22 }}>
           <h1
             style={{
-              fontSize: 28,
+              fontSize: 24,
               fontWeight: 900,
               margin: "0 0 6px",
               letterSpacing: -0.4,
             }}
           >
-            나에게 딱 맞는 AI 서비스 아이디어
+            추천 AI 서비스 아이디어 TOP 5
           </h1>
           <p className="help" style={{ marginTop: 0 }}>
-            코딩 없이, 바이브 코딩 툴(Bolt, Lovable 등)로 2주 안에 만들 수
-            있는 서비스예요.
+            바이브 코딩 툴(Bolt, Lovable 등)로 2주 안에 만들 수 있는
+            서비스예요.
           </p>
         </div>
 
+        {/* 아이디어 카드 */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {result.ideas.map((idea, i) => (
             <div
@@ -117,7 +143,9 @@ export default function CompletePage() {
                 {idea.description}
               </p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 8 }}
+              >
                 <div className="ideaDetail">
                   <span className="ideaLabel">이 사람에게 맞는 이유</span>
                   <span>{idea.reason}</span>
@@ -131,6 +159,7 @@ export default function CompletePage() {
           ))}
         </div>
 
+        {/* 버튼 그룹 */}
         <div
           style={{
             display: "flex",
@@ -213,7 +242,7 @@ export default function CompletePage() {
             오픈 시 가장 먼저 알려드릴게요 🙌
           </p>
           <div style={{ maxWidth: 400, margin: "0 auto" }}>
-            <CtaForm />
+            <CtaForm surveyId={result.surveyId} />
           </div>
         </div>
       </div>

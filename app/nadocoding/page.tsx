@@ -1,30 +1,19 @@
 "use client";
 
+import { useRef } from "react";
 import CtaForm from "../components/CtaForm";
 
 const TARGET_LIST = [
   "AI에 관심은 있지만 뭘 만들어야 할지 모르는 분",
-  "코딩을 전혀 몰라도 서비스를 만들고 싶은 분",
-  "3개월 안에 배포된 내 서비스를 갖고 싶은 분",
+  "코딩을 전혀 몰라도 내 서비스를 만들고 싶은 분",
+  "3개월 안에 배포된 내 AI 서비스를 갖고 싶은 분",
 ];
 
 const STEPS = [
-  {
-    step: "1단계",
-    title: "아이디어 발굴",
-    desc: "나만의 AI 서비스 주제 찾기",
-  },
+  { step: "1단계", title: "아이디어 발굴", desc: "나만의 AI 서비스 주제 찾기" },
   { step: "2단계", title: "기획", desc: "핵심 기능 정의하기" },
-  {
-    step: "3단계",
-    title: "바이브 코딩",
-    desc: "Bolt/Lovable로 구현하기",
-  },
-  {
-    step: "4단계",
-    title: "배포",
-    desc: "실제로 쓸 수 있는 서비스 완성",
-  },
+  { step: "3단계", title: "바이브 코딩", desc: "Bolt / Lovable로 구현하기" },
+  { step: "4단계", title: "배포", desc: "실제로 쓸 수 있는 서비스 완성" },
 ];
 
 const BENEFITS = [
@@ -35,9 +24,15 @@ const BENEFITS = [
 ];
 
 export default function NadocodingPage() {
+  const formRef = useRef<HTMLDivElement>(null);
+
+  function scrollToForm() {
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <main className="container" style={{ maxWidth: 780 }}>
-      {/* 히어로 */}
+      {/* ① 히어로 */}
       <section style={{ textAlign: "center", padding: "48px 0 40px" }}>
         <h1
           style={{
@@ -53,7 +48,7 @@ export default function NadocodingPage() {
           style={{
             fontSize: 18,
             color: "var(--muted)",
-            margin: 0,
+            margin: "0 0 24px",
             lineHeight: 1.6,
           }}
         >
@@ -61,9 +56,17 @@ export default function NadocodingPage() {
           <br />
           <strong style={{ color: "var(--text)" }}>나도 코딩 1기</strong>
         </p>
+        <button
+          className="btn"
+          type="button"
+          onClick={scrollToForm}
+          style={{ width: "auto", padding: "14px 28px", fontSize: 16 }}
+        >
+          오픈 알림 신청하기
+        </button>
       </section>
 
-      {/* 이런 분들을 위해 */}
+      {/* ② 이런 분들을 위해 */}
       <section className="card" style={{ padding: 28, marginBottom: 20 }}>
         <h2
           style={{
@@ -88,14 +91,16 @@ export default function NadocodingPage() {
                 gap: 12,
               }}
             >
-              <span style={{ color: "var(--accent)", fontWeight: 800 }}>✓</span>
+              <span style={{ color: "var(--accent)", fontWeight: 800 }}>
+                ✓
+              </span>
               <span>{item}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 과정 소개 */}
+      {/* ③ 4단계 과정 */}
       <section className="card" style={{ padding: 28, marginBottom: 20 }}>
         <h2
           style={{
@@ -135,32 +140,18 @@ export default function NadocodingPage() {
               >
                 {s.step}
               </div>
-              <div
-                style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}
-              >
+              <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>
                 {s.title}
               </div>
               <div style={{ fontSize: 13, color: "var(--muted)" }}>
                 {s.desc}
               </div>
-              {i < STEPS.length - 1 && (
-                <div
-                  style={{
-                    color: "var(--muted)",
-                    fontSize: 20,
-                    marginTop: 8,
-                    display: "none",
-                  }}
-                >
-                  →
-                </div>
-              )}
             </div>
           ))}
         </div>
       </section>
 
-      {/* 수강 후 얻는 것 */}
+      {/* ④ 수강 후 얻는 것 */}
       <section className="card" style={{ padding: 28, marginBottom: 20 }}>
         <h2
           style={{
@@ -197,8 +188,12 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* 사전 신청 */}
-      <section className="card" style={{ padding: 28, textAlign: "center" }}>
+      {/* ⑤ 사전 신청 */}
+      <section
+        ref={formRef}
+        className="card"
+        style={{ padding: 28, textAlign: "center" }}
+      >
         <h2 style={{ margin: "0 0 8px", fontSize: 22 }}>사전 신청</h2>
         <p
           className="help"

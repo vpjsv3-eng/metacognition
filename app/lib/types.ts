@@ -1,7 +1,12 @@
 export type Profile = {
-  age: number;
   job: string;
-  interests: string[];
+  keywords: string[];
+};
+
+export type SurveyAnswer = {
+  questionId: number;
+  questionText: string;
+  answer: string;
 };
 
 export type ServiceIdea = {
@@ -13,11 +18,13 @@ export type ServiceIdea = {
 
 export type DiagnosisResult = {
   profile: Profile;
-  answers: number[];
+  answers: SurveyAnswer[];
   ideas: ServiceIdea[];
+  comment: string;
+  surveyId?: string;
 };
 
 export type DiagnosisPayload = {
   profile: Profile;
-  answers: number[]; // length: 10, 0-based option indices
+  answers: SurveyAnswer[];
 };

@@ -1,51 +1,70 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Profile } from "./lib/types";
 
-function parseInterests(raw: string): string[] {
-  return raw
-    .split(/[,\n]/g)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .slice(0, 12);
-}
+const JOB_OPTIONS = [
+  "직장인",
+  "프리랜서 / 1인 사업자",
+  "학생",
+  "취업 준비 / 경력 전환 중",
+  "기타 (직접 입력)",
+];
+
+const KEYWORD_OPTIONS = [
+  "절약/재테크에 관심 많아요",
+  "새로운 걸 배우는 걸 좋아해요",
+  "부업이나 수익화에 관심 있어요",
+  "반복적인 업무를 줄이고 싶어요",
+  "글쓰기/콘텐츠 만들기를 즐겨요",
+  "운동/건강 관리에 신경 써요",
+  "육아나 가족 관련 정보를 많이 찾아봐요",
+  "요리/인테리어 등 라이프스타일에 관심 많아요",
+  "직무 역량을 키우고 싶어요",
+  "창업/사업 아이디어를 구상 중이에요",
+];
 
 export default function LandingPage() {
   const router = useRouter();
-  const [age, setAge] = useState<string>("");
-  const [job, setJob] = useState<string>("");
-  const [interestsRaw, setInterestsRaw] = useState<string>("");
+  const [jobIndex, setJobIndex] = useState(-1);
+  const [jobCustom, setJobCustom] = useState("");
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const interestsPreview = useMemo(
-    () => parseInterests(interestsRaw),
-    [interestsRaw],
-  );
+  const isCustomJob =
+    jobIndex >= 0 && JOB_OPTIONS[jobIndex].startsWith("기타");
+
+  function toggleKeyword(kw: string) {
+    setSelectedKeywords((prev) => {
+      if (prev.includes(kw)) return prev.filter((k) => k !== kw);
+      if (prev.length >= 3) return prev;
+      return [...prev, kw];
+    });
+  }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
 
-    const ageNum = Number(age);
-    if (!Number.isFinite(ageNum) || ageNum <= 0 || ageNum > 120) {
-      setError("나이를 올바르게 입력해 주세요.");
-      return;
-    }
-    if (!job.trim()) {
-      setError("직업(또는 직군)을 입력해 주세요.");
+    if (jobIndex < 0) {
+      setError("직업을 선택해 주세요.");
       return;
     }
 
-    const interests = parseInterests(interestsRaw);
-    if (interests.length === 0) {
-      setError("관심사를 1개 이상 입력해 주세요.");
+    const job = isCustomJob ? jobCustom.trim() : JOB_OPTIONS[jobIndex];
+    if (isCustomJob && !job) {
+      setError("직업을 직접 입력해 주세요.");
       return;
     }
 
-    const profile: Profile = { age: ageNum, job: job.trim(), interests };
+    if (selectedKeywords.length === 0) {
+      setError("키워드를 1개 이상 선택해 주세요.");
+      return;
+    }
+
+    const profile: Profile = { job, keywords: selectedKeywords };
     localStorage.setItem("mc_profile", JSON.stringify(profile));
     router.push("/survey");
   }
@@ -54,85 +73,104 @@ export default function LandingPage() {
     <main className="container">
       <div className="topBar">
         <div className="brand">
-          <strong>나만의 AI 서비스 아이디어 진단</strong>
+          <strong>AI 서비스 아이디어 진단</strong>
           <span className="muted" style={{ fontSize: 13 }}>
-            10문항 객관식 설문
+            12문항 객관식 설문
           </span>
         </div>
         <span className="pill">약 2~3분</span>
       </div>
 
       <div className="card">
-        <h1 style={{ margin: "0 0 6px", fontSize: 22 }}>시작하기</h1>
-        <p className="help" style={{ marginTop: 0 }}>
-          AI로 뭘 만들지 모르겠다면? 10문항으로 나에게 딱 맞는 AI 서비스
-          아이디어를 찾아드려요.
+        <h1 style={{ margin: "0 0 6px", fontSize: 24 }}>
+          나만의 AI 서비스, 뭘 만들면 좋을까요?
+        </h1>
+        <p className="help" style={{ marginTop: 0, fontSize: 15 }}>
+          10분 진단으로 나에게 딱 맞는 AI 서비스 아이디어를 찾아드려요
         </p>
 
-        <form onSubmit={onSubmit} style={{ marginTop: 14 }}>
-          <div className="row">
-            <div className="field" style={{ flex: "1 1 200px" }}>
-              <label htmlFor="age">나이</label>
-              <input
-                id="age"
-                type="number"
-                inputMode="numeric"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                min={1}
-                max={120}
-                placeholder="예: 29"
-                required
-              />
-            </div>
-
-            <div className="field" style={{ flex: "2 1 260px" }}>
-              <label htmlFor="job">직업(또는 직군)</label>
-              <input
-                id="job"
-                type="text"
-                value={job}
-                onChange={(e) => setJob(e.target.value)}
-                placeholder="예: 개발자, 학생, 마케터, 프리랜서 등"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="field" style={{ marginTop: 12 }}>
-            <label htmlFor="interests">관심사</label>
-            <textarea
-              id="interests"
-              value={interestsRaw}
-              onChange={(e) => setInterestsRaw(e.target.value)}
-              placeholder="예: AI, 부업, 운동, 여행, 요리"
-            />
-            <div className="help">
-              미리보기:{" "}
-              {interestsPreview.length > 0 ? (
-                interestsPreview.map((x, idx) => (
-                  <span
-                    key={x + idx}
-                    className="pill"
-                    style={{ marginRight: 8, marginTop: 8 }}
+        <form onSubmit={onSubmit} style={{ marginTop: 20 }}>
+          {/* ① 직업 선택 */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
+              현재 직업 또는 주요 활동 <span style={{ color: "#ff6b6b" }}>*</span>
+            </label>
+            <div className="optionList" style={{ marginTop: 8 }}>
+              {JOB_OPTIONS.map((opt, idx) => {
+                const selected = jobIndex === idx;
+                return (
+                  <label
+                    key={idx}
+                    className="radioOption"
+                    data-selected={selected ? "true" : "false"}
                   >
-                    {x}
-                  </span>
-                ))
-              ) : (
-                <span className="muted">입력 없음</span>
-              )}
+                    <input
+                      type="radio"
+                      name="job"
+                      value={idx}
+                      checked={selected}
+                      onChange={() => setJobIndex(idx)}
+                      style={{ display: "none" }}
+                    />
+                    <span className="optionNum">{idx + 1}</span>
+                    <span style={{ fontWeight: 700 }}>{opt}</span>
+                  </label>
+                );
+              })}
             </div>
+            {isCustomJob && (
+              <input
+                type="text"
+                className="customInput"
+                value={jobCustom}
+                onChange={(e) => setJobCustom(e.target.value)}
+                placeholder="직업을 직접 입력해 주세요"
+                autoFocus
+              />
+            )}
           </div>
 
-          {error ? (
-            <p style={{ margin: "12px 0 0", color: "#ffd1d1" }}>
-              <strong>입력 오류:</strong> {error}
-            </p>
-          ) : null}
+          {/* ② 키워드 선택 */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
+              나를 가장 잘 설명하는 키워드를 골라주세요{" "}
+              <span className="muted" style={{ fontSize: 13, fontWeight: 400 }}>
+                (복수 선택, 최대 3개)
+              </span>
+            </label>
+            <div className="keywordGrid">
+              {KEYWORD_OPTIONS.map((kw) => {
+                const selected = selectedKeywords.includes(kw);
+                const disabled = !selected && selectedKeywords.length >= 3;
+                return (
+                  <button
+                    key={kw}
+                    type="button"
+                    className="keywordChip"
+                    data-selected={selected ? "true" : "false"}
+                    data-disabled={disabled ? "true" : "false"}
+                    onClick={() => !disabled && toggleKeyword(kw)}
+                  >
+                    {kw}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedKeywords.length > 0 && (
+              <p className="help">
+                선택: {selectedKeywords.length}/3
+              </p>
+            )}
+          </div>
 
-          <button className="btn" type="submit" style={{ marginTop: 14 }}>
-            설문 시작
+          {error && (
+            <p style={{ margin: "0 0 12px", color: "#ffd1d1" }}>
+              <strong>안내:</strong> {error}
+            </p>
+          )}
+
+          <button className="btn" type="submit" style={{ fontSize: 16 }}>
+            무료 진단 시작하기
           </button>
         </form>
       </div>
