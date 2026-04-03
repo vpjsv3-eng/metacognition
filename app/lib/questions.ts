@@ -105,6 +105,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     options: ["있어요", "없어요", "생각해본 적 없어요"],
     branchTriggerIndex: 0,
     subQuestionId: "Q6-1",
+    hint: "예: 내 식비를 자동으로 분류해주는 가계부,\n매일 운동 루틴을 짜주는 앱,\n육아 일기를 자동으로 정리해주는 서비스 등\n완성된 아이디어가 아니어도 괜찮아요 😊",
   },
   {
     id: "Q6-1",
@@ -182,7 +183,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: "Q10",
     section: "AI / 기술 관련",
-    text: "ChatGPT 같은 AI 툴을 써본 적 있나요?",
+    text: "ChatGPT 같은 AI 서비스나 툴을 써본 적 있나요?",
     type: "branch",
     options: ["자주 써요", "몇 번 써봤어요", "아직 안 써봤어요"],
     branchTriggerIndices: [0, 1],
@@ -208,15 +209,17 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: "Q11",
     section: "AI / 기술 관련",
-    text: "요즘 가장 갖고 싶은 게 뭐예요?",
-    type: "single",
+    text: "지금 삶에서 가장 원하는 변화가 뭐예요?",
+    type: "multi",
     options: [
       "시간적 여유",
       "부업 수입",
       "업무 자동화",
       "나만의 프로젝트",
       "새로운 커리어",
+      "기타 (직접 입력)",
     ],
+    hasCustomOption: true,
   },
   {
     id: "Q12",

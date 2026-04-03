@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type {
   Profile,
   DiagnosisPayload,
@@ -11,7 +12,26 @@ import type {
 } from "../lib/types";
 import { SURVEY_QUESTIONS, type SurveyQuestion } from "../lib/questions";
 
-type Props = { profile: Profile };
+const JOB_OPTIONS = [
+  "직장인",
+  "프리랜서 / 1인 사업자",
+  "학생",
+  "취업 준비 / 경력 전환 중",
+  "기타 (직접 입력)",
+];
+
+const KEYWORD_OPTIONS = [
+  "절약/재테크에 관심 많아요",
+  "새로운 걸 배우는 걸 좋아해요",
+  "부업이나 수익화에 관심 있어요",
+  "반복적인 업무를 줄이고 싶어요",
+  "글쓰기/콘텐츠 만들기를 즐겨요",
+  "운동/건강 관리에 신경 써요",
+  "육아나 가족 관련 정보를 많이 찾아봐요",
+  "요리/인테리어 등 라이프스타일에 관심 많아요",
+  "직무 역량을 키우고 싶어요",
+  "창업/사업 아이디어를 구상 중이에요",
+];
 
 type AnswerState = {
   selectedIndex?: number;
@@ -21,7 +41,13 @@ type AnswerState = {
   skipped?: boolean;
 };
 
-type Phase = "survey" | "email_input" | "email_confirm" | "loading";
+type Phase =
+  | "profile_job"
+  | "profile_keywords"
+  | "survey"
+  | "email_input"
+  | "email_confirm"
+  | "loading";
 
 function isCustomOption(text: string) {
   return text.startsWith("기타");
@@ -33,14 +59,21 @@ const LOADING_STEPS = [
   "결과지 준비 중...",
 ];
 
-export default function SurveyForm({ profile }: Props) {
+export default function SurveyForm() {
   const router = useRouter();
+
+  // Profile state (STEP 0-1, 0-2)
+  const [jobIndex, setJobIndex] = useState(-1);
+  const [jobCustom, setJobCustom] = useState("");
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  const [phase, setPhase] = useState<Phase>("profile_job");
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerState>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [animKey, setAnimKey] = useState(0);
-  const [phase, setPhase] = useState<Phase>("survey");
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [apiDone, setApiDone] = useState(false);
@@ -52,6 +85,23 @@ export default function SurveyForm({ profile }: Props) {
 
   const pulseTriggered = useRef(false);
   const [showPulse, setShowPulse] = useState(false);
+  const [showMotivation, setShowMotivation] = useState(false);
+  const motivationTriggered = useRef(false);
+
+  const isCustomJob = jobIndex >= 0 && JOB_OPTIONS[jobIndex].startsWith("기타");
+
+  function getProfile(): Profile {
+    const job = isCustomJob ? jobCustom.trim() : JOB_OPTIONS[jobIndex] || "";
+    return { job, keywords: selectedKeywords };
+  }
+
+  function toggleKeyword(kw: string) {
+    setSelectedKeywords((prev) => {
+      if (prev.includes(kw)) return prev.filter((k) => k !== kw);
+      if (prev.length >= 3) return prev;
+      return [...prev, kw];
+    });
+  }
 
   const visibleQuestions = useMemo(() => {
     const result: SurveyQuestion[] = [];
@@ -114,16 +164,32 @@ export default function SurveyForm({ profile }: Props) {
     }).length;
   }, [answers, visibleQuestions]);
 
-  const progress = total > 0 ? ((safeStep + 1) / total) * 100 : 0;
+  const progress =
+    phase === "profile_job" || phase === "profile_keywords"
+      ? 0
+      : total > 0
+        ? ((safeStep + 1) / total) * 100
+        : 0;
 
   useEffect(() => {
-    if (progress > 50 && !pulseTriggered.current) {
+    if (phase !== "survey") return;
+    if (progress >= 50 && !pulseTriggered.current) {
       pulseTriggered.current = true;
       setShowPulse(true);
       const t = setTimeout(() => setShowPulse(false), 1000);
       return () => clearTimeout(t);
     }
-  }, [progress]);
+  }, [progress, phase]);
+
+  useEffect(() => {
+    if (phase !== "survey") return;
+    if (progress >= 50 && !motivationTriggered.current) {
+      motivationTriggered.current = true;
+      setShowMotivation(true);
+      const t = setTimeout(() => setShowMotivation(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [progress, phase]);
 
   useEffect(() => {
     if (phase !== "loading") return;
@@ -207,6 +273,10 @@ export default function SurveyForm({ profile }: Props) {
   }
 
   function goPrev() {
+    if (phase === "survey" && safeStep === 0) {
+      setPhase("profile_keywords");
+      return;
+    }
     if (safeStep > 0) navigate(safeStep - 1);
   }
 
@@ -409,7 +479,7 @@ export default function SurveyForm({ profile }: Props) {
 
   async function onSubmit() {
     setError(null);
-
+    const profile = getProfile();
     const updatedProfile = { ...profile, email: email.trim() };
 
     const payload: DiagnosisPayload = {
@@ -443,6 +513,149 @@ export default function SurveyForm({ profile }: Props) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // ── STEP 0-1: 직업 선택 ──
+  if (phase === "profile_job") {
+    return (
+      <>
+        <div className="progressBar">
+          <div className="progressFill" style={{ width: "0%" }} />
+        </div>
+        <div className="surveyWrap">
+          <div className="questionBlock" key="profile-job">
+            <h2 className="questionTitle">먼저 현재 하시는 일을 알려주세요</h2>
+            <div className="optionList">
+              {JOB_OPTIONS.map((opt, idx) => {
+                const selected = jobIndex === idx;
+                return (
+                  <label
+                    key={idx}
+                    className="optionCard"
+                    data-selected={selected ? "true" : "false"}
+                  >
+                    <input
+                      type="radio"
+                      name="job"
+                      value={idx}
+                      checked={selected}
+                      onChange={() => {
+                        setJobIndex(idx);
+                        setProfileError(null);
+                      }}
+                      style={{ display: "none" }}
+                    />
+                    <span className="optionText">{opt}</span>
+                    <span className="optionCheck">{selected ? "✓" : ""}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {isCustomJob && (
+              <input
+                type="text"
+                className="customInput"
+                value={jobCustom}
+                onChange={(e) => setJobCustom(e.target.value)}
+                placeholder="직업을 직접 입력해 주세요"
+                autoFocus
+              />
+            )}
+            {profileError && <p className="errorText">{profileError}</p>}
+            <div className="navArea">
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={() => {
+                  if (jobIndex < 0) {
+                    setProfileError("직업을 선택해 주세요.");
+                    return;
+                  }
+                  if (isCustomJob && !jobCustom.trim()) {
+                    setProfileError("직업을 직접 입력해 주세요.");
+                    return;
+                  }
+                  setProfileError(null);
+                  setPhase("profile_keywords");
+                  setAnimKey((k) => k + 1);
+                }}
+              >
+                다음 →
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── STEP 0-2: 키워드 선택 ──
+  if (phase === "profile_keywords") {
+    return (
+      <>
+        <div className="progressBar">
+          <div className="progressFill" style={{ width: "0%" }} />
+        </div>
+        <div className="surveyWrap">
+          <div className="questionBlock" key="profile-keywords">
+            <h2 className="questionTitle">
+              나를 가장 잘 설명하는 키워드를 골라주세요
+            </h2>
+            <span className="multiBadge">최대 3개 선택</span>
+            <div className="keywordGrid">
+              {KEYWORD_OPTIONS.map((kw) => {
+                const selected = selectedKeywords.includes(kw);
+                const disabled = !selected && selectedKeywords.length >= 3;
+                return (
+                  <button
+                    key={kw}
+                    type="button"
+                    className="keywordChip"
+                    data-selected={selected ? "true" : "false"}
+                    data-disabled={disabled ? "true" : "false"}
+                    onClick={() => !disabled && toggleKeyword(kw)}
+                  >
+                    {kw}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedKeywords.length > 0 && (
+              <p className="help">선택: {selectedKeywords.length}/3</p>
+            )}
+            {profileError && <p className="errorText">{profileError}</p>}
+            <div className="navArea">
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={() => {
+                  setProfileError(null);
+                  setPhase("survey");
+                  setAnimKey((k) => k + 1);
+                }}
+              >
+                다음 →
+              </button>
+              <div className="navBar">
+                <div>
+                  <button
+                    className="btnGhost"
+                    type="button"
+                    onClick={() => {
+                      setProfileError(null);
+                      setPhase("profile_job");
+                    }}
+                  >
+                    ← 이전
+                  </button>
+                </div>
+                <div />
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   // ── Email input screen ──
@@ -648,7 +861,7 @@ export default function SurveyForm({ profile }: Props) {
     );
   }
 
-  // ── Loading screen ──
+  // ── Loading screen with cat GIF ──
   if (phase === "loading") {
     return (
       <>
@@ -657,9 +870,14 @@ export default function SurveyForm({ profile }: Props) {
         </div>
         <div className="loadingWrap">
           <div className="loadingContent">
-            <span style={{ fontSize: 44, display: "block", marginBottom: 16 }}>
-              🔍
-            </span>
+            <Image
+              src="/cat-loading.gif"
+              alt="분석 중 고양이"
+              width={200}
+              height={200}
+              unoptimized
+              style={{ borderRadius: 16, marginBottom: 16 }}
+            />
             <h2
               style={{
                 fontSize: 20,
@@ -668,7 +886,7 @@ export default function SurveyForm({ profile }: Props) {
                 color: "var(--text)",
               }}
             >
-              AI가 회원님의 답변을 분석하고 있어요
+              AI가 열심히 분석하고 있어요 🐱
             </h2>
 
             <div
@@ -749,6 +967,12 @@ export default function SurveyForm({ profile }: Props) {
           style={{ width: `${progress}%` }}
         />
       </div>
+
+      {showMotivation && (
+        <div className="motivationMessage">
+          절반 왔어요 👏 거의 다 왔어요, 조금만 더요!
+        </div>
+      )}
 
       <div className="surveyWrap">
         <div className="questionBlock" key={animKey}>
@@ -883,7 +1107,7 @@ export default function SurveyForm({ profile }: Props) {
 
             <div className="navBar">
               <div>
-                {safeStep > 0 && (
+                {(safeStep > 0 || phase === "survey") && (
                   <button
                     className="btnGhost"
                     type="button"

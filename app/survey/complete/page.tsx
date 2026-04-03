@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { DiagnosisResult } from "../../lib/types";
+import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 
 function getDisplayName(email?: string): string {
   if (!email) return "회원";
@@ -15,6 +15,108 @@ function getTodayString(): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${y}.${m}.${dd}`;
+}
+
+function AccordionIdea({
+  idea,
+  index,
+}: {
+  idea: ServiceIdea;
+  index: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const rank = idea.rank ?? index + 2;
+
+  return (
+    <div className="ideaCard">
+      <div
+        className="accordionHeader"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+          <span className="rankBadge">추천 {rank}순위</span>
+          <div style={{ minWidth: 0 }}>
+            <strong style={{ fontSize: 16, color: "var(--text)", display: "block" }}>
+              {idea.name}
+            </strong>
+            <p
+              style={{
+                margin: "4px 0 0",
+                color: "var(--textSecondary)",
+                fontSize: 14,
+                lineHeight: 1.4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {idea.oneline}
+            </p>
+          </div>
+        </div>
+        <button
+          className="accordionToggle"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((v) => !v);
+          }}
+        >
+          {open ? "▲ 접기" : "▼ 자세히 보기"}
+        </button>
+      </div>
+
+      {open && (
+        <div className="accordionBody">
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="ideaDetail">
+              <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
+              <span>{idea.reason}</span>
+            </div>
+            <div className="ideaDetail">
+              <span className="ideaLabel">핵심 기능</span>
+              <span>{idea.core_feature}</span>
+            </div>
+            <div className="ideaDetail">
+              <span className="ideaLabel">실제 작동 방식</span>
+              <span>{idea.how_it_works}</span>
+            </div>
+          </div>
+          <div className="ideaMetaTags">
+            <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
+            <span className="ideaMetaTag">⏱ {idea.period}</span>
+            <span className="ideaMetaTag">🛠 {idea.tool}</span>
+          </div>
+          <div className="ideaCta">
+            <p
+              style={{
+                margin: "0 0 8px",
+                fontSize: 13,
+                color: "var(--textSecondary)",
+              }}
+            >
+              🔒 이 아이디어로 직접 만들어보고 싶다면?
+            </p>
+            <a
+              href="/nadocoding"
+              style={{
+                display: "inline-block",
+                padding: "8px 16px",
+                borderRadius: 8,
+                background: "var(--accent)",
+                color: "white",
+                fontSize: 13,
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
+            >
+              나도 코딩 1기 자세히 보기 →
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function CompletePage() {
@@ -141,58 +243,83 @@ export default function CompletePage() {
 
   return (
     <main className="resultContainer">
-      {/* 개인화 헤더 */}
+      {/* ═══ 개인화 헤더 (개선) ═══ */}
       <div style={{ textAlign: "center", margin: "16px 0 28px" }}>
         <h1
           style={{
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: 800,
-            margin: "0 0 6px",
+            margin: "0 0 8px",
             letterSpacing: -0.4,
             color: "var(--text)",
           }}
         >
-          📋 {displayName}님의 AI 서비스 아이디어 진단 결과
+          {displayName}님의 진단 결과
         </h1>
         <p
           style={{
-            margin: "0 0 8px",
+            margin: "0 0 12px",
             fontSize: 14,
             color: "var(--textSecondary)",
           }}
         >
-          분석 완료 · {getTodayString()}
+          {getTodayString()}
         </p>
-        {email && (
-          <p style={{ margin: 0, fontSize: 13, color: "var(--textHint)" }}>
-            결과지가 {email} 으로 발송됐어요 📩
-          </p>
-        )}
         {emailStatus === "sending" && (
-          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--textHint)" }}>
             📧 진단 결과를 이메일로 보내는 중...
           </p>
         )}
         {emailStatus === "sent" && (
-          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--accent)" }}>
-            ✅ 이메일 발송 완료!
-          </p>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 16px",
+              borderRadius: 999,
+              background: "var(--accentSoft)",
+            }}
+          >
+            <span style={{ color: "var(--accent)", fontSize: 16 }}>✅</span>
+            <span style={{ fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>
+              {email}으로 결과지 발송 완료
+            </span>
+          </div>
         )}
         {emailStatus === "failed" && (
-          <p style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--textHint)" }}>
             이메일 발송에 실패했어요. 아래 &quot;결과지 다시 받기&quot; 버튼을 눌러주세요.
           </p>
         )}
       </div>
 
-      {/* ═══ PART 1: 나의 성향 분석 ═══ */}
+      {/* ═══ PART 1: 나의 성향 분석 (개선) ═══ */}
       {persona && (
         <div className="personaCard">
-          <h2 className="personaTitle">{persona.title}</h2>
-          <p className="personaSummary">{persona.summary}</p>
-          <div className="personaTags">
-            <span className="personaTag">💪 강점: {persona.strength}</span>
-            <span className="personaTag">🎯 핵심 니즈: {persona.painpoint}</span>
+          <h2
+            style={{
+              fontSize: 24,
+              fontWeight: 800,
+              margin: "0 0 12px",
+              color: "var(--text)",
+            }}
+          >
+            {persona.title}
+          </h2>
+          <p
+            style={{
+              margin: "0 0 16px",
+              fontSize: 15,
+              lineHeight: 1.8,
+              color: "var(--text)",
+            }}
+          >
+            {persona.summary}
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <span className="personaStrengthBadge">💪 강점: {persona.strength}</span>
+            <span className="personaNeedsBadge">🎯 핵심 니즈: {persona.painpoint}</span>
           </div>
         </div>
       )}
@@ -209,12 +336,15 @@ export default function CompletePage() {
         맞춤 아이디어 {result.ideas.length}가지
       </h2>
 
-      {/* 1순위: 전체 공개 */}
+      {/* 1순위: 강조 카드 */}
       {firstIdea && (
         <div
-          className="ideaCard"
+          className="ideaCard firstIdeaCard"
           style={{ borderColor: "var(--accent)", borderWidth: 2, marginBottom: 14 }}
         >
+          <div className="firstIdeaBanner">
+            ✨ 가장 추천하는 아이디어
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
             <span
               className="rankBadge"
@@ -230,7 +360,7 @@ export default function CompletePage() {
             {firstIdea.oneline}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div className="ideaDetail">
+            <div className="ideaDetail firstIdeaReasonBg">
               <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
               <span>{firstIdea.reason}</span>
             </div>
@@ -251,7 +381,7 @@ export default function CompletePage() {
         </div>
       )}
 
-      {/* ═══ 나도코딩 유입 섹션 ═══ */}
+      {/* 나도코딩 유입 섹션 */}
       <div className="promoSection">
         <h3
           style={{
@@ -302,50 +432,10 @@ export default function CompletePage() {
         </button>
       </div>
 
-      {/* 2~5순위: 블러 처리 */}
+      {/* 2~5순위: 아코디언 */}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {otherIdeas.map((idea, i) => (
-          <div key={i} className="ideaCard ideaBlurred">
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-              <span className="rankBadge">추천 {idea.rank ?? i + 2}순위</span>
-            </div>
-            <strong style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
-              {idea.name}
-            </strong>
-            <p style={{ margin: "0 0 14px", color: "var(--textSecondary)", fontSize: 15, lineHeight: 1.5 }}>
-              {idea.oneline}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div className="ideaDetail">
-                <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
-                <span>{idea.reason}</span>
-              </div>
-              <div className="ideaDetail">
-                <span className="ideaLabel">핵심 기능</span>
-                <span>{idea.core_feature}</span>
-              </div>
-            </div>
-            <div className="ideaMetaTags">
-              <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
-              <span className="ideaMetaTag">⏱ {idea.period}</span>
-              <span className="ideaMetaTag">🛠 {idea.tool}</span>
-            </div>
-
-            <div className="ideaLockedOverlay">
-              <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--textSecondary)" }}>
-                🔒 나도 코딩 1기에서 이 아이디어로 직접 만들어보세요
-              </p>
-              <button
-                className="btnAccent"
-                type="button"
-                onClick={() => router.push("/nadocoding")}
-                style={{ fontSize: 13, padding: "8px 16px" }}
-              >
-                자세히 보기
-              </button>
-            </div>
-          </div>
+          <AccordionIdea key={i} idea={idea} index={i} />
         ))}
       </div>
 

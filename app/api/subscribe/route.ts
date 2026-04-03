@@ -19,8 +19,9 @@ export async function POST(req: Request) {
       surveyId?: string;
       source?: string;
       timestamp: string;
+      privacy_consent?: boolean;
     };
-    const { name, phone, email, surveyId, source, timestamp } = body;
+    const { name, phone, email, surveyId, source, timestamp, privacy_consent } = body;
 
     if (!name?.trim() || !phone?.trim()) {
       return NextResponse.json(
@@ -55,6 +56,10 @@ export async function POST(req: Request) {
       }
       if (surveyId) {
         insertData.survey_id = surveyId;
+      }
+      if (privacy_consent) {
+        insertData.privacy_consent = true;
+        insertData.privacy_consent_at = new Date().toISOString();
       }
 
       const { error } = await sb.from("waitlist").insert(insertData);

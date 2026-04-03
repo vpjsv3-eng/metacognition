@@ -1117,6 +1117,34 @@ label {
   animation: progressPulse 1s ease-in-out;
 }
 
+/* ═══════════ Motivation Message ═══════════ */
+
+@keyframes motivationFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes motivationFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.motivationMessage {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 101;
+  padding: 10px 24px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  animation: motivationFadeIn 0.3s ease-out, motivationFadeOut 0.5s ease-in 2.5s forwards;
+  white-space: nowrap;
+}
+
 /* ═══════════ Modal ═══════════ */
 
 .modalOverlay {
@@ -1140,21 +1168,95 @@ label {
   animation: fadeSlideIn 0.3s ease-out;
 }
 
-/* ═══════════ Blur (locked ideas) ═══════════ */
+/* ═══════════ Accordion Ideas ═══════════ */
 
-.ideaBlurred .ideaDetail,
-.ideaBlurred .ideaMetaTags {
-  filter: blur(6px);
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
   user-select: none;
-  pointer-events: none;
+  gap: 12px;
 }
 
-.ideaLockedOverlay {
+.accordionToggle {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.accordionToggle:hover {
+  background: var(--accentSoft);
+}
+
+@keyframes accordionOpen {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 800px; }
+}
+
+.accordionBody {
+  overflow: hidden;
+  animation: accordionOpen 0.35s ease-out;
   margin-top: 14px;
+}
+
+.ideaCta {
+  margin-top: 16px;
   padding: 16px;
   border-radius: 10px;
   background: var(--surface);
   text-align: center;
+}
+
+/* ═══════════ First Idea Banner ═══════════ */
+
+.firstIdeaBanner {
+  background: var(--accent);
+  color: white;
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: 14px 14px 0 0;
+  margin: -22px -22px 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.firstIdeaCard {
+  box-shadow: 0 4px 20px rgba(0, 196, 113, 0.15);
+}
+
+.firstIdeaReasonBg {
+  background: #E8FAF2 !important;
+}
+
+/* ═══════════ Persona Badge Styles ═══════════ */
+
+.personaStrengthBadge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: #059669;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.personaNeedsBadge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #EFF6FF;
+  color: #2563EB;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* ═══════════ Sticky Bar ═══════════ */

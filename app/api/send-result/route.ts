@@ -44,7 +44,7 @@ function buildEmailHtml(
           </div>
           <strong style="font-size:16px;color:#111827;display:block;margin-bottom:4px;">${idea.name}</strong>
           <p style="margin:0 0 12px;color:#6B7280;font-size:14px;line-height:1.6;">${idea.oneline}</p>
-          <div style="padding:12px;border-radius:8px;background:#F8F9FA;margin-bottom:6px;">
+          <div style="padding:12px;border-radius:8px;background:${isFirst ? "#E8FAF2" : "#F8F9FA"};margin-bottom:6px;">
             <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">추천 이유</p>
             <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.reason}</p>
           </div>
@@ -56,10 +56,17 @@ function buildEmailHtml(
             <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">작동 방식</p>
             <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.how_it_works}</p>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
             <span style="padding:4px 10px;border-radius:999px;background:#F3F4F6;font-size:12px;color:#6B7280;">🎯 ${idea.difficulty}</span>
             <span style="padding:4px 10px;border-radius:999px;background:#F3F4F6;font-size:12px;color:#6B7280;">⏱ ${idea.period}</span>
             <span style="padding:4px 10px;border-radius:999px;background:#F3F4F6;font-size:12px;color:#6B7280;">🛠 ${idea.tool}</span>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:8px;background:#F8F9FA;">
+            <p style="margin:0 0 8px;font-size:13px;color:#6B7280;">이 아이디어로 직접 만들어보고 싶다면?</p>
+            <a href="https://metacognition-r6lc.vercel.app/nadocoding"
+               style="display:inline-block;padding:8px 20px;background:#00C471;color:#FFFFFF;text-decoration:none;border-radius:6px;font-weight:600;font-size:13px;">
+              나도 코딩 1기 자세히 보기
+            </a>
           </div>
         </div>`;
       },
@@ -107,17 +114,17 @@ function buildEmailHtml(
 
       <hr style="border:none;border-top:1px solid #E5E7EB;margin:32px 0;">
 
-      <div style="text-align:center;padding:28px 24px;background:#FFFFFF;border-radius:16px;border:1px solid #E5E7EB;">
-        <p style="margin:0 0 8px;font-size:16px;font-weight:600;color:#111827;">
-          내 아이디어, 직접 만들어보고 싶다면?
+      <div style="text-align:center;padding:36px 28px;background:#00C471;border-radius:16px;">
+        <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#FFFFFF;line-height:1.6;">
+          5가지 아이디어 중 마음에 드는 게 있으신가요?
         </p>
-        <p style="margin:0 0 20px;font-size:14px;color:#6B7280;line-height:1.6;">
+        <p style="margin:0 0 24px;font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;">
           코딩 몰라도 괜찮아요.<br>
-          나도 코딩 1기에서 아이디어 발굴부터 배포까지 함께합니다.
+          나도 코딩 1기에서 2주 안에 직접 만들어드려요.
         </p>
         <a href="https://metacognition-r6lc.vercel.app/nadocoding"
-           style="display:inline-block;padding:14px 32px;background:#00C471;color:#FFFFFF;text-decoration:none;border-radius:8px;font-weight:700;font-size:16px;">
-          나도 코딩 1기 자세히 보기
+           style="display:inline-block;padding:16px 36px;background:#FFFFFF;color:#00C471;text-decoration:none;border-radius:8px;font-weight:700;font-size:16px;">
+          지금 얼리버드 신청하기 (무료)
         </a>
       </div>
 

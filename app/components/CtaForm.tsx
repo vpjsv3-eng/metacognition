@@ -61,6 +61,7 @@ export default function CtaForm({ surveyId, onGreenBg, source, compact }: Props)
           surveyId: surveyId || undefined,
           source: source || "nadocoding_page",
           timestamp: new Date().toISOString(),
+          privacy_consent: consent,
         }),
       });
       setSubmitted(true);
