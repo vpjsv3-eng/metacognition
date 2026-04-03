@@ -35,9 +35,11 @@ function buildEmailHtml(
       (idea, i) => {
         const isFirst = (idea.rank ?? i + 1) === 1;
         const borderStyle = isFirst ? "border:2px solid #00C471;" : "border:1px solid #E5E7EB;";
+        const rankNum = idea.rank ?? i + 1;
         return `<div style="margin-bottom:16px;padding:20px;${borderStyle}border-radius:12px;background:#FFFFFF;">
-          <div style="margin-bottom:8px;">
-            <span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${isFirst ? "#00C471" : "#E8FAF2"};color:${isFirst ? "#fff" : "#00C471"};font-size:12px;font-weight:700;">추천 ${idea.rank ?? i + 1}순위</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:32px;height:32px;background:#00C471;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:16px;flex-shrink:0;">${rankNum}</div>
+            <span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${isFirst ? "#00C471" : "#E8FAF2"};color:${isFirst ? "#fff" : "#00C471"};font-size:12px;font-weight:700;">추천 ${rankNum}순위</span>
           </div>
           <strong style="font-size:16px;color:#111827;display:block;margin-bottom:4px;">${idea.name}</strong>
           <p style="margin:0 0 12px;color:#6B7280;font-size:14px;line-height:1.6;">${idea.oneline}</p>

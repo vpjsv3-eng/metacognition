@@ -9,10 +9,18 @@ const TARGET_LIST = [
   { icon: "🚀", text: "2주 안에 배포된 내 AI 서비스를 갖고 싶은 분" },
 ];
 
-const CURRICULUM = [
+type CurriculumItem = {
+  label: string;
+  title: string;
+  desc: string;
+  mode: "online" | "offline";
+};
+
+const CURRICULUM: CurriculumItem[] = [
   {
-    label: "WEEK 0 (4.13~4.17)",
+    label: "WEEK 0 (4.13 월 ~ 4.17 금)",
     title: "사전 준비",
+    mode: "online",
     desc: `사전 VOD 3편 시청 + 과제 제출
 · VOD 1: AI 시대에 왜 직접 만들어야 하는가 (15분)
 · VOD 2: 바이브 코딩이란? Lovable / Bolt 툴 소개 (15분)
@@ -22,7 +30,8 @@ const CURRICULUM = [
   },
   {
     label: "DAY 1 (4.18 토)",
-    title: "개강 OT — 오프라인",
+    title: "개강 OT",
+    mode: "offline",
     desc: `14:00 오프닝 + 자기소개
 15:00 툴 세팅 (GitHub / Vercel / Lovable)
 16:00 클론 바이브 코딩 실습 → 첫 배포 성공 경험
@@ -31,21 +40,37 @@ const CURRICULUM = [
   {
     label: "DAY 2 (4.19 일)",
     title: "기획서 확정",
+    mode: "online",
     desc: `기획서 디스코드 제출
 운영진 피드백 제공`,
   },
   {
-    label: "DAY 3-8 (4.19~4.24)",
-    title: "구현 + 배포 — 온라인",
+    label: "DAY 3-4 (4.20 월 ~ 4.21 화)",
+    title: "구현 시작",
+    mode: "online",
     desc: `Lovable로 화면 만들기
-핵심 기능 구현
-디스코드 실시간 질의응답
-4.21 화 중간 체크인
-4.24 금 배포 완료 + 발표 자료 제출`,
+핵심 기능 구현 시작
+디스코드 실시간 질의응답`,
+  },
+  {
+    label: "DAY 5 (4.21 화)",
+    title: "중간 체크인",
+    mode: "online",
+    desc: `진행 상황 디스코드 공유
+막히는 것 실시간 질의응답`,
+  },
+  {
+    label: "DAY 6-8 (4.22 수 ~ 4.24 금)",
+    title: "구현 완료 + 배포",
+    mode: "online",
+    desc: `핵심 기능 마무리
+Vercel 배포 완료
+발표 자료 제출 (4.24 금 마감)`,
   },
   {
     label: "DAY 9 (4.25 토)",
-    title: "성과 공유회 + 수료식 — 오프라인",
+    title: "성과 공유회 + 수료식",
+    mode: "offline",
     desc: `1기 수강생 서비스 발표
 질의응답 + 피드백
 수료증 수여 + 단체사진`,
@@ -53,10 +78,44 @@ const CURRICULUM = [
 ];
 
 const BENEFITS = [
-  { icon: "🌐", text: "배포된 나만의 AI 서비스 URL" },
-  { icon: "🛠", text: "바이브 코딩 툴 활용 능력" },
-  { icon: "🧠", text: "아이디어를 서비스로 만드는 사고 프레임" },
-  { icon: "👥", text: "함께 성장하는 1기 동료 커뮤니티" },
+  {
+    icon: "🌐",
+    title: "내 이름으로 된 AI 서비스가 생겨요",
+    desc: "링크 하나로 누구에게나 공유할 수 있어요",
+  },
+  {
+    icon: "🛠",
+    title: "코딩 없이 앱을 만드는 방법을 알게 돼요",
+    desc: "Lovable, Bolt 같은 툴로 혼자서도 만들 수 있어요",
+  },
+  {
+    icon: "🧠",
+    title: "머릿속 아이디어를 현실로 꺼내는 법을 배워요",
+    desc: "기획부터 완성까지 한 사이클을 경험해요",
+  },
+  {
+    icon: "👥",
+    title: "같은 목표를 가진 동료들이 생겨요",
+    desc: "수료 후에도 함께 만들고 피드백해요",
+  },
+];
+
+const DIFFERENTIATORS = [
+  {
+    icon: "📅",
+    title: "2주, 딱 필요한 만큼만",
+    desc: "긴 강의 들을 시간 없어요.\n2주 안에 기획 → 구현 → 배포\n한 사이클을 끝냅니다.",
+  },
+  {
+    icon: "🎯",
+    title: "내 아이디어로 만들어요",
+    desc: "정해진 예제 따라하기 NO.\n진단으로 찾은 내 아이디어를\n직접 만들어요.",
+  },
+  {
+    icon: "👨‍👩‍👧",
+    title: "혼자 하지 않아요",
+    desc: "막히면 디스코드에서 바로 질문.\n같은 목표를 가진 동료들과\n함께 완주해요.",
+  },
 ];
 
 type FaqCategory = {
@@ -70,36 +129,36 @@ const FAQ_DATA: FaqCategory[] = [
     items: [
       {
         q: "코딩을 전혀 몰라도 할 수 있나요?",
-        a: "네, 괜찮아요. 이 과정은 코딩 없이 AI 툴만으로 서비스를 만드는 방법을 배워요. 코딩 지식이 전혀 없어도 따라올 수 있도록 설계됐어요.",
+        a: "네, 전혀 몰라도 괜찮아요 😊\n코딩 없이 AI 툴만으로 만드는 방법을 알려드려요.",
       },
       {
         q: "2주가 너무 짧은 거 아닌가요?",
-        a: "이 과정이 추구하는 건 완벽한 서비스가 아니에요. 빠르게 변하는 AI 시대에 가장 중요한 건 아이디어를 빠르게 실행해보는 경험이에요. 2주 안에 기획 → 구현 → 배포 한 사이클을 완성하면 그다음은 혼자서도 할 수 있어요. 완성도보다 완주가 목표예요.",
+        a: "짧아서 오히려 좋아요!\n완성도보다 완주가 목표예요.\n2주 안에 기획 → 구현 → 배포를 한 번 경험하면\n그다음은 혼자서도 할 수 있어요.",
       },
       {
-        q: "2주 안에 진짜 서비스를 만들 수 있나요?",
-        a: "네, 가능해요. 핵심 기능 1개짜리 MVP를 목표로 하기 때문이에요. 실제로 배포된 URL이 생기고 주변에 공유할 수 있는 수준까지 만들어요.",
+        q: "2주 안에 진짜 서비스가 만들어지나요?",
+        a: "네, 실제로 링크가 생겨요 🔗\n핵심 기능 1개짜리 MVP를 목표로 해서\n주변에 공유할 수 있는 수준까지 만들어요.",
       },
       {
         q: "어떤 서비스를 만들게 되나요?",
-        a: "정해진 주제가 없어요. 사전 진단 결과와 기획서 작성을 통해 본인만의 아이디어로 서비스를 만들어요.",
+        a: "정해진 주제 없어요!\n사전 진단 결과와 기획서를 통해\n본인만의 아이디어로 만들어요.",
       },
     ],
   },
   {
-    title: "일정 및 참여 방식",
+    title: "일정 및 참여",
     items: [
       {
-        q: "오프라인 참석이 필수인가요?",
-        a: "4.18 개강 OT와 4.25 성과 공유회는 오프라인으로 진행돼요. 가능하면 참석을 권장해요. 동료들과의 유대감이 완주율에 큰 영향을 줘요. 불가피한 경우 온라인 참여 방법은 별도 안내드려요.",
+        q: "오프라인 참석이 꼭 필요한가요?",
+        a: "4.18(토) OT와 4.25(토) 성과공유회는 오프라인이에요.\n가능하면 참석을 권장드려요.\n불가피한 경우 개별 안내드릴게요.",
       },
       {
-        q: "직장인인데 병행할 수 있나요?",
-        a: "네, 가능해요. 오프라인 세션은 토요일에만 있고 나머지는 본인 시간에 자율적으로 진행해요. 하루 1~2시간 정도면 충분해요.",
+        q: "직장인도 병행할 수 있나요?",
+        a: "충분히 가능해요 💪\n오프라인은 토요일만, 나머지는 자율 진행이에요.\n하루 1~2시간이면 충분해요.",
       },
       {
-        q: "중간에 막히면 어떻게 하나요?",
-        a: "디스코드 채널에서 실시간으로 질문할 수 있어요. 운영진이 상주하며 답변해드려요. 수요일엔 중간 체크인도 진행돼요.",
+        q: "막히면 어떻게 하나요?",
+        a: "디스코드에서 바로 질문하시면 돼요!\n운영진이 실시간으로 답변드려요.",
       },
     ],
   },
@@ -107,16 +166,12 @@ const FAQ_DATA: FaqCategory[] = [
     title: "툴 및 비용",
     items: [
       {
-        q: "어떤 툴을 사용하나요?",
-        a: "Lovable, Bolt 같은 바이브 코딩 툴과 GitHub, Vercel을 사용해요. 모두 무료 또는 저렴한 플랜으로 시작할 수 있어요.",
+        q: "어떤 툴을 쓰나요?",
+        a: "Lovable, Bolt 같은 바이브 코딩 툴과\nGitHub, Vercel을 사용해요.\n대부분 무료로 시작할 수 있어요.",
       },
       {
-        q: "툴 사용 비용이 따로 드나요?",
-        a: "대부분 무료 플랜으로 진행 가능해요. Lovable 유료 플랜이 필요한 경우 월 약 2~3만원 수준이에요. 과정 내에서 비용 최소화하는 방법도 함께 안내드려요.",
-      },
-      {
-        q: "수료 후에도 서비스를 계속 운영할 수 있나요?",
-        a: "네, 배포된 서비스는 수료 후에도 계속 운영 가능해요. 유지비 없이 운영하는 방법도 과정 안에서 안내드려요.",
+        q: "툴 비용이 따로 드나요?",
+        a: "대부분 무료 플랜으로 가능해요.\n유료가 필요한 경우 월 2~3만원 수준이고\n비용 최소화 방법도 알려드려요.",
       },
     ],
   },
@@ -124,16 +179,16 @@ const FAQ_DATA: FaqCategory[] = [
     title: "수강료 및 신청",
     items: [
       {
-        q: "얼리버드 할인은 언제까지인가요?",
-        a: "1기 오픈 전까지만 적용돼요. 오픈 후에는 정가 299,000원으로 변경돼요. 지금 사전 신청하시면 99,000원에 수강 가능해요.",
+        q: "얼리버드는 언제까지인가요?",
+        a: "1기 오픈 전까지만이에요.\n지금 사전 신청하시면 99,000원 적용돼요 🎉",
       },
       {
-        q: "환불은 되나요?",
-        a: "개강 전까지는 100% 환불 가능해요. 개강 후에는 환불이 어려운 점 양해 부탁드려요.",
+        q: "환불되나요?",
+        a: "개강 전 100% 환불 가능해요.\n개강 후에는 어려운 점 양해 부탁드려요.",
       },
       {
-        q: "1기 이후 추가 모집이 있나요?",
-        a: "네, 1기 운영 후 2기 모집 예정이에요. 다만 1기는 선착순 10명 한정이고 얼리버드 가격은 1기에만 적용돼요.",
+        q: "2기도 있나요?",
+        a: "네, 1기 이후 2기 모집 예정이에요.\n얼리버드 가격은 1기에만 적용돼요.",
       },
     ],
   },
@@ -141,16 +196,16 @@ const FAQ_DATA: FaqCategory[] = [
     title: "수료 후",
     items: [
       {
-        q: "수료 후 혼자서도 계속 만들 수 있나요?",
-        a: "네, 이 과정의 목표가 그거예요. 한 사이클을 경험하고 나면 혼자서도 아이디어를 서비스로 만들 수 있는 사고 프레임과 툴 활용 능력이 생겨요.",
+        q: "수료 후 혼자서도 만들 수 있나요?",
+        a: "그게 이 과정의 목표예요 🎯\n한 사이클을 경험하면\n혼자서도 만들 수 있는 힘이 생겨요.",
       },
       {
-        q: "수료증이 발급되나요?",
-        a: "네, 성과 공유회 당일 수료증을 드려요. 포트폴리오로도 활용할 수 있어요.",
+        q: "수료증이 나오나요?",
+        a: "네! 4.25 성과공유회 당일 드려요.\n포트폴리오로도 활용할 수 있어요.",
       },
       {
-        q: "1기 수강생들끼리 계속 연결될 수 있나요?",
-        a: "네, 디스코드 커뮤니티는 수료 후에도 유지돼요. 1기 동료들과 계속 교류하고 서로의 서비스를 피드백할 수 있어요.",
+        q: "수료 후에도 동료들과 연결되나요?",
+        a: "디스코드 커뮤니티는 수료 후에도 유지돼요.\n계속 교류하고 피드백할 수 있어요 😊",
       },
     ],
   },
@@ -237,16 +292,14 @@ export default function NadocodingPage() {
           </p>
         </div>
 
-        <div
-          style={{ display: "flex", flexDirection: "column", gap: 10 }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <button
             className="btnPrimary"
             type="button"
             onClick={scrollToForm}
             style={{ fontSize: 16 }}
           >
-            지금 얼리버드 신청하기
+            무료로 사전 신청하기
           </button>
           <button
             className="btnOutline"
@@ -283,7 +336,98 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ③ 2주 커리큘럼 */}
+      {/* ③ 2주 후 내 모습 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 16px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            2주 후 내 모습
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            {BENEFITS.map((b, i) => (
+              <div key={i} className="benefitCard" style={{ flexDirection: "column", alignItems: "flex-start", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span className="benefitIcon">{b.icon}</span>
+                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{b.title}</strong>
+                </div>
+                <span style={{ fontSize: 13, color: "var(--textSecondary)", paddingLeft: 34 }}>{b.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ④ 나도 코딩이 다른 이유 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 16px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            나도 코딩이 다른 이유
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {DIFFERENTIATORS.map((d, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "18px 20px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border)",
+                  background: "#FFFFFF",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    marginBottom: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>{d.icon}</span>
+                  <strong
+                    style={{ fontSize: 15, color: "var(--text)" }}
+                  >
+                    {d.title}
+                  </strong>
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 14,
+                    color: "var(--textSecondary)",
+                    lineHeight: 1.65,
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {d.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ⑤ 2주 커리큘럼 */}
       <section ref={curriculumRef} style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -301,7 +445,33 @@ export default function NadocodingPage() {
             {CURRICULUM.map((item, i) => (
               <div key={i} className="timelineItem">
                 <div className="timelineDot" />
-                <div className="timelineLabel">{item.label}</div>
+                <div className="timelineLabel">
+                  {item.label}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      marginLeft: 8,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background:
+                        item.mode === "offline"
+                          ? "var(--accent)"
+                          : "var(--surface)",
+                      color:
+                        item.mode === "offline"
+                          ? "#fff"
+                          : "var(--textSecondary)",
+                      border:
+                        item.mode === "offline"
+                          ? "none"
+                          : "1px solid var(--border)",
+                    }}
+                  >
+                    {item.mode === "offline" ? "오프라인" : "온라인"}
+                  </span>
+                </div>
                 <div className="timelineTitle">{item.title}</div>
                 <div className="timelineDesc">{item.desc}</div>
               </div>
@@ -310,38 +480,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ④ 수강하면 이런 게 생겨요 */}
-      <section style={{ marginBottom: 24 }}>
-        <div className="card" style={{ padding: 28 }}>
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              margin: "0 0 16px",
-              textAlign: "center",
-              color: "var(--text)",
-            }}
-          >
-            수강하면 이런 게 생겨요
-          </h2>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 10,
-            }}
-          >
-            {BENEFITS.map((b, i) => (
-              <div key={i} className="benefitCard">
-                <span className="benefitIcon">{b.icon}</span>
-                <span>{b.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ⑤ FAQ */}
+      {/* ⑥ FAQ */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -375,7 +514,9 @@ export default function NadocodingPage() {
                     </span>
                   </div>
                   {isOpen && (
-                    <div className="faqAnswer">{item.a}</div>
+                    <div className="faqAnswer" style={{ whiteSpace: "pre-line" }}>
+                      {item.a}
+                    </div>
                   )}
                 </div>
               );
@@ -391,7 +532,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑥ 사전 신청 폼 */}
+      {/* ⑦ 사전 신청 폼 */}
       <section ref={formRef} className="greenCtaSection">
         <h2
           style={{
@@ -400,7 +541,7 @@ export default function NadocodingPage() {
             margin: "0 0 8px",
           }}
         >
-          지금 신청하면 얼리버드 99,000원
+          사전 무료 신청하기
         </h2>
         <p
           style={{
@@ -409,17 +550,26 @@ export default function NadocodingPage() {
             lineHeight: 1.6,
           }}
         >
-          1기 오픈 시 가장 먼저 안내드릴게요
+          지금 신청해두시면 1기 오픈 시 가장 먼저 알려드려요
+          <br />
+          얼리버드 할인가 99,000원도 자동으로 적용돼요 🎉
         </p>
-        <p
+        <div
           style={{
-            margin: "0 0 24px",
+            margin: "16px auto 20px",
+            maxWidth: 380,
+            padding: "12px 16px",
+            borderRadius: 10,
+            background: "rgba(255,255,255,0.15)",
             fontSize: 13,
-            opacity: 0.8,
+            lineHeight: 1.6,
+            textAlign: "center",
           }}
         >
-          선착순 10명 마감 시 조기 종료될 수 있어요
-        </p>
+          💡 지금은 결제가 필요 없어요
+          <br />
+          신청만 해두시면 오픈 알림 + 얼리버드 혜택이 자동 적용돼요
+        </div>
         <div style={{ maxWidth: 400, margin: "0 auto" }}>
           <CtaForm onGreenBg />
         </div>
