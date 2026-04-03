@@ -70,110 +70,134 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="container">
-      <div className="topBar">
-        <div className="brand">
-          <strong>AI 서비스 아이디어 진단</strong>
-          <span className="muted" style={{ fontSize: 13 }}>
-            12문항 객관식 설문
-          </span>
-        </div>
-        <span className="pill">약 2~3분</span>
-      </div>
-
-      <div className="card">
-        <h1 style={{ margin: "0 0 6px", fontSize: 24 }}>
-          나만의 AI 서비스, 뭘 만들면 좋을까요?
+    <main className="container" style={{ paddingTop: 60 }}>
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <h1
+          style={{
+            fontSize: 28,
+            fontWeight: 800,
+            margin: "0 0 10px",
+            letterSpacing: -0.5,
+            lineHeight: 1.35,
+          }}
+        >
+          나만의 AI 서비스,
+          <br />
+          뭘 만들면 좋을까요?
         </h1>
-        <p className="help" style={{ marginTop: 0, fontSize: 15 }}>
+        <p
+          className="muted"
+          style={{ margin: "0 0 6px", fontSize: 15, lineHeight: 1.5 }}
+        >
           10분 진단으로 나에게 딱 맞는 AI 서비스 아이디어를 찾아드려요
         </p>
-
-        <form onSubmit={onSubmit} style={{ marginTop: 20 }}>
-          {/* ① 직업 선택 */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
-              현재 직업 또는 주요 활동 <span style={{ color: "#ff6b6b" }}>*</span>
-            </label>
-            <div className="optionList" style={{ marginTop: 8 }}>
-              {JOB_OPTIONS.map((opt, idx) => {
-                const selected = jobIndex === idx;
-                return (
-                  <label
-                    key={idx}
-                    className="radioOption"
-                    data-selected={selected ? "true" : "false"}
-                  >
-                    <input
-                      type="radio"
-                      name="job"
-                      value={idx}
-                      checked={selected}
-                      onChange={() => setJobIndex(idx)}
-                      style={{ display: "none" }}
-                    />
-                    <span className="optionNum">{idx + 1}</span>
-                    <span style={{ fontWeight: 700 }}>{opt}</span>
-                  </label>
-                );
-              })}
-            </div>
-            {isCustomJob && (
-              <input
-                type="text"
-                className="customInput"
-                value={jobCustom}
-                onChange={(e) => setJobCustom(e.target.value)}
-                placeholder="직업을 직접 입력해 주세요"
-                autoFocus
-              />
-            )}
-          </div>
-
-          {/* ② 키워드 선택 */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
-              나를 가장 잘 설명하는 키워드를 골라주세요{" "}
-              <span className="muted" style={{ fontSize: 13, fontWeight: 400 }}>
-                (복수 선택, 최대 3개)
-              </span>
-            </label>
-            <div className="keywordGrid">
-              {KEYWORD_OPTIONS.map((kw) => {
-                const selected = selectedKeywords.includes(kw);
-                const disabled = !selected && selectedKeywords.length >= 3;
-                return (
-                  <button
-                    key={kw}
-                    type="button"
-                    className="keywordChip"
-                    data-selected={selected ? "true" : "false"}
-                    data-disabled={disabled ? "true" : "false"}
-                    onClick={() => !disabled && toggleKeyword(kw)}
-                  >
-                    {kw}
-                  </button>
-                );
-              })}
-            </div>
-            {selectedKeywords.length > 0 && (
-              <p className="help">
-                선택: {selectedKeywords.length}/3
-              </p>
-            )}
-          </div>
-
-          {error && (
-            <p style={{ margin: "0 0 12px", color: "#ffd1d1" }}>
-              <strong>안내:</strong> {error}
-            </p>
-          )}
-
-          <button className="btn" type="submit" style={{ fontSize: 16 }}>
-            무료 진단 시작하기
-          </button>
-        </form>
+        <span
+          className="pill"
+          style={{ marginTop: 10, display: "inline-flex" }}
+        >
+          약 2~3분 소요
+        </span>
       </div>
+
+      <form onSubmit={onSubmit}>
+        {/* ① 직업 선택 */}
+        <div style={{ marginBottom: 28 }}>
+          <label
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text)",
+              display: "block",
+              marginBottom: 4,
+            }}
+          >
+            현재 직업 또는 주요 활동{" "}
+            <span style={{ color: "var(--error)" }}>*</span>
+          </label>
+          <div className="optionList">
+            {JOB_OPTIONS.map((opt, idx) => {
+              const selected = jobIndex === idx;
+              return (
+                <label
+                  key={idx}
+                  className="optionCard"
+                  data-selected={selected ? "true" : "false"}
+                >
+                  <input
+                    type="radio"
+                    name="job"
+                    value={idx}
+                    checked={selected}
+                    onChange={() => setJobIndex(idx)}
+                    style={{ display: "none" }}
+                  />
+                  <span className="optionCheck">{selected ? "✓" : ""}</span>
+                  <span className="optionText">{opt}</span>
+                </label>
+              );
+            })}
+          </div>
+          {isCustomJob && (
+            <input
+              type="text"
+              className="customInput"
+              value={jobCustom}
+              onChange={(e) => setJobCustom(e.target.value)}
+              placeholder="직업을 직접 입력해 주세요"
+              autoFocus
+            />
+          )}
+        </div>
+
+        {/* ② 키워드 선택 */}
+        <div style={{ marginBottom: 28 }}>
+          <label
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text)",
+              display: "block",
+              marginBottom: 4,
+            }}
+          >
+            나를 가장 잘 설명하는 키워드를 골라주세요{" "}
+            <span className="muted" style={{ fontSize: 13, fontWeight: 400 }}>
+              (복수 선택, 최대 3개)
+            </span>
+          </label>
+          <div className="keywordGrid">
+            {KEYWORD_OPTIONS.map((kw) => {
+              const selected = selectedKeywords.includes(kw);
+              const disabled = !selected && selectedKeywords.length >= 3;
+              return (
+                <button
+                  key={kw}
+                  type="button"
+                  className="keywordChip"
+                  data-selected={selected ? "true" : "false"}
+                  data-disabled={disabled ? "true" : "false"}
+                  onClick={() => !disabled && toggleKeyword(kw)}
+                >
+                  {kw}
+                </button>
+              );
+            })}
+          </div>
+          {selectedKeywords.length > 0 && (
+            <p className="help">선택: {selectedKeywords.length}/3</p>
+          )}
+        </div>
+
+        {error && (
+          <p className="errorText" style={{ marginBottom: 12 }}>
+            {error}
+          </p>
+        )}
+
+        <button className="btn" type="submit" style={{ fontSize: 16 }}>
+          무료 진단 시작하기
+        </button>
+      </form>
     </main>
   );
 }

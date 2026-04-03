@@ -4,7 +4,7 @@ export type Profile = {
 };
 
 export type SurveyAnswer = {
-  questionId: number;
+  questionId: string;
   questionText: string;
   answer: string;
 };

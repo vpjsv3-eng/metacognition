@@ -1,11 +1,15 @@
 :root {
-  --bg: #0b1220;
-  --card: rgba(255, 255, 255, 0.06);
-  --cardBorder: rgba(255, 255, 255, 0.12);
-  --text: rgba(255, 255, 255, 0.92);
-  --muted: rgba(255, 255, 255, 0.7);
-  --accent: #7c5cff;
-  --accent2: #19d3ff;
+  --bg: #0f172a;
+  --surface: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.1);
+  --borderHover: rgba(255, 255, 255, 0.22);
+  --text: rgba(255, 255, 255, 0.95);
+  --textSecondary: rgba(255, 255, 255, 0.5);
+  --accent: #6366f1;
+  --accentHover: #818cf8;
+  --accentSoft: rgba(99, 102, 241, 0.12);
+  --accentBorder: rgba(99, 102, 241, 0.45);
+  --error: #f87171;
 }
 
 * {
@@ -19,57 +23,347 @@ body {
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  background: radial-gradient(
-      1200px 600px at 20% 10%,
-      rgba(124, 92, 255, 0.35),
-      transparent 55%
-    ),
-    radial-gradient(
-      900px 500px at 85% 10%,
-      rgba(25, 211, 255, 0.25),
-      transparent 50%
-    ),
-    var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   color: inherit;
 }
 
+/* ═══════════ Layout ═══════════ */
+
 .container {
-  max-width: 860px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 28px 18px 72px;
+  padding: 32px 20px 80px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--cardBorder);
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.field {
+.surveyWrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 72px 20px 80px;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 100%;
+  justify-content: center;
 }
 
-label {
-  font-size: 13px;
-  color: var(--muted);
+/* ═══════════ Progress Bar ═══════════ */
+
+.progressBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  z-index: 100;
 }
+
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ═══════════ Card ═══════════ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* ═══════════ Question Block (animated) ═══════════ */
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.questionBlock {
+  animation: fadeSlideIn 0.35s ease-out;
+}
+
+.questionCounter {
+  font-size: 13px;
+  color: var(--textSecondary);
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.questionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 0 0 8px;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+
+/* ═══════════ Section Tag ═══════════ */
+
+.sectionTag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accentHover);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+/* ═══════════ Multi Badge ═══════════ */
+
+.multiBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accentHover);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ═══════════ Option List & Cards ═══════════ */
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.optionCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.optionCard:hover {
+  border-color: var(--borderHover);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.optionCard[data-selected="true"] {
+  border-color: var(--accentBorder);
+  background: var(--accentSoft);
+  box-shadow: 0 0 0 1px var(--accentBorder) inset;
+}
+
+.optionCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 700;
+  color: transparent;
+}
+
+.optionCard[data-selected="true"] .optionCheck {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.optionText {
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ═══════════ Custom Input (기타) ═══════════ */
+
+.customInput {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--accentBorder);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.customInput:focus {
+  border-color: var(--accent);
+}
+
+/* ═══════════ Text Input (주관식) ═══════════ */
+
+.textInput {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.15);
+  color: var(--text);
+  outline: none;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  margin-top: 20px;
+}
+
+.textInput:focus {
+  border-color: var(--accent);
+}
+
+.textInput::placeholder {
+  color: var(--textSecondary);
+}
+
+/* ═══════════ Navigation ═══════════ */
+
+.navBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  gap: 12px;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnGhost {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--textSecondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.btnGhost:hover {
+  color: var(--text);
+}
+
+.btnGhost:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btnPrimary {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btnPrimary:hover {
+  background: var(--accentHover);
+}
+
+.btnPrimary:active {
+  transform: scale(0.97);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSkip {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--textSecondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btnSkip:hover {
+  border-color: var(--borderHover);
+  color: var(--text);
+}
+
+/* ═══════════ Error ═══════════ */
+
+.errorText {
+  margin: 14px 0 0;
+  color: var(--error);
+  font-size: 14px;
+}
+
+/* ═══════════ Generic Button ═══════════ */
+
+.btn {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn:hover {
+  background: var(--accentHover);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ═══════════ Inputs ═══════════ */
 
 input[type="text"],
 input[type="number"],
@@ -77,181 +371,109 @@ input[type="tel"],
 textarea,
 select {
   width: 100%;
-  padding: 11px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid var(--cardBorder);
-  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text);
   outline: none;
   font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--textSecondary);
 }
 
 textarea {
   min-height: 92px;
   resize: vertical;
+  font-family: inherit;
 }
 
-.btn {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: linear-gradient(
-    90deg,
-    rgba(124, 92, 255, 0.92),
-    rgba(25, 211, 255, 0.68)
-  );
-  color: #0b1220;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-.btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
+/* ═══════════ Pill / Badge ═══════════ */
 
 .pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid var(--cardBorder);
-  background: rgba(0, 0, 0, 0.22);
-  color: var(--muted);
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--textSecondary);
   font-size: 13px;
 }
 
-/* 객관식 옵션 */
-.optionList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
-}
+/* ═══════════ Keyword Chips ═══════════ */
 
-.radioOption {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1px solid var(--cardBorder);
-  background: rgba(0, 0, 0, 0.22);
-  cursor: pointer;
-  user-select: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.radioOption:hover {
-  border-color: rgba(124, 92, 255, 0.35);
-}
-
-.radioOption[data-selected="true"] {
-  border-color: rgba(124, 92, 255, 0.6);
-  box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.2) inset;
-  background: rgba(124, 92, 255, 0.08);
-}
-
-.optionNum {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--muted);
-  font-weight: 800;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.radioOption[data-selected="true"] .optionNum {
-  background: var(--accent);
-  color: #fff;
-}
-
-/* 기타 직접 입력 */
-.customInput {
-  margin-top: 10px;
-  width: 100%;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(124, 92, 255, 0.3);
-  background: rgba(0, 0, 0, 0.3);
-  color: var(--text);
-  outline: none;
-  font-size: 14px;
-}
-
-.customInput:focus {
-  border-color: rgba(124, 92, 255, 0.6);
-}
-
-/* 키워드 칩 선택 */
 .keywordGrid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .keywordChip {
   padding: 10px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--cardBorder);
-  background: rgba(0, 0, 0, 0.22);
-  color: var(--muted);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--textSecondary);
   cursor: pointer;
   user-select: none;
   font-size: 14px;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  transition: all 0.2s;
 }
 
 .keywordChip:hover {
-  border-color: rgba(124, 92, 255, 0.35);
+  border-color: var(--borderHover);
 }
 
 .keywordChip[data-selected="true"] {
-  border-color: rgba(124, 92, 255, 0.6);
-  background: rgba(124, 92, 255, 0.15);
-  color: #c4b5fd;
+  border-color: var(--accentBorder);
+  background: var(--accentSoft);
+  color: var(--accentHover);
 }
 
 .keywordChip[data-disabled="true"] {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
-/* 섹션 라벨 */
-.sectionLabel {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
-  background: rgba(124, 92, 255, 0.15);
-  color: #a78bfa;
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
+/* ═══════════ Help / Muted ═══════════ */
 
 .help {
-  margin: 10px 0 0;
-  color: var(--muted);
+  margin: 8px 0 0;
+  color: var(--textSecondary);
   font-size: 13px;
   line-height: 1.5;
 }
+
+.muted {
+  color: var(--textSecondary);
+}
+
+label {
+  font-size: 14px;
+  color: var(--textSecondary);
+}
+
+/* ═══════════ Top Bar ═══════════ */
 
 .topBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .brand {
@@ -264,9 +486,20 @@ textarea {
   font-size: 16px;
 }
 
-.muted {
-  color: var(--muted);
+/* ═══════════ Section Label (legacy) ═══════════ */
+
+.sectionLabel {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accentHover);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
+
+/* ═══════════ Step Navigation ═══════════ */
 
 .stepNav {
   display: flex;
@@ -277,21 +510,142 @@ textarea {
   width: auto;
 }
 
-/* 아이디어 카드 디테일 */
+/* ═══════════ Idea Cards ═══════════ */
+
 .ideaDetail {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   font-size: 14px;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .ideaLabel {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accentHover);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════ CTA / Result page adjustments ═══════════ */
+
+.resultContainer {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.resultComment {
+  background: var(--accentSoft);
+  border: 1px solid var(--accentBorder);
+  border-radius: 14px;
+  padding: 20px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.resultComment p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.ideaCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  transition: border-color 0.2s;
+}
+
+.ideaCard:hover {
+  border-color: var(--borderHover);
+}
+
+.ideaNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accentSoft);
+  color: var(--accentHover);
   font-weight: 800;
-  color: #93c5fd;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.btnSecondary {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btnSecondary:hover {
+  border-color: var(--borderHover);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.btnAccent {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #f97316, #ec4899);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.1s;
+}
+
+.btnAccent:hover {
+  transform: scale(1.02);
+}
+
+/* ═══════════ Mobile ═══════════ */
+
+@media (max-width: 640px) {
+  .surveyWrap {
+    padding: 56px 16px 60px;
+  }
+
+  .questionTitle {
+    font-size: 19px;
+  }
+
+  .optionCard {
+    padding: 14px 14px;
+    gap: 12px;
+  }
+
+  .navBar {
+    flex-wrap: wrap;
+  }
+
+  .container,
+  .resultContainer {
+    padding: 24px 16px 60px;
+  }
+
+  .resultComment {
+    padding: 16px 18px;
+  }
+
+  .ideaCard {
+    padding: 18px;
+  }
 }

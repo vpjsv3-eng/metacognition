@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
   const { profile, answers } = payload ?? ({} as DiagnosisPayload);
 
-  if (!profile || !Array.isArray(answers) || answers.length !== 12) {
+  if (!profile || !Array.isArray(answers) || answers.length < 12) {
     return NextResponse.json(
       { ok: false, error: "데이터가 누락되었습니다." },
       { status: 400 },
