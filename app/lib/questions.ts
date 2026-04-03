@@ -105,7 +105,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     options: ["있어요", "없어요", "생각해본 적 없어요"],
     branchTriggerIndex: 0,
     subQuestionId: "Q6-1",
-    hint: "예: 내 식비를 자동으로 분류해주는 가계부,\n매일 운동 루틴을 짜주는 앱,\n육아 일기를 자동으로 정리해주는 서비스 등\n완성된 아이디어가 아니어도 괜찮아요 😊",
+    hint: "예: 식비 자동 분류 가계부, 운동 루틴 추천,\n육아 일기 자동 정리",
   },
   {
     id: "Q6-1",
@@ -124,6 +124,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     options: ["있어요", "없어요", "생각해본 적 없어요"],
     branchTriggerIndex: 0,
     subQuestionId: "Q7-1",
+    hint: "예: 매일 아침 뉴스 요약, 일정 자동 정리,\nSNS 콘텐츠 자동 생성 등",
   },
   {
     id: "Q7-1",
@@ -158,7 +159,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     options: ["있어요", "있긴 한데 흐릿해요", "생각해본 적 없어요"],
     branchTriggerIndex: 0,
     subQuestionId: "Q9-1",
-    hint: "예: 운동 루틴 짜주는 앱, 육아 일기 자동 정리,\n거래처 이메일 자동 답장 등\n완성된 아이디어가 아니어도 괜찮아요 😊",
+    hint: "예: 글쓰기 보조, 업무 요약, 이미지 생성",
   },
   {
     id: "Q9-1",
@@ -209,7 +210,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: "Q11",
     section: "AI / 기술 관련",
-    text: "지금 삶에서 가장 원하는 변화가 뭐예요?",
+    text: "지금 가장 원하는 게 뭐예요? (복수 선택)",
     type: "multi",
     options: [
       "시간적 여유",

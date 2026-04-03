@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import type {
   Profile,
   DiagnosisPayload,
@@ -19,6 +18,16 @@ const JOB_OPTIONS = [
   "취업 준비 / 경력 전환 중",
   "기타 (직접 입력)",
 ];
+
+const JOB_DETAIL_PLACEHOLDERS: Record<string, string> = {
+  "직장인": "어떤 업종/직무인지 알려주세요\n예: 마케터, 영업, 개발자, 간호사 등",
+  "프리랜서 / 1인 사업자": "어떤 일을 하시나요?\n예: 디자이너, 작가, 유튜버, 쇼핑몰 운영 등",
+  "학생": "어떤 전공을 공부하고 있나요?\n예: 경영학, 컴퓨터공학, 간호학 등",
+  "취업 준비 / 경력 전환 중": "어떤 분야로 가고 싶으신가요?\n예: IT, 마케팅, 디자인, 창업 등",
+  "기타 (직접 입력)": "하시는 일을 간단히 알려주세요",
+};
+
+const STORAGE_KEY = "survey_progress";
 
 const KEYWORD_OPTIONS = [
   "절약/재테크에 관심 많아요",
@@ -65,6 +74,7 @@ export default function SurveyForm() {
   // Profile state (STEP 0-1, 0-2)
   const [jobIndex, setJobIndex] = useState(-1);
   const [jobCustom, setJobCustom] = useState("");
+  const [jobDetail, setJobDetail] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [profileError, setProfileError] = useState<string | null>(null);
 
@@ -88,7 +98,61 @@ export default function SurveyForm() {
   const [showMotivation, setShowMotivation] = useState(false);
   const motivationTriggered = useRef(false);
 
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const resumeChecked = useRef(false);
+
   const isCustomJob = jobIndex >= 0 && JOB_OPTIONS[jobIndex].startsWith("기타");
+
+  const saveProgress = useCallback(() => {
+    try {
+      const data = {
+        currentStep,
+        answers,
+        job: jobIndex,
+        jobCustom,
+        jobDetail,
+        keywords: selectedKeywords,
+        phase,
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch {}
+  }, [currentStep, answers, jobIndex, jobCustom, jobDetail, selectedKeywords, phase]);
+
+  useEffect(() => {
+    if (resumeChecked.current) return;
+    resumeChecked.current = true;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.answers && Object.keys(parsed.answers).length > 0) {
+          setShowResumeModal(true);
+        }
+      }
+    } catch {}
+  }, []);
+
+  function restoreProgress() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (parsed.job !== undefined) setJobIndex(parsed.job);
+      if (parsed.jobCustom) setJobCustom(parsed.jobCustom);
+      if (parsed.jobDetail) setJobDetail(parsed.jobDetail);
+      if (parsed.keywords) setSelectedKeywords(parsed.keywords);
+      if (parsed.answers) setAnswers(parsed.answers);
+      if (parsed.phase) setPhase(parsed.phase);
+      if (parsed.currentStep !== undefined) setCurrentStep(parsed.currentStep);
+    } catch {}
+    setShowResumeModal(false);
+  }
+
+  function clearProgress() {
+    localStorage.removeItem(STORAGE_KEY);
+    setShowResumeModal(false);
+  }
 
   function getProfile(): Profile {
     const job = isCustomJob ? jobCustom.trim() : JOB_OPTIONS[jobIndex] || "";
@@ -324,6 +388,7 @@ export default function SurveyForm() {
 
     if (safeStep < total - 1) {
       navigate(safeStep + 1);
+      setTimeout(saveProgress, 0);
     }
   }
 
@@ -341,6 +406,7 @@ export default function SurveyForm() {
 
     if (safeStep < total - 1) {
       navigate(safeStep + 1);
+      setTimeout(saveProgress, 0);
     }
   }
 
@@ -423,6 +489,9 @@ export default function SurveyForm() {
 
   function buildAnswersMap(): AnswersMap {
     const map: AnswersMap = {};
+    if (jobDetail.trim()) {
+      map["job_detail"] = jobDetail.trim();
+    }
 
     for (const q of visibleQuestions) {
       const a = answers[q.id];
@@ -515,8 +584,48 @@ export default function SurveyForm() {
     }
   }
 
+  // ── Resume modal ──
+  if (showResumeModal) {
+    return (
+      <div className="modalOverlay">
+        <div className="modalContent">
+          <h3
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 8px",
+              color: "var(--text)",
+            }}
+          >
+            이전에 하던 진단이 있어요
+          </h3>
+          <p
+            style={{
+              margin: "0 0 24px",
+              fontSize: 15,
+              color: "var(--textSecondary)",
+            }}
+          >
+            이어서 진행하시겠어요?
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <button className="btnPrimary" type="button" onClick={restoreProgress}>
+              이어서 하기
+            </button>
+            <button className="btnGhost" type="button" onClick={clearProgress}>
+              처음부터 하기
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── STEP 0-1: 직업 선택 ──
   if (phase === "profile_job") {
+    const selectedJobName = jobIndex >= 0 ? JOB_OPTIONS[jobIndex] : "";
+    const detailPlaceholder = JOB_DETAIL_PLACEHOLDERS[selectedJobName] || "";
+
     return (
       <>
         <div className="progressBar">
@@ -561,6 +670,16 @@ export default function SurveyForm() {
                 autoFocus
               />
             )}
+            {jobIndex >= 0 && detailPlaceholder && (
+              <textarea
+                className="textInput"
+                value={jobDetail}
+                onChange={(e) => setJobDetail(e.target.value)}
+                placeholder={detailPlaceholder}
+                rows={2}
+                style={{ marginTop: 12 }}
+              />
+            )}
             {profileError && <p className="errorText">{profileError}</p>}
             <div className="navArea">
               <button
@@ -578,6 +697,7 @@ export default function SurveyForm() {
                   setProfileError(null);
                   setPhase("profile_keywords");
                   setAnimKey((k) => k + 1);
+                  setTimeout(saveProgress, 0);
                 }}
               >
                 다음 →
@@ -632,6 +752,7 @@ export default function SurveyForm() {
                   setProfileError(null);
                   setPhase("survey");
                   setAnimKey((k) => k + 1);
+                  setTimeout(saveProgress, 0);
                 }}
               >
                 다음 →
@@ -870,13 +991,17 @@ export default function SurveyForm() {
         </div>
         <div className="loadingWrap">
           <div className="loadingContent">
-            <Image
-              src="/cat-loading.gif"
-              alt="분석 중 고양이"
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
+              alt="AI 분석 중"
               width={200}
               height={200}
-              unoptimized
-              style={{ borderRadius: 16, marginBottom: 16 }}
+              style={{ borderRadius: 16, marginBottom: 16, objectFit: "cover" }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "https://media.giphy.com/media/l3nWhI38IWDofyDrW/giphy.gif";
+              }}
             />
             <h2
               style={{
@@ -886,7 +1011,7 @@ export default function SurveyForm() {
                 color: "var(--text)",
               }}
             >
-              AI가 열심히 분석하고 있어요 🐱
+              AI가 답변을 분석하고 있어요 🤖
             </h2>
 
             <div

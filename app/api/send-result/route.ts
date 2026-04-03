@@ -38,21 +38,21 @@ function buildEmailHtml(
         const borderStyle = isFirst ? "border:2px solid #00C471;" : "border:1px solid #E5E7EB;";
         const rankNum = idea.rank ?? i + 1;
         return `<div style="margin-bottom:16px;padding:20px;${borderStyle}border-radius:12px;background:#FFFFFF;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div style="width:32px;height:32px;background:#00C471;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:16px;flex-shrink:0;">${rankNum}</div>
-            <span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${isFirst ? "#00C471" : "#E8FAF2"};color:${isFirst ? "#fff" : "#00C471"};font-size:12px;font-weight:700;">추천 ${rankNum}순위</span>
-          </div>
+          <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;"><tr>
+            <td style="width:40px;height:40px;background:#00C471;border-radius:50%;text-align:center;vertical-align:middle;font-size:18px;font-weight:bold;color:white;line-height:40px;">${rankNum}</td>
+            <td style="padding-left:12px;vertical-align:middle;"><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${isFirst ? "#00C471" : "#E8FAF2"};color:${isFirst ? "#fff" : "#00C471"};font-size:12px;font-weight:700;">추천 ${rankNum}순위</span></td>
+          </tr></table>
           <strong style="font-size:16px;color:#111827;display:block;margin-bottom:4px;">${idea.name}</strong>
           <p style="margin:0 0 12px;color:#6B7280;font-size:14px;line-height:1.6;">${idea.oneline}</p>
-          <div style="padding:12px;border-radius:8px;background:${isFirst ? "#E8FAF2" : "#F8F9FA"};margin-bottom:6px;">
+          <div style="padding:12px 16px;border-radius:8px;background:${isFirst ? "#E8FAF2" : "#F8F9FA"};margin-bottom:6px;text-align:left;vertical-align:middle;">
             <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">추천 이유</p>
             <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.reason}</p>
           </div>
-          <div style="padding:12px;border-radius:8px;background:#F8F9FA;margin-bottom:6px;">
+          <div style="padding:12px 16px;border-radius:8px;background:#F8F9FA;margin-bottom:6px;text-align:left;vertical-align:middle;">
             <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">핵심 기능</p>
             <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.core_feature}</p>
           </div>
-          <div style="padding:12px;border-radius:8px;background:#F8F9FA;margin-bottom:8px;">
+          <div style="padding:12px 16px;border-radius:8px;background:#F8F9FA;margin-bottom:8px;text-align:left;vertical-align:middle;">
             <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">작동 방식</p>
             <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.how_it_works}</p>
           </div>

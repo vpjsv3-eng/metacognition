@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 
-function getDisplayName(email?: string): string {
-  if (!email) return "회원";
-  return email.split("@")[0] || "회원";
-}
+const SURVEY_STORAGE_KEY = "survey_progress";
 
 function getTodayString(): string {
   const d = new Date();
@@ -32,9 +29,26 @@ function AccordionIdea({
       <div
         className="accordionHeader"
         onClick={() => setOpen((v) => !v)}
+        style={{ padding: "16px" }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-          <span className="rankBadge">추천 {rank}순위</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+          <span
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              background: "var(--accentSoft)",
+              color: "var(--accent)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              fontSize: 18,
+              flexShrink: 0,
+            }}
+          >
+            {rank}
+          </span>
           <div style={{ minWidth: 0 }}>
             <strong style={{ fontSize: 16, color: "var(--text)", display: "block" }}>
               {idea.name}
@@ -67,7 +81,7 @@ function AccordionIdea({
       </div>
 
       {open && (
-        <div className="accordionBody">
+        <div className="accordionBody" style={{ padding: "0 16px 16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div className="ideaDetail">
               <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
@@ -133,6 +147,8 @@ export default function CompletePage() {
   const [resendDone, setResendDone] = useState(false);
 
   useEffect(() => {
+    localStorage.removeItem(SURVEY_STORAGE_KEY);
+
     const savedData = localStorage.getItem("diagnosis_result");
     if (!savedData) {
       alert("진단 데이터가 없습니다. 다시 시작하세요.");
@@ -234,7 +250,6 @@ export default function CompletePage() {
     );
   }
 
-  const displayName = getDisplayName(result.profile?.email);
   const email = result.profile?.email || "";
   const persona = result.persona;
   const firstStep = result.first_step;
@@ -254,7 +269,7 @@ export default function CompletePage() {
             color: "var(--text)",
           }}
         >
-          {displayName}님의 진단 결과
+          사용자님의 AI 서비스 아이디어 진단 결과
         </h1>
         <p
           style={{

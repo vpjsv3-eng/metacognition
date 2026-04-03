@@ -211,7 +211,7 @@ const FAQ_DATA: FaqCategory[] = [
   },
 ];
 
-const DEADLINE = new Date("2026-04-18T00:00:00+09:00").getTime();
+const DEADLINE = new Date("2026-04-06T23:59:59+09:00").getTime();
 
 function useCountdown() {
   const [now, setNow] = useState(Date.now());
@@ -268,10 +268,6 @@ export default function NadocodingPage() {
 
   let faqFlatIdx = 0;
 
-  const dDayText = countdown
-    ? `D-${countdown.days}`
-    : "종료";
-
   return (
     <main className="container" style={{ maxWidth: 600, paddingBottom: showSticky ? 140 : 80 }}>
       {/* 카운트다운 타이머 */}
@@ -287,6 +283,21 @@ export default function NadocodingPage() {
           "얼리버드가 종료됐어요"
         )}
       </div>
+      <p
+        style={{
+          textAlign: "center",
+          fontSize: 14,
+          fontWeight: 600,
+          color: "#E53E3E",
+          lineHeight: 1.6,
+          margin: "0 0 16px",
+          padding: "0 16px",
+        }}
+      >
+        ⚠️ 늦기 전에 지금 무료로 알림 신청하세요!
+        <br />
+        마감 후에는 정가 299,000원으로 변경돼요.
+      </p>
 
       {/* ① 히어로 섹션 */}
       <section ref={heroRef} className="heroSection">
@@ -665,7 +676,7 @@ export default function NadocodingPage() {
       {showSticky && (
         <div className="stickyBar">
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
-            🔥 얼리버드 마감 {dDayText}
+            🔥 얼리버드 마감 D-3
           </span>
           <button
             className="btnPrimary"
