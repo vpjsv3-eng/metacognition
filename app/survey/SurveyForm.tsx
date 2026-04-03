@@ -35,15 +35,18 @@ export default function SurveyForm({ profile }: Props) {
   const visibleQuestions = useMemo(() => {
     const result: SurveyQuestion[] = [];
     for (const q of SURVEY_QUESTIONS) {
-      if (q.type === "text") {
-        const parent = SURVEY_QUESTIONS.find(
-          (pq) => pq.subQuestionId === q.id,
-        );
-        if (parent) {
-          const parentAnswer = answers[parent.id];
-          if (parentAnswer?.selectedIndex !== parent.branchTriggerIndex) {
-            continue;
-          }
+      const parent = SURVEY_QUESTIONS.find(
+        (pq) => pq.subQuestionId === q.id,
+      );
+      if (parent) {
+        const parentAnswer = answers[parent.id];
+        const triggerIndices =
+          parent.branchTriggerIndices ??
+          (parent.branchTriggerIndex !== undefined
+            ? [parent.branchTriggerIndex]
+            : []);
+        if (!triggerIndices.includes(parentAnswer?.selectedIndex ?? -1)) {
+          continue;
         }
       }
       result.push(q);
@@ -62,6 +65,7 @@ export default function SurveyForm({ profile }: Props) {
       if (!a) return false;
       if (q.type === "text") return !!(a.textValue?.trim() || a.skipped);
       if (q.type === "multi") {
+        if (a.skipped) return true;
         if (!a.selectedIndices?.length) return false;
         if (
           q.hasCustomOption &&
@@ -114,6 +118,7 @@ export default function SurveyForm({ profile }: Props) {
           ...prev[currentQ.id],
           selectedIndices: next,
           customText: prev[currentQ.id]?.customText || "",
+          skipped: false,
         },
       };
     });
@@ -148,13 +153,18 @@ export default function SurveyForm({ profile }: Props) {
         return;
       }
     } else if (currentQ.type === "multi") {
-      if (!a?.selectedIndices?.length) {
-        setError("최소 1개를 선택해 주세요.");
+      if (!a?.selectedIndices?.length && !a?.skipped) {
+        setError(
+          currentQ.skippable
+            ? "최소 1개를 선택하거나 건너뛰기를 눌러주세요."
+            : "최소 1개를 선택해 주세요.",
+        );
         return;
       }
       if (
+        !a?.skipped &&
         currentQ.hasCustomOption &&
-        a.selectedIndices.includes(currentQ.options!.length - 1) &&
+        a?.selectedIndices?.includes(currentQ.options!.length - 1) &&
         !a.customText?.trim()
       ) {
         setError("기타 내용을 입력해 주세요.");
@@ -180,10 +190,15 @@ export default function SurveyForm({ profile }: Props) {
     }
   }
 
-  function skipTextQuestion() {
+  function skipQuestion() {
     setAnswers((prev) => ({
       ...prev,
-      [currentQ.id]: { ...prev[currentQ.id], skipped: true, textValue: "" },
+      [currentQ.id]: {
+        ...prev[currentQ.id],
+        skipped: true,
+        textValue: "",
+        selectedIndices: [],
+      },
     }));
     setError(null);
     if (safeStep < total - 1) {
@@ -201,12 +216,16 @@ export default function SurveyForm({ profile }: Props) {
           ? "(건너뜀)"
           : (a?.textValue?.trim() || "");
       } else if (q.type === "multi") {
-        const indices = a?.selectedIndices || [];
-        const parts = indices.map((i) => {
-          const opt = q.options![i];
-          return isCustomOption(opt) ? (a?.customText?.trim() || opt) : opt;
-        });
-        answerText = parts.join(", ");
+        if (a?.skipped) {
+          answerText = "(건너뜀)";
+        } else {
+          const indices = a?.selectedIndices || [];
+          const parts = indices.map((i) => {
+            const opt = q.options![i];
+            return isCustomOption(opt) ? (a?.customText?.trim() || opt) : opt;
+          });
+          answerText = parts.join(", ");
+        }
       } else {
         const idx = a?.selectedIndex ?? 0;
         const opt = q.options![idx];
@@ -223,6 +242,7 @@ export default function SurveyForm({ profile }: Props) {
       if (!a) return false;
       if (q.type === "text") return !!(a.textValue?.trim() || a.skipped);
       if (q.type === "multi") {
+        if (a.skipped) return true;
         if (!a.selectedIndices?.length) return false;
         if (
           q.hasCustomOption &&
@@ -294,7 +314,6 @@ export default function SurveyForm({ profile }: Props) {
 
   return (
     <>
-      {/* Progress bar */}
       <div className="progressBar">
         <div className="progressFill" style={{ width: `${progress}%` }} />
       </div>
@@ -354,10 +373,10 @@ export default function SurveyForm({ profile }: Props) {
                       }
                       style={{ display: "none" }}
                     />
+                    <span className="optionText">{opt}</span>
                     <span className="optionCheck">
                       {selected ? "✓" : ""}
                     </span>
-                    <span className="optionText">{opt}</span>
                   </label>
                 );
               })}
@@ -377,51 +396,52 @@ export default function SurveyForm({ profile }: Props) {
 
           {error && <p className="errorText">{error}</p>}
 
-          <div className="navBar">
-            <div>
-              {safeStep > 0 && (
-                <button
-                  className="btnGhost"
-                  type="button"
-                  onClick={goPrev}
-                  disabled={submitting}
-                >
-                  ← 이전
-                </button>
-              )}
-            </div>
+          <div className="navArea">
+            {!isLast ? (
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={goNext}
+                disabled={submitting}
+              >
+                다음 →
+              </button>
+            ) : (
+              <button
+                className="btnPrimary"
+                type="button"
+                onClick={onSubmit}
+                disabled={submitting}
+              >
+                {submitting ? "AI 분석 중..." : "결과 보기"}
+              </button>
+            )}
 
-            <div className="navRight">
-              {currentQ.type === "text" && currentQ.skippable && (
-                <button
-                  className="btnSkip"
-                  type="button"
-                  onClick={skipTextQuestion}
-                  disabled={submitting}
-                >
-                  건너뛰기
-                </button>
-              )}
-
-              {!isLast ? (
-                <button
-                  className="btnPrimary"
-                  type="button"
-                  onClick={goNext}
-                  disabled={submitting}
-                >
-                  다음 →
-                </button>
-              ) : (
-                <button
-                  className="btnPrimary"
-                  type="button"
-                  onClick={onSubmit}
-                  disabled={submitting}
-                >
-                  {submitting ? "AI 분석 중..." : "결과 보기"}
-                </button>
-              )}
+            <div className="navBar">
+              <div>
+                {safeStep > 0 && (
+                  <button
+                    className="btnGhost"
+                    type="button"
+                    onClick={goPrev}
+                    disabled={submitting}
+                  >
+                    ← 이전
+                  </button>
+                )}
+              </div>
+              <div>
+                {currentQ.skippable && (
+                  <button
+                    className="btnSkip"
+                    type="button"
+                    onClick={skipQuestion}
+                    disabled={submitting}
+                  >
+                    건너뛰기
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

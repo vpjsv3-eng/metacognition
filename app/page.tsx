@@ -74,22 +74,27 @@ export default function LandingPage() {
       <div style={{ textAlign: "center", marginBottom: 40 }}>
         <h1
           style={{
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: 800,
             margin: "0 0 10px",
             letterSpacing: -0.5,
-            lineHeight: 1.35,
+            lineHeight: 1.4,
+            color: "var(--text)",
           }}
         >
-          나만의 AI 서비스,
+          진단을 시작하기 전에
           <br />
-          뭘 만들면 좋을까요?
+          간단히 알려주세요
         </h1>
         <p
-          className="muted"
-          style={{ margin: "0 0 6px", fontSize: 15, lineHeight: 1.5 }}
+          style={{
+            margin: "0 0 6px",
+            fontSize: 15,
+            lineHeight: 1.5,
+            color: "var(--textSecondary)",
+          }}
         >
-          10분 진단으로 나에게 딱 맞는 AI 서비스 아이디어를 찾아드려요
+          입력하신 정보는 맞춤 아이디어 추천에만 사용돼요
         </p>
         <span
           className="pill"
@@ -100,7 +105,6 @@ export default function LandingPage() {
       </div>
 
       <form onSubmit={onSubmit}>
-        {/* ① 직업 선택 */}
         <div style={{ marginBottom: 28 }}>
           <label
             style={{
@@ -131,8 +135,8 @@ export default function LandingPage() {
                     onChange={() => setJobIndex(idx)}
                     style={{ display: "none" }}
                   />
-                  <span className="optionCheck">{selected ? "✓" : ""}</span>
                   <span className="optionText">{opt}</span>
+                  <span className="optionCheck">{selected ? "✓" : ""}</span>
                 </label>
               );
             })}
@@ -149,7 +153,6 @@ export default function LandingPage() {
           )}
         </div>
 
-        {/* ② 키워드 선택 */}
         <div style={{ marginBottom: 28 }}>
           <label
             style={{
@@ -160,9 +163,15 @@ export default function LandingPage() {
               marginBottom: 4,
             }}
           >
-            나를 가장 잘 설명하는 키워드를 골라주세요{" "}
-            <span className="muted" style={{ fontSize: 13, fontWeight: 400 }}>
-              (복수 선택, 최대 3개)
+            나를 가장 잘 설명하는 키워드{" "}
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--textHint)",
+              }}
+            >
+              최대 3개 선택
             </span>
           </label>
           <div className="keywordGrid">
@@ -195,7 +204,7 @@ export default function LandingPage() {
         )}
 
         <button className="btn" type="submit" style={{ fontSize: 16 }}>
-          무료 진단 시작하기
+          진단 시작하기
         </button>
       </form>
     </main>

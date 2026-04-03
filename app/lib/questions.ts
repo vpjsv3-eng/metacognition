@@ -10,6 +10,7 @@ export type SurveyQuestion = {
   placeholder?: string;
   skippable?: boolean;
   branchTriggerIndex?: number;
+  branchTriggerIndices?: number[];
   subQuestionId?: string;
 };
 
@@ -135,11 +136,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     section: "불편함 발굴",
     text: '"이런 앱이 있으면 좋겠다"고 생각하거나 주변에 말한 적 있나요?',
     type: "branch",
-    options: [
-      "있어요, 구체적으로 생각해둔 게 있어요",
-      "있긴 한데 흐릿해요",
-      "생각해본 적 없어요",
-    ],
+    options: ["있어요", "있긴 한데 흐릿해요", "생각해본 적 없어요"],
     branchTriggerIndex: 0,
     subQuestionId: "Q8-1",
   },
@@ -157,8 +154,27 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: "Q9",
     section: "AI / 기술 관련",
     text: "ChatGPT 같은 AI 툴을 써본 적 있나요?",
-    type: "single",
+    type: "branch",
     options: ["자주 써요", "몇 번 써봤어요", "아직 안 써봤어요"],
+    branchTriggerIndices: [0, 1],
+    subQuestionId: "Q9-1",
+  },
+  {
+    id: "Q9-1",
+    section: "AI / 기술 관련",
+    text: "주로 어떤 용도로 쓰고 있어요?",
+    type: "multi",
+    options: [
+      "글쓰기 / 문서 작성",
+      "업무 자동화 / 정리",
+      "공부 / 정보 검색",
+      "아이디어 구상 / 기획",
+      "이미지 생성",
+      "코딩 도움",
+      "기타 (직접 입력)",
+    ],
+    hasCustomOption: true,
+    skippable: true,
   },
   {
     id: "Q10",
