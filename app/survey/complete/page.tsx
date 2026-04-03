@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import type { DiagnosisResult } from "../../lib/types";
@@ -9,6 +9,10 @@ import CtaForm from "../../components/CtaForm";
 
 export default function CompletePage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [emailStatus, setEmailStatus] = useState<
+    "idle" | "sending" | "sent" | "failed"
+  >("idle");
+  const emailSentRef = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,6 +34,39 @@ export default function CompletePage() {
       router.push("/");
     }
   }, []);
+
+  useEffect(() => {
+    if (!result || emailSentRef.current) return;
+    const email = result.profile?.email;
+    if (!email) return;
+
+    emailSentRef.current = true;
+    setEmailStatus("sending");
+
+    fetch("/api/send-result", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        ideas: result.ideas,
+        comment: result.comment,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ok) {
+          setEmailStatus("sent");
+          console.log("[이메일 발송 완료]", email);
+        } else {
+          setEmailStatus("failed");
+          console.error("[이메일 발송 실패]", data.error);
+        }
+      })
+      .catch((e) => {
+        setEmailStatus("failed");
+        console.error("[이메일 발송 오류]", e);
+      });
+  }, [result]);
 
   if (!result) {
     return (
@@ -60,6 +97,16 @@ export default function CompletePage() {
         <p style={{ margin: 0, fontSize: 14, color: "var(--textSecondary)" }}>
           바이브 코딩 툴(Bolt, Lovable 등)로 2주 안에 만들 수 있는 서비스예요.
         </p>
+        {emailStatus === "sending" && (
+          <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--textHint)" }}>
+            📧 진단 결과를 이메일로 보내는 중...
+          </p>
+        )}
+        {emailStatus === "sent" && (
+          <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--accent)" }}>
+            ✅ 진단 결과가 이메일로 발송되었어요!
+          </p>
+        )}
       </div>
 
       {result.comment && (
