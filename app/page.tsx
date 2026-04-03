@@ -31,11 +31,22 @@ export default function LandingPage() {
   const [jobIndex, setJobIndex] = useState(-1);
   const [jobCustom, setJobCustom] = useState("");
   const [email, setEmail] = useState("");
+  const [emailConfirm, setEmailConfirm] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const isCustomJob =
     jobIndex >= 0 && JOB_OPTIONS[jobIndex].startsWith("기타");
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const emailsMatch =
+    email.trim().length > 0 &&
+    emailConfirm.trim().length > 0 &&
+    email.trim() === emailConfirm.trim();
+  const emailMismatch =
+    emailConfirm.trim().length > 0 && email.trim() !== emailConfirm.trim();
+
+  const canSubmit = emailValid && emailsMatch && jobIndex >= 0;
 
   function toggleKeyword(kw: string) {
     setSelectedKeywords((prev) => {
@@ -60,14 +71,14 @@ export default function LandingPage() {
       return;
     }
 
-    if (selectedKeywords.length === 0) {
-      setError("키워드를 1개 이상 선택해 주세요.");
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !emailValid) {
+      setError("이메일 주소를 정확히 입력해 주세요.");
       return;
     }
 
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setError("이메일 주소를 정확히 입력해 주세요.");
+    if (!emailsMatch) {
+      setError("이메일이 일치하지 않아요.");
       return;
     }
 
@@ -77,8 +88,23 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="container" style={{ paddingTop: 60 }}>
-      <div style={{ textAlign: "center", marginBottom: 40 }}>
+    <main className="container" style={{ paddingTop: 48 }}>
+      <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <span
+          style={{
+            display: "inline-block",
+            padding: "6px 16px",
+            borderRadius: 999,
+            background: "var(--accentSoft)",
+            color: "var(--accent)",
+            fontSize: 13,
+            fontWeight: 700,
+            marginBottom: 20,
+          }}
+        >
+          ✨ 유료 AI 컨설팅 50,000원 상당 · 지금 무료로 받아보세요
+        </span>
+
         <h1
           style={{
             fontSize: 26,
@@ -89,29 +115,124 @@ export default function LandingPage() {
             color: "var(--text)",
           }}
         >
-          진단을 시작하기 전에
+          나만의 AI 서비스 아이디어
           <br />
-          간단히 알려주세요
+          무료로 찾아드려요
         </h1>
         <p
           style={{
-            margin: "0 0 6px",
+            margin: 0,
             fontSize: 15,
-            lineHeight: 1.5,
+            lineHeight: 1.6,
             color: "var(--textSecondary)",
           }}
         >
-          입력하신 정보는 맞춤 아이디어 추천에만 사용돼요
+          3분 진단으로 나에게 딱 맞는
+          <br />
+          AI 서비스 아이디어 5가지를 추천해드려요
         </p>
-        <span
-          className="pill"
-          style={{ marginTop: 10, display: "inline-flex" }}
-        >
-          약 2~3분 소요
-        </span>
+      </div>
+
+      <div
+        style={{
+          background: "#E8FAF2",
+          borderRadius: 12,
+          padding: "14px 18px",
+          marginBottom: 28,
+          fontSize: 12,
+          lineHeight: 1.7,
+          color: "var(--text)",
+        }}
+      >
+        📋 진단 결과지를 이메일로 보내드려요
+        <br />
+        결과지에는 맞춤 아이디어 5가지 + 시작 로드맵이 담겨 있어요
+        <br />
+        스팸함도 꼭 확인해주세요 🙂
       </div>
 
       <form onSubmit={onSubmit}>
+        {/* 이메일 입력 */}
+        <div style={{ marginBottom: 20 }}>
+          <label
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text)",
+              display: "block",
+              marginBottom: 6,
+            }}
+          >
+            결과지를 받을 이메일{" "}
+            <span style={{ color: "var(--error)" }}>*</span>
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="result@example.com"
+          />
+        </div>
+
+        {/* 이메일 확인 */}
+        <div style={{ marginBottom: 28 }}>
+          <label
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text)",
+              display: "block",
+              marginBottom: 6,
+            }}
+          >
+            이메일 확인{" "}
+            <span style={{ color: "var(--error)" }}>*</span>
+          </label>
+          <div style={{ position: "relative" }}>
+            <input
+              type="email"
+              value={emailConfirm}
+              onChange={(e) => setEmailConfirm(e.target.value)}
+              placeholder="이메일을 한 번 더 입력해주세요"
+              style={{
+                borderColor: emailMismatch
+                  ? "var(--error)"
+                  : emailsMatch
+                    ? "var(--accent)"
+                    : undefined,
+                paddingRight: 40,
+              }}
+            />
+            {emailsMatch && (
+              <span
+                style={{
+                  position: "absolute",
+                  right: 14,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--accent)",
+                  fontSize: 18,
+                  fontWeight: 700,
+                }}
+              >
+                ✓
+              </span>
+            )}
+          </div>
+          {emailMismatch && (
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontSize: 13,
+                color: "var(--error)",
+              }}
+            >
+              이메일이 일치하지 않아요
+            </p>
+          )}
+        </div>
+
+        {/* 직업 선택 */}
         <div style={{ marginBottom: 28 }}>
           <label
             style={{
@@ -160,6 +281,7 @@ export default function LandingPage() {
           )}
         </div>
 
+        {/* 키워드 선택 */}
         <div style={{ marginBottom: 28 }}>
           <label
             style={{
@@ -204,44 +326,23 @@ export default function LandingPage() {
           )}
         </div>
 
-        <div style={{ marginBottom: 28 }}>
-          <label
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--text)",
-              display: "block",
-              marginBottom: 4,
-            }}
-          >
-            이메일 주소{" "}
-            <span style={{ color: "var(--error)" }}>*</span>
-          </label>
-          <p
-            style={{
-              margin: "0 0 8px",
-              fontSize: 13,
-              color: "var(--textHint)",
-            }}
-          >
-            진단 결과를 이메일로 보내드려요
-          </p>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@email.com"
-          />
-        </div>
-
         {error && (
           <p className="errorText" style={{ marginBottom: 12 }}>
             {error}
           </p>
         )}
 
-        <button className="btn" type="submit" style={{ fontSize: 16 }}>
-          진단 시작하기
+        <button
+          className="btn"
+          type="submit"
+          disabled={!canSubmit}
+          style={{
+            fontSize: 16,
+            opacity: canSubmit ? 1 : 0.45,
+            cursor: canSubmit ? "pointer" : "not-allowed",
+          }}
+        >
+          무료 진단 시작하기
         </button>
       </form>
     </main>

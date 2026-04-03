@@ -378,6 +378,7 @@ a {
 /* ═══════════ Inputs ═══════════ */
 
 input[type="text"],
+input[type="email"],
 input[type="number"],
 input[type="tel"],
 textarea,
@@ -940,6 +941,52 @@ label {
 .targetIcon {
   font-size: 24px;
   flex-shrink: 0;
+}
+
+/* ═══════════ Encouragement Screen ═══════════ */
+
+.encouragementWrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 72px 20px 80px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.encouragementContent {
+  text-align: center;
+  animation: fadeSlideIn 0.4s ease-out;
+  max-width: 360px;
+  width: 100%;
+}
+
+/* ═══════════ Loading Screen ═══════════ */
+
+.loadingWrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 72px 20px 80px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loadingContent {
+  text-align: center;
+  animation: fadeSlideIn 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.loadingStepText {
+  font-size: 14px;
 }
 
 /* ═══════════ Mobile ═══════════ */

@@ -2,16 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import type { DiagnosisResult } from "../../lib/types";
-import DiagnosisReportPdf from "../DiagnosisReportPdf";
-import CtaForm from "../../components/CtaForm";
+
+function getDisplayName(email?: string): string {
+  if (!email) return "회원";
+  return email.split("@")[0] || "회원";
+}
+
+function getTodayString(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${dd}`;
+}
 
 export default function CompletePage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [emailStatus, setEmailStatus] = useState<
     "idle" | "sending" | "sent" | "failed"
   >("idle");
+  const [resending, setResending] = useState(false);
   const emailSentRef = useRef(false);
   const router = useRouter();
 
@@ -68,6 +79,32 @@ export default function CompletePage() {
       });
   }, [result]);
 
+  async function resendEmail() {
+    if (!result?.profile?.email || resending) return;
+    setResending(true);
+    try {
+      const res = await fetch("/api/send-result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: result.profile.email,
+          ideas: result.ideas,
+          comment: result.comment,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert("결과지가 이메일로 재발송되었어요!");
+      } else {
+        alert("발송에 실패했어요. 잠시 후 다시 시도해주세요.");
+      }
+    } catch {
+      alert("발송 중 오류가 발생했어요.");
+    } finally {
+      setResending(false);
+    }
+  }
+
   if (!result) {
     return (
       <main className="resultContainer">
@@ -80,31 +117,64 @@ export default function CompletePage() {
     );
   }
 
+  const displayName = getDisplayName(result.profile?.email);
+  const email = result.profile?.email || "";
+
   return (
     <main className="resultContainer">
+      {/* 개인화 헤더 */}
       <div style={{ textAlign: "center", margin: "16px 0 28px" }}>
         <h1
           style={{
-            fontSize: 26,
+            fontSize: 24,
             fontWeight: 800,
-            margin: "0 0 8px",
+            margin: "0 0 6px",
             letterSpacing: -0.4,
             color: "var(--text)",
           }}
         >
-          추천 AI 서비스 아이디어
+          📋 {displayName}님의 AI 서비스 아이디어 진단 결과
         </h1>
-        <p style={{ margin: 0, fontSize: 14, color: "var(--textSecondary)" }}>
-          바이브 코딩 툴(Bolt, Lovable 등)로 2주 안에 만들 수 있는 서비스예요.
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontSize: 14,
+            color: "var(--textSecondary)",
+          }}
+        >
+          분석 완료 · {getTodayString()}
         </p>
+        {email && (
+          <p
+            style={{
+              margin: 0,
+              fontSize: 13,
+              color: "var(--textHint)",
+            }}
+          >
+            결과지가 {email} 으로 발송됐어요 📩
+          </p>
+        )}
         {emailStatus === "sending" && (
-          <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--textHint)" }}>
+          <p
+            style={{
+              margin: "8px 0 0",
+              fontSize: 13,
+              color: "var(--textHint)",
+            }}
+          >
             📧 진단 결과를 이메일로 보내는 중...
           </p>
         )}
         {emailStatus === "sent" && (
-          <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--accent)" }}>
-            ✅ 진단 결과가 이메일로 발송되었어요!
+          <p
+            style={{
+              margin: "8px 0 0",
+              fontSize: 13,
+              color: "var(--accent)",
+            }}
+          >
+            ✅ 이메일 발송 완료!
           </p>
         )}
       </div>
@@ -157,6 +227,7 @@ export default function CompletePage() {
         ))}
       </div>
 
+      {/* 버튼 영역 */}
       <div
         style={{
           display: "flex",
@@ -167,24 +238,11 @@ export default function CompletePage() {
           marginTop: 28,
         }}
       >
-        <PDFDownloadLink
-          document={<DiagnosisReportPdf result={result} />}
-          fileName="ai-idea-diagnosis.pdf"
-        >
-          {({ loading }) => (
-            <span
-              className="btnSecondary"
-              style={{ opacity: loading ? 0.7 : 1 }}
-            >
-              {loading ? "PDF 생성 중..." : "진단서 다운로드"}
-            </span>
-          )}
-        </PDFDownloadLink>
-
         <button
           className="btnAccent"
           type="button"
           onClick={() => router.push("/nadocoding")}
+          style={{ fontSize: 15, padding: "14px 24px" }}
         >
           나도 코딩 1기 자세히 보기
         </button>
@@ -192,13 +250,11 @@ export default function CompletePage() {
         <button
           className="btnSecondary"
           type="button"
-          onClick={() => {
-            localStorage.removeItem("mc_profile");
-            localStorage.removeItem("diagnosis_result");
-            router.push("/");
-          }}
+          onClick={resendEmail}
+          disabled={resending}
+          style={{ fontSize: 14 }}
         >
-          다시 하기
+          {resending ? "발송 중..." : "결과지 다시 받기"}
         </button>
       </div>
 
@@ -256,7 +312,14 @@ export default function CompletePage() {
           </p>
 
           <div style={{ maxWidth: 400, margin: "0 auto" }}>
-            <CtaForm surveyId={result.surveyId} />
+            <button
+              className="btn"
+              type="button"
+              onClick={() => router.push("/nadocoding")}
+              style={{ fontSize: 16 }}
+            >
+              나도 코딩 1기 얼리버드 신청하기
+            </button>
           </div>
         </div>
       </div>

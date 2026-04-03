@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type {
   Profile,
@@ -21,9 +21,17 @@ type AnswerState = {
   skipped?: boolean;
 };
 
+type Phase = "survey" | "encouragement" | "loading";
+
 function isCustomOption(text: string) {
   return text.startsWith("기타");
 }
+
+const LOADING_STEPS = [
+  "답변 패턴 분석 중...",
+  "맞춤 아이디어 생성 중...",
+  "결과지 준비 중...",
+];
 
 export default function SurveyForm({ profile }: Props) {
   const router = useRouter();
@@ -32,6 +40,10 @@ export default function SurveyForm({ profile }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [animKey, setAnimKey] = useState(0);
+  const [phase, setPhase] = useState<Phase>("survey");
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [apiDone, setApiDone] = useState(false);
 
   const visibleQuestions = useMemo(() => {
     const result: SurveyQuestion[] = [];
@@ -89,6 +101,53 @@ export default function SurveyForm({ profile }: Props) {
 
   const progress = total > 0 ? ((safeStep + 1) / total) * 100 : 0;
 
+  const isQ6Step = useMemo(() => {
+    if (!currentQ) return false;
+    const mainQs = visibleQuestions.filter((q) => !q.id.includes("-"));
+    const currentMainQ = currentQ.id.includes("-")
+      ? visibleQuestions[safeStep - 1]
+      : currentQ;
+    const mainIndex = mainQs.findIndex((q) => q.id === currentMainQ?.id);
+    return mainIndex === 5;
+  }, [currentQ, visibleQuestions, safeStep]);
+
+  const currentQMainIndex = useMemo(() => {
+    if (!currentQ) return 0;
+    const baseId = currentQ.id.split("-")[0];
+    const num = parseInt(baseId.replace("Q", ""), 10);
+    return isNaN(num) ? 0 : num;
+  }, [currentQ]);
+
+  useEffect(() => {
+    if (phase !== "loading") return;
+    const interval = setInterval(() => {
+      setLoadingStep((prev) => {
+        if (prev < LOADING_STEPS.length - 1) return prev + 1;
+        return prev;
+      });
+    }, 1200);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "loading") return;
+    const interval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (apiDone) return 100;
+        if (prev < 85) return prev + Math.random() * 8;
+        return prev;
+      });
+    }, 400);
+    return () => clearInterval(interval);
+  }, [phase, apiDone]);
+
+  useEffect(() => {
+    if (apiDone && loadingProgress >= 100) {
+      const t = setTimeout(() => router.push("/survey/complete"), 500);
+      return () => clearTimeout(t);
+    }
+  }, [apiDone, loadingProgress, router]);
+
   function navigate(step: number) {
     setError(null);
     setCurrentStep(step);
@@ -144,6 +203,20 @@ export default function SurveyForm({ profile }: Props) {
     if (safeStep > 0) navigate(safeStep - 1);
   }
 
+  const shouldShowEncouragement = useCallback(() => {
+    if (!currentQ) return false;
+    const currentId = currentQ.id;
+    if (currentId === "Q6" || currentId === "Q6-1") {
+      const nextStepIdx = safeStep + 1;
+      if (nextStepIdx < total) {
+        const nextQ = visibleQuestions[nextStepIdx];
+        return nextQ && nextQ.id !== "Q6-1";
+      }
+      return true;
+    }
+    return false;
+  }, [currentQ, safeStep, total, visibleQuestions]);
+
   function goNext() {
     setError(null);
     const a = currentAnswer;
@@ -186,6 +259,18 @@ export default function SurveyForm({ profile }: Props) {
       }
     }
 
+    if (shouldShowEncouragement()) {
+      setPhase("encouragement");
+      return;
+    }
+
+    if (safeStep < total - 1) {
+      navigate(safeStep + 1);
+    }
+  }
+
+  function onEncouragementContinue() {
+    setPhase("survey");
     if (safeStep < total - 1) {
       navigate(safeStep + 1);
     }
@@ -202,6 +287,12 @@ export default function SurveyForm({ profile }: Props) {
       },
     }));
     setError(null);
+
+    if (shouldShowEncouragement()) {
+      setPhase("encouragement");
+      return;
+    }
+
     if (safeStep < total - 1) {
       navigate(safeStep + 1);
     }
@@ -307,6 +398,11 @@ export default function SurveyForm({ profile }: Props) {
     };
 
     setSubmitting(true);
+    setPhase("loading");
+    setLoadingStep(0);
+    setLoadingProgress(0);
+    setApiDone(false);
+
     try {
       const res = await fetch("/api/diagnosis/submit", {
         method: "POST",
@@ -319,14 +415,139 @@ export default function SurveyForm({ profile }: Props) {
       }
       const data = (await res.json()) as { ok: true; result: DiagnosisResult };
       localStorage.setItem("diagnosis_result", JSON.stringify(data.result));
-      router.push("/survey/complete");
+      setApiDone(true);
     } catch (e) {
+      setPhase("survey");
       setError(e instanceof Error ? e.message : "제출 중 오류가 발생했습니다.");
     } finally {
       setSubmitting(false);
     }
   }
 
+  // ── Encouragement screen ──
+  if (phase === "encouragement") {
+    return (
+      <>
+        <div className="progressBar">
+          <div className="progressFill" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="encouragementWrap">
+          <div className="encouragementContent">
+            <span style={{ fontSize: 48, display: "block", marginBottom: 16 }}>
+              👏
+            </span>
+            <h2
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                margin: "0 0 12px",
+                color: "var(--text)",
+              }}
+            >
+              절반 왔어요
+            </h2>
+            <p
+              style={{
+                fontSize: 15,
+                color: "var(--textSecondary)",
+                lineHeight: 1.6,
+                margin: "0 0 28px",
+              }}
+            >
+              답변이 구체적일수록
+              <br />
+              더 정확한 아이디어를 추천받을 수 있어요
+            </p>
+            <button
+              className="btnPrimary"
+              type="button"
+              onClick={onEncouragementContinue}
+            >
+              계속하기
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── Loading screen ──
+  if (phase === "loading") {
+    return (
+      <>
+        <div className="progressBar">
+          <div className="progressFill" style={{ width: "100%" }} />
+        </div>
+        <div className="loadingWrap">
+          <div className="loadingContent">
+            <span style={{ fontSize: 44, display: "block", marginBottom: 16 }}>
+              🔍
+            </span>
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 800,
+                margin: "0 0 24px",
+                color: "var(--text)",
+              }}
+            >
+              AI가 회원님의 답변을 분석하고 있어요
+            </h2>
+
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 320,
+                height: 6,
+                borderRadius: 3,
+                background: "var(--border)",
+                marginBottom: 28,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  borderRadius: 3,
+                  background: "var(--accent)",
+                  transition: "width 0.4s ease",
+                  width: `${Math.min(loadingProgress, 100)}%`,
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {LOADING_STEPS.map((text, i) => (
+                <p
+                  key={i}
+                  className="loadingStepText"
+                  style={{
+                    opacity: i <= loadingStep ? 1 : 0,
+                    transform:
+                      i <= loadingStep
+                        ? "translateY(0)"
+                        : "translateY(8px)",
+                    transition: "opacity 0.5s ease, transform 0.5s ease",
+                    margin: 0,
+                    fontSize: 14,
+                    color:
+                      i === loadingStep
+                        ? "var(--accent)"
+                        : "var(--textSecondary)",
+                    fontWeight: i === loadingStep ? 600 : 400,
+                  }}
+                >
+                  {text}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── Survey screen ──
   if (!currentQ) return null;
 
   const isLast = safeStep === total - 1;
@@ -351,9 +572,27 @@ export default function SurveyForm({ profile }: Props) {
 
       <div className="surveyWrap">
         <div className="questionBlock" key={animKey}>
-          <span className="questionCounter">
-            {answeredCount}/{total} 문항 완료
-          </span>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 16,
+            }}
+          >
+            <span className="questionCounter">
+              {answeredCount}/{total} 문항 완료
+            </span>
+            <span
+              style={{
+                fontSize: 12,
+                color: "var(--accent)",
+                fontWeight: 600,
+              }}
+            >
+              AI 분석 진행 중
+            </span>
+          </div>
 
           {showSection && (
             <div className="sectionTag">{currentQ.section}</div>
