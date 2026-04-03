@@ -646,7 +646,7 @@ export default function NadocodingPage() {
           <span className="priceOriginal" style={{ color: "rgba(255,255,255,0.6)" }}>
             299,000원
           </span>
-          <span style={{ fontSize: 28, fontWeight: 800, color: "white" }}>
+          <span style={{ fontSize: 28, fontWeight: 800, color: "#FCA5A5" }}>
             99,000원
           </span>
         </div>

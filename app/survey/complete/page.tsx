@@ -6,6 +6,11 @@ import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 
+function getEmailId(email?: string): string {
+  if (!email) return "사용자";
+  return email.split("@")[0] || "사용자";
+}
+
 function getTodayString(): string {
   const d = new Date();
   const y = d.getFullYear();
@@ -145,6 +150,7 @@ export default function CompletePage() {
   const [resendEmail, setResendEmail] = useState("");
   const [resending, setResending] = useState(false);
   const [resendDone, setResendDone] = useState(false);
+  const [isRestoredResult, setIsRestoredResult] = useState(false);
 
   useEffect(() => {
     localStorage.removeItem(SURVEY_STORAGE_KEY);
@@ -162,9 +168,16 @@ export default function CompletePage() {
       }
       setResult(parsed);
       setResendEmail(parsed.profile?.email || "");
+
+      const savedAt = localStorage.getItem("diagnosis_result_savedAt");
+      if (savedAt) {
+        setIsRestoredResult(true);
+      }
+      localStorage.setItem("diagnosis_result_savedAt", new Date().toISOString());
     } catch {
       alert("진단 데이터가 손상되었습니다. 다시 시작하세요.");
       localStorage.removeItem("diagnosis_result");
+      localStorage.removeItem("diagnosis_result_savedAt");
       router.push("/");
     }
   }, []);
@@ -251,6 +264,7 @@ export default function CompletePage() {
   }
 
   const email = result.profile?.email || "";
+  const emailId = getEmailId(email);
   const persona = result.persona;
   const firstStep = result.first_step;
   const firstIdea = result.ideas[0];
@@ -258,6 +272,41 @@ export default function CompletePage() {
 
   return (
     <main className="resultContainer">
+      {isRestoredResult && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "10px 16px",
+            marginBottom: 8,
+            fontSize: 13,
+            color: "var(--textSecondary)",
+            background: "var(--surface)",
+            borderRadius: 8,
+          }}
+        >
+          이전 진단 결과예요 ·{" "}
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.removeItem("diagnosis_result");
+              localStorage.removeItem("diagnosis_result_savedAt");
+              router.push("/");
+            }}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--accent)",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: "pointer",
+              padding: 0,
+            }}
+          >
+            새로 진단하기
+          </button>
+        </div>
+      )}
+
       {/* ═══ 개인화 헤더 (개선) ═══ */}
       <div style={{ textAlign: "center", margin: "16px 0 28px" }}>
         <h1
@@ -269,7 +318,7 @@ export default function CompletePage() {
             color: "var(--text)",
           }}
         >
-          사용자님의 AI 서비스 아이디어 진단 결과
+          {emailId}님의 AI 서비스 아이디어 진단 결과
         </h1>
         <p
           style={{

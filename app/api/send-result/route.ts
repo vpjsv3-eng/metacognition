@@ -39,7 +39,7 @@ function buildEmailHtml(
         const rankNum = idea.rank ?? i + 1;
         return `<div style="margin-bottom:16px;padding:20px;${borderStyle}border-radius:12px;background:#FFFFFF;">
           <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;"><tr>
-            <td style="width:40px;height:40px;background:#00C471;border-radius:50%;text-align:center;vertical-align:middle;font-size:18px;font-weight:bold;color:white;line-height:40px;">${rankNum}</td>
+            <td style="width:36px;height:36px;background-color:#00C471;border-radius:50%;text-align:center;vertical-align:middle;font-size:16px;font-weight:bold;color:#ffffff;line-height:36px;padding:0;mso-line-height-rule:exactly;">${rankNum}</td>
             <td style="padding-left:12px;vertical-align:middle;"><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${isFirst ? "#00C471" : "#E8FAF2"};color:${isFirst ? "#fff" : "#00C471"};font-size:12px;font-weight:700;">추천 ${rankNum}순위</span></td>
           </tr></table>
           <strong style="font-size:16px;color:#111827;display:block;margin-bottom:4px;">${idea.name}</strong>

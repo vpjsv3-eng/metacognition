@@ -995,12 +995,16 @@ export default function SurveyForm() {
             <img
               src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
               alt="AI 분석 중"
-              width={200}
-              height={200}
+              width={180}
+              height={180}
               style={{ borderRadius: 16, marginBottom: 16, objectFit: "cover" }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "https://media.giphy.com/media/l3nWhI38IWDofyDrW/giphy.gif";
+                const img = e.target as HTMLImageElement;
+                if (img.src.includes("3oEjI6SIIHBdRxXI40")) {
+                  img.src = "https://media.giphy.com/media/l3nWhI38IWDofyDrW/giphy.gif";
+                } else if (img.src.includes("l3nWhI38IWDofyDrW")) {
+                  img.src = "https://media.giphy.com/media/RkDkBsVvWDkFPJAKPY/giphy.gif";
+                }
               }}
             />
             <h2
