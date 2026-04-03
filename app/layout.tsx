@@ -3,17 +3,15 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "메타인지 진단",
-  description: "나이/직업/관심사 입력 후 20문항 메타인지 5점 척도 설문을 진행합니다.",
+  title: "나만의 AI 서비스 아이디어 진단",
+  description:
+    "AI로 뭘 만들지 모르겠다면? 10문항으로 나에게 딱 맞는 AI 서비스 아이디어를 찾아드려요.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
-

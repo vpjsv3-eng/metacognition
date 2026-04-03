@@ -20,7 +20,10 @@ export default function LandingPage() {
   const [interestsRaw, setInterestsRaw] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  const interestsPreview = useMemo(() => parseInterests(interestsRaw), [interestsRaw]);
+  const interestsPreview = useMemo(
+    () => parseInterests(interestsRaw),
+    [interestsRaw],
+  );
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -38,7 +41,7 @@ export default function LandingPage() {
 
     const interests = parseInterests(interestsRaw);
     if (interests.length === 0) {
-      setError("관심사는 쉼표(,) 또는 줄바꿈으로 1개 이상 입력해 주세요.");
+      setError("관심사를 1개 이상 입력해 주세요.");
       return;
     }
 
@@ -51,19 +54,19 @@ export default function LandingPage() {
     <main className="container">
       <div className="topBar">
         <div className="brand">
-          <strong>메타인지 진단</strong>
+          <strong>나만의 AI 서비스 아이디어 진단</strong>
           <span className="muted" style={{ fontSize: 13 }}>
-            20문항, 5점 척도 설문
+            10문항 객관식 설문
           </span>
         </div>
-        <span className="pill">약 3~5분</span>
+        <span className="pill">약 2~3분</span>
       </div>
 
       <div className="card">
-        <h1 style={{ margin: "0 0 10px", fontSize: 22 }}>시작하기</h1>
+        <h1 style={{ margin: "0 0 6px", fontSize: 22 }}>시작하기</h1>
         <p className="help" style={{ marginTop: 0 }}>
-          아래 정보를 바탕으로 결과 해석에 참고할 수 있도록 사용합니다. 설문은 익명으로 진행되며, 제출 후 브라우저에 기록은 남기지
-          않습니다.
+          AI로 뭘 만들지 모르겠다면? 10문항으로 나에게 딱 맞는 AI 서비스
+          아이디어를 찾아드려요.
         </p>
 
         <form onSubmit={onSubmit} style={{ marginTop: 14 }}>
@@ -90,7 +93,7 @@ export default function LandingPage() {
                 type="text"
                 value={job}
                 onChange={(e) => setJob(e.target.value)}
-                placeholder="예: 개발자, 학생, 의료, 프리랜서 등"
+                placeholder="예: 개발자, 학생, 마케터, 프리랜서 등"
                 required
               />
             </div>
@@ -102,13 +105,17 @@ export default function LandingPage() {
               id="interests"
               value={interestsRaw}
               onChange={(e) => setInterestsRaw(e.target.value)}
-              placeholder="예: 심리학, 글쓰기, 운동, 학습법"
+              placeholder="예: AI, 부업, 운동, 여행, 요리"
             />
             <div className="help">
               미리보기:{" "}
               {interestsPreview.length > 0 ? (
                 interestsPreview.map((x, idx) => (
-                  <span key={x + idx} className="pill" style={{ marginRight: 8, marginTop: 8 }}>
+                  <span
+                    key={x + idx}
+                    className="pill"
+                    style={{ marginRight: 8, marginTop: 8 }}
+                  >
                     {x}
                   </span>
                 ))
@@ -132,4 +139,3 @@ export default function LandingPage() {
     </main>
   );
 }
-

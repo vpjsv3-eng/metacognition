@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import type { DiagnosisResult } from "../../lib/types";
-import type { AiReport } from "../../lib/aiReport";
-import { buildAiReportFromResult } from "../../lib/aiReport";
 import DiagnosisReportPdf from "../DiagnosisReportPdf";
+import CtaForm from "../../components/CtaForm";
 
 export default function CompletePage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null);
-  const [aiReport, setAiReport] = useState<AiReport | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,42 +20,22 @@ export default function CompletePage() {
     }
 
     try {
-      const parsed = JSON.parse(savedData) as any;
-      // 요청사항: diagnosis_result에는 'result 전체'가 저장됨.
-      // 그래도 이전 포맷이 남아있을 수 있어 방어적으로 처리합니다.
-      const parsedResult: DiagnosisResult | null =
-        parsed?.domainAverages && parsed?.overallAverage && parsed?.profile
-          ? (parsed as DiagnosisResult)
-          : parsed?.result
-            ? (parsed.result as DiagnosisResult)
-            : null;
-
-      if (!parsedResult) throw new Error("진단 결과 포맷을 확인할 수 없습니다.");
-
-      const report = parsedResult.aiReport ?? buildAiReportFromResult(parsedResult);
-      setResult(parsedResult);
-      setAiReport(report);
+      const parsed = JSON.parse(savedData) as DiagnosisResult;
+      if (!parsed?.ideas || !Array.isArray(parsed.ideas)) {
+        throw new Error("결과 포맷 오류");
+      }
+      setResult(parsed);
     } catch {
       alert("진단 데이터가 손상되었습니다. 다시 시작하세요.");
+      localStorage.removeItem("diagnosis_result");
       router.push("/");
     }
   }, []);
 
-  const domainPills = useMemo(() => {
-    if (!result) return [];
-    const d = result.domainAverages;
-    return [
-      { label: "영역1(인지적 자기 객관화)", value: d.self_awareness },
-      { label: "영역2(AI 자원 활용/최적화)", value: d.resource_management },
-      { label: "영역3(실행 모니터링/통제)", value: d.monitoring_control },
-      { label: "영역4(변화 대응/전략 수정)", value: d.cognitive_flexibility },
-    ];
-  }, [result]);
-
-  if (!result || !aiReport) {
+  if (!result) {
     return (
       <main className="container">
-        <div className="card">진단 리포트를 생성하는 중...</div>
+        <div className="card">분석 결과를 불러오는 중...</div>
       </main>
     );
   }
@@ -67,85 +45,90 @@ export default function CompletePage() {
       <div className="card" style={{ padding: 26 }}>
         <div className="topBar" style={{ marginBottom: 14 }}>
           <div className="brand">
-            <strong>전략 보고서</strong>
+            <strong>AI 서비스 아이디어 진단 결과</strong>
             <span className="muted" style={{ fontSize: 13 }}>
-              메타인지 진단 결과 · 5점 척도 평균 기반
+              10문항 분석 기반 맞춤 추천
             </span>
           </div>
-          <span className="pill">생성: {new Date().toLocaleString("ko-KR")}</span>
+          <span className="pill">
+            생성: {new Date().toLocaleString("ko-KR")}
+          </span>
         </div>
 
-        <div style={{ textAlign: "center", marginBottom: 18 }}>
-          <div className="pill" style={{ marginBottom: 10 }}>
-            퍼소나 유형
-          </div>
-          <div style={{ fontSize: 34, fontWeight: 900, letterSpacing: -0.4, fontStyle: "italic" }}>
-            {aiReport.typeName}
-          </div>
-          <div className="help" style={{ marginTop: 8 }}>
-            종합 평균:{" "}
-            <strong style={{ color: "var(--text)" }}>{result.overallAverage.toFixed(2)}</strong>
-          </div>
-        </div>
-
-        <div className="row" style={{ marginBottom: 18 }}>
-          {domainPills.map((p) => (
-            <div key={p.label} className="pill" style={{ flex: "1 1 260px", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--muted)" }}>{p.label}</span>
-              <strong style={{ color: "var(--text)" }}>{p.value.toFixed(2)}</strong>
-            </div>
-          ))}
-        </div>
-
-        <div
-          className="card"
-          style={{
-            background: "rgba(255, 255, 255, 0.04)",
-            borderColor: "rgba(255, 110, 110, 0.35)",
-            marginBottom: 18,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontWeight: 900, color: "#ff9b9b" }}>●</span>
-            <strong style={{ fontSize: 16 }}>냉혹한 진단</strong>
-          </div>
-          <p style={{ margin: 0, color: "rgba(255,255,255,0.86)", lineHeight: 1.65 }}>
-            {aiReport.diagnosis}
+        <div style={{ textAlign: "center", marginBottom: 22 }}>
+          <h1
+            style={{
+              fontSize: 28,
+              fontWeight: 900,
+              margin: "0 0 6px",
+              letterSpacing: -0.4,
+            }}
+          >
+            나에게 딱 맞는 AI 서비스 아이디어
+          </h1>
+          <p className="help" style={{ marginTop: 0 }}>
+            코딩 없이, 바이브 코딩 툴(Bolt, Lovable 등)로 2주 안에 만들 수
+            있는 서비스예요.
           </p>
         </div>
 
-        <div className="row" style={{ marginBottom: 18 }}>
-          <div className="card" style={{ flex: "1 1 360px", background: "rgba(0,0,0,0.18)" }}>
-            <strong style={{ color: "#7db2ff" }}>추천 수익 모델</strong>
-            <div className="help" style={{ marginTop: 6 }}>
-              현재 강점 축을 상품화하는 방식으로 제안합니다.
-            </div>
-            <div style={{ marginTop: 12 }}>
-              {aiReport.revenueModels.map((m, i) => (
-                <div key={i} className="pill" style={{ marginBottom: 10, width: "100%", justifyContent: "flex-start" }}>
-                  <span style={{ color: "var(--muted)", minWidth: 86 }}>모델 {String(i + 1).padStart(2, "0")}</span>
-                  <span style={{ color: "var(--text)", fontWeight: 750 }}>{m}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {result.ideas.map((idea, i) => (
+            <div
+              key={i}
+              className="card ideaCard"
+              style={{
+                background: "rgba(255, 255, 255, 0.04)",
+                borderColor: "rgba(124, 92, 255, 0.25)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  marginBottom: 10,
+                }}
+              >
+                <span
+                  className="pill"
+                  style={{
+                    background: "rgba(124, 92, 255, 0.25)",
+                    borderColor: "rgba(124, 92, 255, 0.5)",
+                    color: "#c4b5fd",
+                    fontWeight: 800,
+                    minWidth: 32,
+                    justifyContent: "center",
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <strong style={{ fontSize: 18 }}>{idea.name}</strong>
+              </div>
 
-          <div className="card" style={{ flex: "1 1 360px", background: "rgba(0,0,0,0.18)" }}>
-            <strong style={{ color: "#7c5cff" }}>24시간 내 실행 과제</strong>
-            <div className="help" style={{ marginTop: 6 }}>
-              “생각”이 아니라 “실행”을 고정합니다.
-            </div>
-            <div style={{ marginTop: 12 }}>
-              {aiReport.actionTasks.map((t, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
-                  <span className="pill" style={{ width: 34, justifyContent: "center" }}>
-                    {i + 1}
-                  </span>
-                  <div style={{ color: "rgba(255,255,255,0.88)", lineHeight: 1.55, fontWeight: 650 }}>{t}</div>
+              <p
+                style={{
+                  margin: "0 0 12px",
+                  color: "rgba(255,255,255,0.88)",
+                  fontSize: 15,
+                  lineHeight: 1.5,
+                }}
+              >
+                {idea.description}
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div className="ideaDetail">
+                  <span className="ideaLabel">이 사람에게 맞는 이유</span>
+                  <span>{idea.reason}</span>
                 </div>
-              ))}
+                <div className="ideaDetail">
+                  <span className="ideaLabel">핵심 기능</span>
+                  <span>{idea.coreFeature}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
 
         <div
@@ -153,22 +136,42 @@ export default function CompletePage() {
             display: "flex",
             gap: 12,
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "center",
             flexWrap: "wrap",
+            marginTop: 24,
           }}
         >
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <PDFDownloadLink
-              document={<DiagnosisReportPdf aiReport={aiReport} result={result} />}
-              fileName="diagnosis-report.pdf"
-            >
-              {({ loading }) => (
-                <span className="btn" style={{ width: "auto", padding: "12px 18px", opacity: loading ? 0.85 : 1 }}>
-                  {loading ? "진단서 생성 중..." : "진단서 다운로드"}
-                </span>
-              )}
-            </PDFDownloadLink>
-          </div>
+          <PDFDownloadLink
+            document={<DiagnosisReportPdf result={result} />}
+            fileName="ai-idea-diagnosis.pdf"
+          >
+            {({ loading }) => (
+              <span
+                className="btn"
+                style={{
+                  width: "auto",
+                  padding: "12px 20px",
+                  opacity: loading ? 0.85 : 1,
+                }}
+              >
+                {loading ? "PDF 생성 중..." : "진단서 다운로드"}
+              </span>
+            )}
+          </PDFDownloadLink>
+
+          <button
+            className="btn"
+            type="button"
+            onClick={() => router.push("/nadocoding")}
+            style={{
+              width: "auto",
+              padding: "12px 20px",
+              background:
+                "linear-gradient(90deg, rgba(255, 140, 50, 0.9), rgba(255, 80, 120, 0.8))",
+            }}
+          >
+            나도 코딩 1기 자세히 보기
+          </button>
 
           <button
             className="btn"
@@ -178,10 +181,40 @@ export default function CompletePage() {
               localStorage.removeItem("diagnosis_result");
               router.push("/");
             }}
-            style={{ width: "auto", padding: "12px 18px" }}
+            style={{ width: "auto", padding: "12px 20px" }}
           >
             다시 하기
           </button>
+        </div>
+      </div>
+
+      {/* CTA 섹션 */}
+      <div style={{ margin: "32px 0 0" }}>
+        <hr
+          style={{
+            border: "none",
+            borderTop: "1px solid rgba(255,255,255,0.12)",
+            marginBottom: 28,
+          }}
+        />
+        <div className="card" style={{ padding: 28, textAlign: "center" }}>
+          <h2 style={{ margin: "0 0 8px", fontSize: 22 }}>
+            내 아이디어, 직접 만들어보고 싶다면?
+          </h2>
+          <p
+            className="help"
+            style={{ marginTop: 0, fontSize: 15, lineHeight: 1.6 }}
+          >
+            코딩 몰라도 괜찮아요. 나도 코딩 1기에서
+            <br />
+            아이디어 발굴부터 배포까지 함께합니다.
+          </p>
+          <p style={{ margin: "12px 0 20px", fontSize: 15 }}>
+            오픈 시 가장 먼저 알려드릴게요 🙌
+          </p>
+          <div style={{ maxWidth: 400, margin: "0 auto" }}>
+            <CtaForm />
+          </div>
         </div>
       </div>
     </main>

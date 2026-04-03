@@ -3,22 +3,24 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Profile, DiagnosisPayload, DiagnosisResult } from "../lib/types";
-import { MC_5POINT_OPTIONS, METACOGNITION_QUESTIONS, type ScaleValue } from "../lib/questions";
+import { SURVEY_QUESTIONS } from "../lib/questions";
 
 type Props = {
   profile: Profile;
 };
 
 function computeIsComplete(answers: number[]): boolean {
-  return answers.length === 20 && answers.every((v) => v >= 1 && v <= 5);
+  return answers.length === 10 && answers.every((v) => v >= 0);
 }
 
 export default function SurveyForm({ profile }: Props) {
   const router = useRouter();
-  const questions = METACOGNITION_QUESTIONS;
+  const questions = SURVEY_QUESTIONS;
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<number[]>(() => Array.from({ length: 20 }, () => 0));
+  const [answers, setAnswers] = useState<number[]>(() =>
+    Array.from({ length: 10 }, () => -1),
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,17 +28,22 @@ export default function SurveyForm({ profile }: Props) {
   const total = questions.length;
 
   const progressText = useMemo(() => {
-    const answeredCount = answers.filter((v) => v >= 1 && v <= 5).length;
+    const answeredCount = answers.filter((v) => v >= 0).length;
     return `${answeredCount}/${total} 문항 선택 완료`;
   }, [answers, total]);
 
-  function setAnswer(value: ScaleValue) {
+  function setAnswer(optionIndex: number) {
     setAnswers((prev) => {
       const next = [...prev];
-      next[currentIndex] = value;
+      next[currentIndex] = optionIndex;
       return next;
     });
     setError(null);
+    if (currentIndex < total - 1) {
+      setTimeout(() => {
+        setCurrentIndex((i) => Math.min(total - 1, i + 1));
+      }, 350);
+    }
   }
 
   function goPrev() {
@@ -46,8 +53,7 @@ export default function SurveyForm({ profile }: Props) {
 
   function goNext() {
     setError(null);
-    const val = answers[currentIndex];
-    if (!(val >= 1 && val <= 5)) {
+    if (answers[currentIndex] < 0) {
       setError("현재 문항을 먼저 선택해 주세요.");
       return;
     }
@@ -64,7 +70,7 @@ export default function SurveyForm({ profile }: Props) {
 
     const payload: DiagnosisPayload = {
       profile,
-      answers: answers as Array<number>,
+      answers,
     };
 
     setSubmitting(true);
@@ -81,7 +87,6 @@ export default function SurveyForm({ profile }: Props) {
       }
 
       const data = (await res.json()) as { ok: true; result: DiagnosisResult };
-      // 요청사항: 응답의 result 전체를 'diagnosis_result' 키로 저장
       localStorage.setItem("diagnosis_result", JSON.stringify(data.result));
       router.push("/survey/complete");
     } catch (e) {
@@ -91,14 +96,14 @@ export default function SurveyForm({ profile }: Props) {
     }
   }
 
-  const selectedValue = answers[currentIndex] as 0 | ScaleValue;
+  const selectedValue = answers[currentIndex];
   const isLast = currentIndex === total - 1;
 
   return (
     <div className="card">
       <div className="topBar">
         <div className="brand">
-          <strong>설문</strong>
+          <strong>AI 아이디어 진단</strong>
           <span className="muted" style={{ fontSize: 13 }}>
             {progressText}
           </span>
@@ -110,36 +115,41 @@ export default function SurveyForm({ profile }: Props) {
 
       <div style={{ marginBottom: 12 }}>
         <span className="pill" style={{ marginRight: 8 }}>
-          나이: {profile.age}
+          {profile.job}
         </span>
-        <span className="pill" style={{ marginRight: 8 }}>
-          직업: {profile.job}
+        <span className="pill">
+          관심사:{" "}
+          {profile.interests.slice(0, 3).join(", ")}
+          {profile.interests.length > 3 ? "…" : ""}
         </span>
-        <span className="pill">관심사: {profile.interests.slice(0, 4).join(", ")}{profile.interests.length > 4 ? "…" : ""}</span>
       </div>
 
-      <h2 style={{ margin: "12px 0 8px", fontSize: 18 }}>{currentQuestion.text}</h2>
+      <h2 style={{ margin: "12px 0 8px", fontSize: 18 }}>
+        Q{currentQuestion.id}. {currentQuestion.text}
+      </h2>
       <p className="help" style={{ marginTop: 0 }}>
         아래 중 하나를 선택해 주세요.
       </p>
 
-      <div className="radioGrid" role="radiogroup" aria-label={`문항 ${currentQuestion.id}`}>
-        {MC_5POINT_OPTIONS.map((opt) => {
-          const selected = selectedValue === opt.value;
+      <div className="optionList" role="radiogroup" aria-label={`문항 ${currentQuestion.id}`}>
+        {currentQuestion.options.map((opt, idx) => {
+          const selected = selectedValue === idx;
           return (
-            <label key={opt.value} className="radioOption" data-selected={selected ? "true" : "false"}>
+            <label
+              key={idx}
+              className="radioOption"
+              data-selected={selected ? "true" : "false"}
+            >
               <input
                 type="radio"
                 name={`q-${currentQuestion.id}`}
-                value={opt.value}
+                value={idx}
                 checked={selected}
-                onChange={() => setAnswer(opt.value)}
+                onChange={() => setAnswer(idx)}
                 style={{ display: "none" }}
               />
-              <span style={{ fontWeight: 800 }}>{opt.label}</span>
-              <span className="muted" style={{ fontSize: 12 }}>
-                {opt.value}/5
-              </span>
+              <span className="optionNum">{idx + 1}</span>
+              <span style={{ fontWeight: 700 }}>{opt}</span>
             </label>
           );
         })}
@@ -152,21 +162,38 @@ export default function SurveyForm({ profile }: Props) {
       ) : null}
 
       <div className="stepNav" style={{ marginTop: 16 }}>
-        <button className="btn" type="button" onClick={goPrev} disabled={currentIndex === 0 || submitting} style={{ width: "auto", padding: "12px 18px" }}>
+        <button
+          className="btn"
+          type="button"
+          onClick={goPrev}
+          disabled={currentIndex === 0 || submitting}
+          style={{ width: "auto", padding: "12px 18px" }}
+        >
           이전
         </button>
 
         {!isLast ? (
-          <button className="btn" type="button" onClick={goNext} disabled={submitting} style={{ width: "auto", padding: "12px 18px" }}>
+          <button
+            className="btn"
+            type="button"
+            onClick={goNext}
+            disabled={submitting}
+            style={{ width: "auto", padding: "12px 18px" }}
+          >
             다음
           </button>
         ) : (
-          <button className="btn" type="button" onClick={onSubmit} disabled={submitting} style={{ width: "auto", padding: "12px 18px" }}>
-            {submitting ? "제출 중..." : "제출하기"}
+          <button
+            className="btn"
+            type="button"
+            onClick={onSubmit}
+            disabled={submitting}
+            style={{ width: "auto", padding: "12px 18px" }}
+          >
+            {submitting ? "분석 중..." : "결과 보기"}
           </button>
         )}
       </div>
     </div>
   );
 }
-

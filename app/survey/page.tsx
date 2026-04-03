@@ -39,10 +39,16 @@ export default function SurveyPage() {
         <div className="card">
           <h1 style={{ margin: 0, fontSize: 18 }}>프로필 정보가 없습니다.</h1>
           <p className="help">
-            설문을 시작하려면 먼저 랜딩 페이지에서 `나이/직업/관심사`를 입력해 주세요.
+            설문을 시작하려면 먼저 메인 페이지에서 나이/직업/관심사를 입력해
+            주세요.
           </p>
-          <button className="btn" type="button" onClick={() => router.push("/")} style={{ marginTop: 14 }}>
-            랜딩으로 돌아가기
+          <button
+            className="btn"
+            type="button"
+            onClick={() => router.push("/")}
+            style={{ marginTop: 14 }}
+          >
+            메인으로 돌아가기
           </button>
         </div>
       </main>
@@ -55,4 +61,3 @@ export default function SurveyPage() {
     </main>
   );
 }
-

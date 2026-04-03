@@ -64,6 +64,7 @@ label {
 
 input[type="text"],
 input[type="number"],
+input[type="tel"],
 textarea,
 select {
   width: 100%;
@@ -73,6 +74,7 @@ select {
   background: rgba(0, 0, 0, 0.25);
   color: var(--text);
   outline: none;
+  font-size: 15px;
 }
 
 textarea {
@@ -89,6 +91,7 @@ textarea {
   color: #0b1220;
   font-weight: 700;
   cursor: pointer;
+  font-size: 15px;
 }
 
 .btn:disabled {
@@ -108,28 +111,55 @@ textarea {
   font-size: 13px;
 }
 
-.radioGrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+/* 객관식 옵션 리스트 */
+.optionList {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-top: 10px;
 }
 
 .radioOption {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
   border-radius: 12px;
   border: 1px solid var(--cardBorder);
   background: rgba(0, 0, 0, 0.22);
   cursor: pointer;
   user-select: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.radioOption:hover {
+  border-color: rgba(124, 92, 255, 0.35);
 }
 
 .radioOption[data-selected="true"] {
   border-color: rgba(124, 92, 255, 0.6);
   box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.2) inset;
+  background: rgba(124, 92, 255, 0.08);
+}
+
+.optionNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.radioOption[data-selected="true"] .optionNum {
+  background: var(--accent);
+  color: #fff;
 }
 
 .help {
@@ -170,3 +200,21 @@ textarea {
   width: auto;
 }
 
+/* 아이디어 카드 디테일 */
+.ideaDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ideaLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: #93c5fd;
+}
