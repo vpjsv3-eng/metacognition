@@ -1,6 +1,7 @@
 export type Profile = {
   job: string;
   keywords: string[];
+  email?: string;
 };
 
 export type SurveyAnswer = {
@@ -8,6 +9,8 @@ export type SurveyAnswer = {
   questionText: string;
   answer: string;
 };
+
+export type AnswersMap = Record<string, string | string[]>;
 
 export type ServiceIdea = {
   name: string;
@@ -27,4 +30,5 @@ export type DiagnosisResult = {
 export type DiagnosisPayload = {
   profile: Profile;
   answers: SurveyAnswer[];
+  answersMap: AnswersMap;
 };

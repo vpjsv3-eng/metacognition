@@ -7,6 +7,7 @@ import type {
   DiagnosisPayload,
   DiagnosisResult,
   SurveyAnswer,
+  AnswersMap,
 } from "../lib/types";
 import { SURVEY_QUESTIONS, type SurveyQuestion } from "../lib/questions";
 
@@ -236,6 +237,35 @@ export default function SurveyForm({ profile }: Props) {
     });
   }
 
+  function buildAnswersMap(): AnswersMap {
+    const map: AnswersMap = {};
+
+    for (const q of visibleQuestions) {
+      const a = answers[q.id];
+      const key = q.id.replace("-", "_");
+
+      if (q.type === "text") {
+        map[key] = a?.skipped ? "(건너뜀)" : (a?.textValue?.trim() || "");
+      } else if (q.type === "multi") {
+        if (a?.skipped) {
+          map[key] = [];
+        } else {
+          const indices = a?.selectedIndices || [];
+          map[key] = indices.map((i) => {
+            const opt = q.options![i];
+            return isCustomOption(opt) ? (a?.customText?.trim() || opt) : opt;
+          });
+        }
+      } else {
+        const idx = a?.selectedIndex ?? 0;
+        const opt = q.options![idx];
+        map[key] = isCustomOption(opt) ? (a?.customText?.trim() || opt) : opt;
+      }
+    }
+
+    return map;
+  }
+
   function isComplete(): boolean {
     return visibleQuestions.every((q) => {
       const a = answers[q.id];
@@ -273,6 +303,7 @@ export default function SurveyForm({ profile }: Props) {
     const payload: DiagnosisPayload = {
       profile,
       answers: buildAnswerList(),
+      answersMap: buildAnswersMap(),
     };
 
     setSubmitting(true);

@@ -30,6 +30,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [jobIndex, setJobIndex] = useState(-1);
   const [jobCustom, setJobCustom] = useState("");
+  const [email, setEmail] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +65,13 @@ export default function LandingPage() {
       return;
     }
 
-    const profile: Profile = { job, keywords: selectedKeywords };
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError("이메일 주소를 정확히 입력해 주세요.");
+      return;
+    }
+
+    const profile: Profile = { job, keywords: selectedKeywords, email: trimmedEmail };
     localStorage.setItem("mc_profile", JSON.stringify(profile));
     router.push("/survey");
   }
@@ -195,6 +202,36 @@ export default function LandingPage() {
           {selectedKeywords.length > 0 && (
             <p className="help">선택: {selectedKeywords.length}/3</p>
           )}
+        </div>
+
+        <div style={{ marginBottom: 28 }}>
+          <label
+            style={{
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text)",
+              display: "block",
+              marginBottom: 4,
+            }}
+          >
+            이메일 주소{" "}
+            <span style={{ color: "var(--error)" }}>*</span>
+          </label>
+          <p
+            style={{
+              margin: "0 0 8px",
+              fontSize: 13,
+              color: "var(--textHint)",
+            }}
+          >
+            진단 결과를 이메일로 보내드려요
+          </p>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="example@email.com"
+          />
         </div>
 
         {error && (
