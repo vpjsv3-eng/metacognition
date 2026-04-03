@@ -29,7 +29,7 @@ const s = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: 800, marginBottom: 4 },
   subtitle: { fontSize: 10, color: "#9ca3af", marginBottom: 14 },
-  comment: {
+  persona: {
     fontSize: 11,
     padding: 12,
     backgroundColor: "#1a1f36",
@@ -68,17 +68,21 @@ export default function DiagnosisReportPdf({
           안에 만들 수 있는 서비스 추천
         </Text>
 
-        {result.comment && <Text style={s.comment}>{result.comment}</Text>}
+        {result.persona && (
+          <Text style={s.persona}>
+            {result.persona.title} — {result.persona.summary}
+          </Text>
+        )}
 
         {result.ideas.map((idea, i) => (
           <View key={i} style={s.card}>
-            <Text style={s.num}>아이디어 {i + 1}</Text>
+            <Text style={s.num}>아이디어 {idea.rank ?? i + 1}</Text>
             <Text style={s.name}>{idea.name}</Text>
-            <Text style={s.desc}>{idea.description}</Text>
-            <Text style={s.label}>이 사람에게 맞는 이유</Text>
+            <Text style={s.desc}>{idea.oneline}</Text>
+            <Text style={s.label}>추천 이유</Text>
             <Text style={s.detail}>{idea.reason}</Text>
             <Text style={s.label}>핵심 기능</Text>
-            <Text style={s.detail}>{idea.coreFeature}</Text>
+            <Text style={s.detail}>{idea.core_feature}</Text>
           </View>
         ))}
       </Page>

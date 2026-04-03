@@ -12,18 +12,44 @@ export type SurveyAnswer = {
 
 export type AnswersMap = Record<string, string | string[]>;
 
+export type Persona = {
+  title: string;
+  summary: string;
+  strength: string;
+  painpoint: string;
+};
+
 export type ServiceIdea = {
+  rank: number;
   name: string;
-  description: string;
+  oneline: string;
   reason: string;
-  coreFeature: string;
+  core_feature: string;
+  how_it_works: string;
+  difficulty: string;
+  period: string;
+  tool: string;
+};
+
+export type FirstStep = {
+  idea_name: string;
+  reason: string;
+  steps: string[];
+  encouragement: string;
+};
+
+export type GPTResult = {
+  persona: Persona;
+  ideas: ServiceIdea[];
+  first_step: FirstStep;
 };
 
 export type DiagnosisResult = {
   profile: Profile;
   answers: SurveyAnswer[];
+  persona: Persona;
   ideas: ServiceIdea[];
-  comment: string;
+  first_step: FirstStep;
   surveyId?: string;
 };
 

@@ -59,8 +59,9 @@ export default function CompletePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email,
+        persona: result.persona,
         ideas: result.ideas,
-        comment: result.comment,
+        first_step: result.first_step,
       }),
     })
       .then((res) => res.json())
@@ -88,8 +89,9 @@ export default function CompletePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: result.profile.email,
+          persona: result.persona,
           ideas: result.ideas,
-          comment: result.comment,
+          first_step: result.first_step,
         }),
       });
       const data = await res.json();
@@ -119,6 +121,8 @@ export default function CompletePage() {
 
   const displayName = getDisplayName(result.profile?.email);
   const email = result.profile?.email || "";
+  const persona = result.persona;
+  const firstStep = result.first_step;
 
   return (
     <main className="resultContainer">
@@ -145,89 +149,189 @@ export default function CompletePage() {
           분석 완료 · {getTodayString()}
         </p>
         {email && (
-          <p
-            style={{
-              margin: 0,
-              fontSize: 13,
-              color: "var(--textHint)",
-            }}
-          >
+          <p style={{ margin: 0, fontSize: 13, color: "var(--textHint)" }}>
             결과지가 {email} 으로 발송됐어요 📩
           </p>
         )}
         {emailStatus === "sending" && (
           <p
-            style={{
-              margin: "8px 0 0",
-              fontSize: 13,
-              color: "var(--textHint)",
-            }}
+            style={{ margin: "8px 0 0", fontSize: 13, color: "var(--textHint)" }}
           >
             📧 진단 결과를 이메일로 보내는 중...
           </p>
         )}
         {emailStatus === "sent" && (
           <p
-            style={{
-              margin: "8px 0 0",
-              fontSize: 13,
-              color: "var(--accent)",
-            }}
+            style={{ margin: "8px 0 0", fontSize: 13, color: "var(--accent)" }}
           >
             ✅ 이메일 발송 완료!
           </p>
         )}
       </div>
 
-      {result.comment && (
-        <div className="resultComment">
-          <p>{result.comment}</p>
+      {/* ═══ PART 1: 나의 성향 분석 ═══ */}
+      {persona && (
+        <div className="personaCard">
+          <h2 className="personaTitle">{persona.title}</h2>
+          <p className="personaSummary">{persona.summary}</p>
+          <div className="personaTags">
+            <span className="personaTag">
+              💪 강점: {persona.strength}
+            </span>
+            <span className="personaTag">
+              🎯 핵심 니즈: {persona.painpoint}
+            </span>
+          </div>
         </div>
       )}
 
+      {/* ═══ PART 2: 맞춤 아이디어 5가지 ═══ */}
+      <h2
+        style={{
+          fontSize: 20,
+          fontWeight: 700,
+          margin: "32px 0 16px",
+          color: "var(--text)",
+        }}
+      >
+        맞춤 아이디어 {result.ideas.length}가지
+      </h2>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {result.ideas.map((idea, i) => (
-          <div key={i} className="ideaCard">
+        {result.ideas.map((idea, i) => {
+          const isFirst = idea.rank === 1 || i === 0;
+          return (
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 12,
-              }}
+              key={i}
+              className="ideaCard"
+              style={
+                isFirst
+                  ? { borderColor: "var(--accent)", borderWidth: 2 }
+                  : undefined
+              }
             >
-              <span className="ideaNum">{i + 1}</span>
-              <strong style={{ fontSize: 17, color: "var(--text)" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 6,
+                }}
+              >
+                <span
+                  className="rankBadge"
+                  style={
+                    isFirst
+                      ? { background: "var(--accent)", color: "#fff" }
+                      : undefined
+                  }
+                >
+                  추천 {idea.rank ?? i + 1}순위
+                </span>
+              </div>
+
+              <strong
+                style={{
+                  fontSize: 18,
+                  color: "var(--text)",
+                  display: "block",
+                  marginBottom: 4,
+                }}
+              >
                 {idea.name}
               </strong>
-            </div>
+              <p
+                style={{
+                  margin: "0 0 14px",
+                  color: "var(--textSecondary)",
+                  fontSize: 15,
+                  lineHeight: 1.5,
+                }}
+              >
+                {idea.oneline}
+              </p>
 
-            <p
-              style={{
-                margin: "0 0 14px",
-                color: "var(--textSecondary)",
-                fontSize: 15,
-                lineHeight: 1.5,
-              }}
-            >
-              {idea.description}
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div className="ideaDetail">
-                <span className="ideaLabel">이 사람에게 맞는 이유</span>
-                <span>{idea.reason}</span>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 8 }}
+              >
+                <div className="ideaDetail">
+                  <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
+                  <span>{idea.reason}</span>
+                </div>
+                <div className="ideaDetail">
+                  <span className="ideaLabel">핵심 기능</span>
+                  <span>{idea.core_feature}</span>
+                </div>
+                <div className="ideaDetail">
+                  <span className="ideaLabel">실제 작동 방식</span>
+                  <span>{idea.how_it_works}</span>
+                </div>
               </div>
-              <div className="ideaDetail">
-                <span className="ideaLabel">핵심 기능</span>
-                <span>{idea.coreFeature}</span>
+
+              <div className="ideaMetaTags">
+                <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
+                <span className="ideaMetaTag">⏱ {idea.period}</span>
+                <span className="ideaMetaTag">🛠 {idea.tool}</span>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* 버튼 영역 */}
+      {/* ═══ PART 3: 지금 당장 시작하는 법 ═══ */}
+      {firstStep && (
+        <div className="firstStepSection">
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              margin: "0 0 8px",
+              color: "var(--text)",
+            }}
+          >
+            ✅ 지금 바로 시작해보세요
+          </h2>
+          <p
+            style={{
+              margin: "0 0 6px",
+              fontSize: 15,
+              color: "var(--text)",
+            }}
+          >
+            가장 추천하는 아이디어:{" "}
+            <strong style={{ color: "var(--accent)" }}>
+              {firstStep.idea_name}
+            </strong>
+          </p>
+          <p
+            style={{
+              margin: "0 0 20px",
+              fontSize: 14,
+              color: "var(--textSecondary)",
+              lineHeight: 1.6,
+            }}
+          >
+            {firstStep.reason}
+          </p>
+
+          <div className="stepsContainer">
+            {firstStep.steps.map((step, i) => (
+              <div key={i} className="stepItem">
+                <span className="stepNum">{i + 1}</span>
+                <span className="stepText">{step.replace(/^\d+단계:\s*/, "")}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="encourageBox">
+            <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
+              {firstStep.encouragement}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 하단 CTA 버튼 */}
       <div
         style={{
           display: "flex",
@@ -235,7 +339,7 @@ export default function CompletePage() {
           alignItems: "center",
           justifyContent: "center",
           flexWrap: "wrap",
-          marginTop: 28,
+          marginTop: 32,
         }}
       >
         <button
@@ -269,7 +373,6 @@ export default function CompletePage() {
         />
         <div style={{ textAlign: "center" }}>
           <span className="earlybirdBadge">🎉 얼리버드 특가 진행 중</span>
-
           <h2
             style={{
               margin: "0 0 8px",
@@ -306,10 +409,6 @@ export default function CompletePage() {
               지금 신청하신 분께만 적용되는 특별 할인가예요
             </p>
           </div>
-
-          <p style={{ margin: "0 0 24px", fontSize: 15, color: "var(--text)" }}>
-            사전 신청자에게는 얼리버드 할인가 99,000원이 적용돼요 🙌
-          </p>
 
           <div style={{ maxWidth: 400, margin: "0 auto" }}>
             <button

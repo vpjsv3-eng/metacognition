@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import type { ServiceIdea } from "../../lib/types";
+import type { ServiceIdea, Persona, FirstStep } from "../../lib/types";
 
 type SendResultBody = {
   email: string;
+  persona?: Persona;
   ideas: ServiceIdea[];
-  comment: string;
+  first_step?: FirstStep;
 };
 
 function getDisplayName(email: string): string {
@@ -14,31 +15,68 @@ function getDisplayName(email: string): string {
 
 function buildEmailHtml(
   email: string,
+  persona: Persona | undefined,
   ideas: ServiceIdea[],
-  comment: string,
+  firstStep: FirstStep | undefined,
 ): string {
   const name = getDisplayName(email);
 
+  const personaHtml = persona
+    ? `<div style="background:#E8FAF2;border:1px solid #00C471;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+        <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;color:#111827;">${persona.title}</h3>
+        <p style="margin:0 0 12px;font-size:14px;color:#374151;line-height:1.6;">${persona.summary}</p>
+        <p style="margin:0 0 4px;font-size:13px;color:#6B7280;">💪 강점: ${persona.strength}</p>
+        <p style="margin:0;font-size:13px;color:#6B7280;">🎯 핵심 니즈: ${persona.painpoint}</p>
+      </div>`
+    : "";
+
   const ideasHtml = ideas
     .map(
-      (idea, i) =>
-        `<div style="margin-bottom:16px;padding:20px;border:1px solid #E5E7EB;border-radius:12px;background:#FFFFFF;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#E8FAF2;color:#00C471;font-weight:800;font-size:13px;">${i + 1}</span>
-            <strong style="font-size:16px;color:#111827;">${idea.name}</strong>
+      (idea, i) => {
+        const isFirst = (idea.rank ?? i + 1) === 1;
+        const borderStyle = isFirst ? "border:2px solid #00C471;" : "border:1px solid #E5E7EB;";
+        return `<div style="margin-bottom:16px;padding:20px;${borderStyle}border-radius:12px;background:#FFFFFF;">
+          <div style="margin-bottom:8px;">
+            <span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${isFirst ? "#00C471" : "#E8FAF2"};color:${isFirst ? "#fff" : "#00C471"};font-size:12px;font-weight:700;">추천 ${idea.rank ?? i + 1}순위</span>
           </div>
-          <p style="margin:0 0 10px;color:#374151;font-size:14px;line-height:1.6;">${idea.description}</p>
+          <strong style="font-size:16px;color:#111827;display:block;margin-bottom:4px;">${idea.name}</strong>
+          <p style="margin:0 0 12px;color:#6B7280;font-size:14px;line-height:1.6;">${idea.oneline}</p>
           <div style="padding:12px;border-radius:8px;background:#F8F9FA;margin-bottom:6px;">
-            <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;text-transform:uppercase;letter-spacing:0.03em;">이 사람에게 맞는 이유</p>
+            <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">추천 이유</p>
             <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.reason}</p>
           </div>
-          <div style="padding:12px;border-radius:8px;background:#F8F9FA;">
-            <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;text-transform:uppercase;letter-spacing:0.03em;">핵심 기능</p>
-            <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.coreFeature}</p>
+          <div style="padding:12px;border-radius:8px;background:#F8F9FA;margin-bottom:6px;">
+            <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">핵심 기능</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.core_feature}</p>
           </div>
-        </div>`,
+          <div style="padding:12px;border-radius:8px;background:#F8F9FA;margin-bottom:8px;">
+            <p style="margin:0;font-size:12px;font-weight:700;color:#00C471;">작동 방식</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#6B7280;line-height:1.5;">${idea.how_it_works}</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span style="padding:4px 10px;border-radius:999px;background:#F3F4F6;font-size:12px;color:#6B7280;">🎯 ${idea.difficulty}</span>
+            <span style="padding:4px 10px;border-radius:999px;background:#F3F4F6;font-size:12px;color:#6B7280;">⏱ ${idea.period}</span>
+            <span style="padding:4px 10px;border-radius:999px;background:#F3F4F6;font-size:12px;color:#6B7280;">🛠 ${idea.tool}</span>
+          </div>
+        </div>`;
+      },
     )
     .join("");
+
+  const firstStepHtml = firstStep
+    ? `<div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;padding:24px;margin-top:24px;">
+        <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;color:#111827;">✅ 지금 바로 시작해보세요</h3>
+        <p style="margin:0 0 4px;font-size:14px;color:#111827;">가장 추천: <strong style="color:#00C471;">${firstStep.idea_name}</strong></p>
+        <p style="margin:0 0 16px;font-size:13px;color:#6B7280;line-height:1.5;">${firstStep.reason}</p>
+        ${firstStep.steps.map((s, i) => `<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:#E8FAF2;color:#00C471;font-weight:800;font-size:12px;">${i + 1}</span>
+          <span style="font-size:13px;color:#374151;line-height:1.5;">${s.replace(/^\d+단계:\s*/, "")}</span>
+        </div>`).join("")}
+        <div style="background:#E8FAF2;border-radius:8px;padding:14px 18px;margin-top:12px;">
+          <p style="margin:0;font-size:14px;color:#111827;line-height:1.6;">${firstStep.encouragement}</p>
+        </div>
+      </div>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -46,7 +84,6 @@ function buildEmailHtml(
 <body style="margin:0;padding:0;background:#F8F9FA;">
   <div style="max-width:600px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
-    <!-- 헤더 -->
     <div style="background:#00C471;padding:32px 24px;text-align:center;">
       <h1 style="font-size:22px;color:#FFFFFF;margin:0;font-weight:800;">
         나도코딩 AI 서비스 아이디어 진단 결과
@@ -54,8 +91,6 @@ function buildEmailHtml(
     </div>
 
     <div style="padding:32px 20px;">
-
-      <!-- 인사 -->
       <p style="font-size:18px;font-weight:700;color:#111827;margin:0 0 4px;">
         안녕하세요 ${name}님 👋
       </p>
@@ -63,18 +98,12 @@ function buildEmailHtml(
         진단 결과를 알려드릴게요
       </p>
 
-      <!-- 한 줄 코멘트 -->
-      <div style="background:#E8FAF2;border:1px solid #00C471;border-radius:12px;padding:18px 24px;margin-bottom:28px;text-align:center;">
-        <p style="margin:0;font-size:15px;font-weight:600;color:#111827;line-height:1.6;">${comment}</p>
-      </div>
-
-      <!-- 아이디어 카드 -->
+      ${personaHtml}
       ${ideasHtml}
+      ${firstStepHtml}
 
-      <!-- 구분선 -->
       <hr style="border:none;border-top:1px solid #E5E7EB;margin:32px 0;">
 
-      <!-- CTA 섹션 -->
       <div style="text-align:center;padding:28px 24px;background:#FFFFFF;border-radius:16px;border:1px solid #E5E7EB;">
         <p style="margin:0 0 8px;font-size:16px;font-weight:600;color:#111827;">
           내 아이디어, 직접 만들어보고 싶다면?
@@ -89,16 +118,10 @@ function buildEmailHtml(
         </a>
       </div>
 
-      <!-- 푸터 -->
       <div style="text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid #E5E7EB;">
-        <p style="margin:0 0 4px;font-size:12px;color:#9CA3AF;">
-          © 나도코딩
-        </p>
-        <p style="margin:0;font-size:12px;color:#9CA3AF;">
-          본 메일은 발신 전용이에요
-        </p>
+        <p style="margin:0 0 4px;font-size:12px;color:#9CA3AF;">© 나도코딩</p>
+        <p style="margin:0;font-size:12px;color:#9CA3AF;">본 메일은 발신 전용이에요</p>
       </div>
-
     </div>
   </div>
 </body>
@@ -116,7 +139,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { email, ideas, comment } = body;
+  const { email, persona, ideas, first_step } = body;
 
   if (!email || !ideas?.length) {
     return NextResponse.json(
@@ -139,7 +162,7 @@ export async function POST(req: Request) {
       from: "onboarding@resend.dev",
       to: email,
       subject: `[나도코딩] ${displayName}님의 AI 서비스 아이디어 진단 결과가 도착했어요`,
-      html: buildEmailHtml(email, ideas, comment),
+      html: buildEmailHtml(email, persona, ideas, first_step),
     });
 
     if (error) {

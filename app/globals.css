@@ -943,6 +943,122 @@ label {
   flex-shrink: 0;
 }
 
+/* ═══════════ Persona Card ═══════════ */
+
+.personaCard {
+  background: var(--accentSoft);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 8px;
+}
+
+.personaTitle {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: var(--text);
+}
+
+.personaSummary {
+  margin: 0 0 14px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.personaTags {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.personaTag {
+  font-size: 13px;
+  color: var(--textSecondary);
+  line-height: 1.5;
+}
+
+/* ═══════════ Rank Badge ═══════════ */
+
+.rankBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accentSoft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ═══════════ Idea Meta Tags ═══════════ */
+
+.ideaMetaTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.ideaMetaTag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--textSecondary);
+}
+
+/* ═══════════ First Step Section ═══════════ */
+
+.firstStepSection {
+  margin-top: 32px;
+  padding: 24px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.stepsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.stepNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accentSoft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.stepText {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.55;
+  padding-top: 4px;
+}
+
+.encourageBox {
+  background: var(--accentSoft);
+  border-radius: 10px;
+  padding: 16px 20px;
+  color: var(--text);
+}
+
 /* ═══════════ Encouragement Screen ═══════════ */
 
 .encouragementWrap {
