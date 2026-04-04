@@ -1841,3 +1841,368 @@ label {
     font-size: 14px;
   }
 }
+
+/* ═══════════ Mobile (≤768px): 가로 스크롤 차단 + 타이포 + 배너 ═══════════ */
+
+@media (max-width: 768px) {
+  html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    position: relative !important;
+  }
+
+  #__next {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  * {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  .tool-flow-box {
+    max-width: calc(100vw - 48px) !important;
+    overflow-x: scroll !important;
+  }
+
+  .tool-flow-box__inner,
+  .tool-flow-box__inner * {
+    max-width: none !important;
+  }
+
+  .scrollToTopBtn {
+    max-width: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .modalOverlay {
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  .modalContent {
+    max-width: min(calc(100vw - 32px), 400px) !important;
+  }
+
+  .resultFixedCtaBar,
+  .nadocodingFixedCtaBar {
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  .resultFixedCtaBar *,
+  .nadocodingFixedCtaBar * {
+    max-width: none !important;
+  }
+
+  .nadocoding-page {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .nadocoding-page .nadocoding-hero,
+  .nadocoding-page .hero-stats-grid,
+  .nadocoding-page .countdownTimer,
+  .nadocoding-page .heroStatBox {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .nadocoding-page .vs-card {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .result-page .ideaCard,
+  .result-page .promoSection,
+  .result-page .personaCard,
+  .result-page .firstStepSection {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* 1순위 배너 — 카드 테두리 보정 */
+  .idea-card-container {
+    overflow: hidden !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .idea-banner {
+    width: calc(100% + 2px) !important;
+    max-width: none !important;
+    margin: 0 !important;
+    margin-left: -1px !important;
+    padding: 14px 0 !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: #00c471 !important;
+    box-sizing: border-box !important;
+  }
+
+  .firstIdeaCard > *:not(.firstIdeaBanner):not(.idea-banner) {
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  /* ===== 결과 페이지 타이포 ===== */
+  .result-page h1 {
+    font-size: 26px !important;
+  }
+
+  .result-page h2 {
+    font-size: 22px !important;
+  }
+
+  .result-page h3 {
+    font-size: 18px !important;
+  }
+
+  .result-page p,
+  .result-page li {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+  }
+
+  .result-page .idea-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+  }
+
+  .result-page .rank-badge {
+    font-size: 13px !important;
+    padding: 4px 12px !important;
+  }
+
+  .result-page button,
+  .result-page a[role="button"] {
+    font-size: 16px !important;
+    padding: 14px 20px !important;
+    min-height: 52px !important;
+  }
+
+  .result-page .resultResendBtn {
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    min-height: auto !important;
+  }
+
+  .result-page .scrollToTopBtn {
+    min-height: 48px !important;
+    padding: 0 !important;
+    font-size: 18px !important;
+  }
+
+  .result-page .resultFixedCtaBarBtn {
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    min-height: auto !important;
+  }
+
+  .result-page .card {
+    padding: 20px !important;
+  }
+
+  .result-page .persona-title {
+    font-size: 22px !important;
+  }
+
+  .result-page .persona-summary {
+    font-size: 15px !important;
+  }
+
+  .result-page .idea-section-label {
+    font-size: 14px !important;
+  }
+
+  .result-page .idea-section-content {
+    font-size: 15px !important;
+  }
+
+  .result-page .idea-tag {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+  }
+
+  .result-page .promoSection,
+  .result-page .firstStepSection,
+  .result-page .personaCard {
+    margin-bottom: 24px !important;
+  }
+
+  /* ===== 상세페이지 타이포 ===== */
+  .nadocoding-hero h1,
+  .nadocoding-page .nadocodingHeroTitle {
+    font-size: 28px !important;
+    line-height: 1.3 !important;
+  }
+
+  .nadocoding-hero .subtitle,
+  .nadocoding-page .nadocodingHeroSubtitle {
+    font-size: 16px !important;
+  }
+
+  .nadocoding-hero .date,
+  .nadocoding-page .nadocodingHeroDate {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page p,
+  .nadocoding-page li {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+  }
+
+  .nadocoding-page h2 {
+    font-size: 22px !important;
+  }
+
+  .nadocoding-page h3 {
+    font-size: 18px !important;
+  }
+
+  .nadocoding-page .stat-number {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+  }
+
+  .nadocoding-page .stat-label {
+    font-size: 13px !important;
+  }
+
+  .nadocoding-page .stat-desc {
+    font-size: 12px !important;
+  }
+
+  .nadocoding-page button,
+  .nadocoding-page a[role="button"] {
+    font-size: 17px !important;
+    padding: 16px 24px !important;
+    min-height: 56px !important;
+  }
+
+  .nadocoding-page .nadocodingFixedCtaBarBtn {
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    min-height: auto !important;
+  }
+
+  .nadocoding-page .scrollToTopBtn {
+    min-height: 48px !important;
+    padding: 0 !important;
+    font-size: 18px !important;
+  }
+
+  .nadocoding-page .card {
+    padding: 20px !important;
+  }
+
+  .nadocoding-page .vs-card {
+    font-size: 15px !important;
+    padding: 16px !important;
+  }
+
+  .nadocoding-page .vs-text {
+    font-size: 24px !important;
+  }
+
+  .nadocoding-page .hook-item {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+  }
+
+  .nadocoding-page .example-title {
+    font-size: 17px !important;
+  }
+
+  .nadocoding-page .example-desc {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page .example-tag {
+    font-size: 12px !important;
+  }
+
+  .nadocoding-page .instructor-name {
+    font-size: 18px !important;
+  }
+
+  .nadocoding-page .instructor-role {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page .instructor-bio {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page .review-text {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+  }
+
+  .nadocoding-page .review-name {
+    font-size: 13px !important;
+  }
+
+  .nadocoding-page .countdown-text,
+  .nadocoding-page .countdownTimer {
+    font-size: 15px !important;
+  }
+
+  .nadocoding-page .faq-question {
+    font-size: 15px !important;
+  }
+
+  .nadocoding-page .faq-answer {
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+  }
+
+  .nadocoding-page .curriculum-week {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+  }
+
+  .nadocoding-page .curriculum-content {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page .after-title {
+    font-size: 17px !important;
+  }
+
+  .nadocoding-page .after-desc {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page .sticky-bar {
+    font-size: 14px !important;
+  }
+
+  .nadocoding-page .sticky-bar .nadocodingFixedCtaBarBtn {
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    min-height: auto !important;
+  }
+
+  .nadocoding-page .priceOriginal {
+    font-size: 16px !important;
+  }
+
+  .nadocoding-page .price-early {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+  }
+
+  .nadocoding-page .price-save {
+    font-size: 14px !important;
+  }
+}

@@ -307,7 +307,7 @@ export default function NadocodingPage() {
 
   return (
     <main
-      className="container nadocodingPageWithBottomCta nadocoding-container"
+      className="container nadocodingPageWithBottomCta nadocoding-container nadocoding-page"
       style={{ maxWidth: 600 }}
     >
       {showScrollTop && (
@@ -322,7 +322,7 @@ export default function NadocodingPage() {
       )}
 
       {/* ① 히어로 섹션 */}
-      <section className="nadocodingHero">
+      <section className="nadocodingHero nadocoding-hero">
         <div
           style={{
             display: "inline-block",
@@ -338,24 +338,27 @@ export default function NadocodingPage() {
         >
           나도 코딩 올인원 부트캠프 1기 모집
         </div>
-        <p className="nadocodingHeroDate">4월 18일 (토) ~ 4월 25일 (토)</p>
+        <p className="nadocodingHeroDate date">4월 18일 (토) ~ 4월 25일 (토)</p>
 
         <h1 className="nadocodingHeroTitle">
           아이디어 발굴부터
           <br />
           <span className="nadocodingHeroTitleEm">실제 서비스 배포까지</span>
         </h1>
-        <p className="nadocodingHeroSubtitle">
+        <p className="nadocodingHeroSubtitle subtitle">
           ✦ 코딩 없이 2주 올인원 완성 과정 ✦
         </p>
 
         {/* 4개 박스 */}
         <div
+          className="hero-stats-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(2, 1fr)",
             gap: 12,
             marginBottom: 28,
+            width: "100%",
+            maxWidth: "100%",
           }}
         >
           {[
@@ -387,8 +390,9 @@ export default function NadocodingPage() {
               kwColor: "#00C471" as const,
             },
           ].map((item, i) => (
-            <div key={i} className="heroStatBox" style={{ textAlign: "center" }}>
+            <div key={i} className="heroStatBox" style={{ textAlign: "center", minWidth: 0, maxWidth: "100%" }}>
               <div
+                className="stat-number"
                 style={{
                   fontSize: 18,
                   fontWeight: 800,
@@ -398,6 +402,7 @@ export default function NadocodingPage() {
                 {item.kw}
               </div>
               <div
+                className="stat-desc"
                 style={{
                   fontSize: 11,
                   color: "var(--textSecondary)",
@@ -415,7 +420,7 @@ export default function NadocodingPage() {
         </div>
 
         {/* 카운트다운 */}
-        <div className="countdownTimer" style={{ marginBottom: 20 }}>
+        <div className="countdownTimer countdown-text" style={{ marginBottom: 20, maxWidth: "100%" }}>
           {countdown
             ? `⏰ 얼리버드 마감까지 ${countdown.days}일${String(countdown.hours).padStart(2, "0")}시간${String(countdown.minutes).padStart(2, "0")}분${String(countdown.seconds).padStart(2, "0")}초`
             : "얼리버드가 종료됐어요"}
@@ -424,8 +429,9 @@ export default function NadocodingPage() {
         {/* 가격 */}
         <div style={{ margin: "0 0 20px" }}>
           <span className="priceOriginal">299,000원</span>
-          <span className="priceEarlybird">99,000원</span>
+          <span className="priceEarlybird price-early">99,000원</span>
           <p
+            className="price-save"
             style={{
               margin: "6px 0 0",
               fontSize: 14,
@@ -470,6 +476,7 @@ export default function NadocodingPage() {
             ].map((text, i) => (
               <div
                 key={i}
+                className="hook-item"
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
@@ -477,6 +484,8 @@ export default function NadocodingPage() {
                   fontSize: 15,
                   color: "var(--text)",
                   lineHeight: 1.6,
+                  maxWidth: "100%",
+                  minWidth: 0,
                 }}
               >
                 <span style={{ color: "var(--accent)", fontWeight: 700, flexShrink: 0 }}>✓</span>
@@ -521,12 +530,14 @@ export default function NadocodingPage() {
       </section>
 
       {/* ③ AI 시대 — 라이트 VS */}
-      <section style={{ marginBottom: 24 }}>
+      <section style={{ marginBottom: 24, maxWidth: "100%" }}>
         <div
           style={{
             background: "linear-gradient(135deg, #E8FAF2 0%, #F0FDF4 100%)",
             borderRadius: 20,
             padding: "40px 24px",
+            maxWidth: "100%",
+            boxSizing: "border-box",
           }}
         >
           <h2
@@ -570,6 +581,7 @@ export default function NadocodingPage() {
             }}
           >
             <div
+              className="vs-card"
               style={{
                 flex: "1 1 120px",
                 minWidth: 0,
@@ -579,6 +591,7 @@ export default function NadocodingPage() {
                 border: "1px solid #E5E7EB",
                 textAlign: "center",
                 opacity: 0.8,
+                maxWidth: "100%",
               }}
             >
               <div
@@ -599,6 +612,7 @@ export default function NadocodingPage() {
               </div>
             </div>
             <div
+              className="vs-text"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -617,6 +631,7 @@ export default function NadocodingPage() {
               VS
             </div>
             <div
+              className="vs-card"
               style={{
                 flex: "1 1 120px",
                 minWidth: 0,
@@ -626,6 +641,7 @@ export default function NadocodingPage() {
                 border: "2px solid #00C471",
                 boxShadow: "0 4px 12px rgba(0, 196, 113, 0.2)",
                 textAlign: "center",
+                maxWidth: "100%",
               }}
             >
               <div
@@ -678,9 +694,10 @@ export default function NadocodingPage() {
               <div key={i} className="cardPlainInner">
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <span style={{ fontSize: 24 }}>{ex.emoji}</span>
-                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{ex.name}</strong>
+                  <strong className="example-title" style={{ fontSize: 15, color: "var(--text)" }}>{ex.name}</strong>
                 </div>
                 <p
+                  className="example-desc"
                   style={{
                     margin: "0 0 10px",
                     fontSize: 14,
@@ -691,10 +708,11 @@ export default function NadocodingPage() {
                 >
                   {ex.desc}
                 </p>
-                <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {ex.tags.map((tag) => (
                     <span
                       key={tag}
+                      className="example-tag"
                       style={{
                         padding: "3px 10px",
                         borderRadius: 999,
@@ -733,9 +751,9 @@ export default function NadocodingPage() {
               <div key={i} className="benefitCard" style={{ flexDirection: "column", alignItems: "flex-start", gap: 6 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span className="benefitIcon">{b.icon}</span>
-                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{b.title}</strong>
+                  <strong className="after-title" style={{ fontSize: 15, color: "var(--text)" }}>{b.title}</strong>
                 </div>
-                <span style={{ fontSize: 13, color: "var(--textSecondary)", paddingLeft: 34 }}>{b.desc}</span>
+                <span className="after-desc" style={{ fontSize: 13, color: "var(--textSecondary)", paddingLeft: 34 }}>{b.desc}</span>
               </div>
             ))}
           </div>
@@ -849,10 +867,11 @@ export default function NadocodingPage() {
                 🔒 곧 공개됩니다
               </span>
             </div>
-            <strong style={{ fontSize: 16, color: "var(--text)", display: "block", marginBottom: 6 }}>
+            <strong className="instructor-name" style={{ fontSize: 16, color: "var(--text)", display: "block", marginBottom: 6 }}>
               메인 강사 (공개 예정)
             </strong>
             <span
+              className="instructor-role"
               style={{
                 display: "inline-block",
                 padding: "4px 12px",
@@ -866,7 +885,7 @@ export default function NadocodingPage() {
             >
               검증된 현직 AI 개발자
             </span>
-            <div style={{ fontSize: 14, color: "var(--textSecondary)", lineHeight: 1.8, textAlign: "left", paddingLeft: 20 }}>
+            <div className="instructor-bio" style={{ fontSize: 14, color: "var(--textSecondary)", lineHeight: 1.8, textAlign: "left", paddingLeft: 20 }}>
               · 국내 AI 앱 3개 직접 런칭
               <br />
               · 실무 중심 커리큘럼 설계
@@ -897,10 +916,11 @@ export default function NadocodingPage() {
             >
               J
             </div>
-            <strong style={{ fontSize: 16, color: "var(--text)", display: "block", marginBottom: 6 }}>
+            <strong className="instructor-name" style={{ fontSize: 16, color: "var(--text)", display: "block", marginBottom: 6 }}>
               제이 (J)
             </strong>
             <span
+              className="instructor-role"
               style={{
                 display: "inline-block",
                 padding: "4px 12px",
@@ -914,7 +934,7 @@ export default function NadocodingPage() {
             >
               나도코딩 1기 총괄
             </span>
-            <div style={{ fontSize: 14, color: "var(--textSecondary)", lineHeight: 1.8, textAlign: "left", paddingLeft: 20 }}>
+            <div className="instructor-bio" style={{ fontSize: 14, color: "var(--textSecondary)", lineHeight: 1.8, textAlign: "left", paddingLeft: 20 }}>
               · 전) 교육 기획 & 운영 전문가
               <br />
               · 커리큘럼 설계 및 수강생 관리 담당
@@ -953,10 +973,11 @@ export default function NadocodingPage() {
             {REVIEWS.map((review, i) => (
               <div key={i} className="cardPlainInner" style={{ padding: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <strong style={{ fontSize: 14, color: "var(--text)" }}>{review.name}</strong>
+                  <strong className="review-name" style={{ fontSize: 14, color: "var(--text)" }}>{review.name}</strong>
                   <span style={{ fontSize: 14, letterSpacing: 2 }}>⭐⭐⭐⭐⭐</span>
                 </div>
                 <p
+                  className="review-text"
                   style={{
                     margin: 0,
                     fontSize: 14,
@@ -991,7 +1012,7 @@ export default function NadocodingPage() {
               <div key={i} className="timelineItem">
                 <div className="timelineDot" />
                 <div className="curriculumStepCard">
-                  <div className="timelineLabel">
+                  <div className="timelineLabel curriculum-week">
                     {item.label}
                     <span
                       style={{
@@ -1010,7 +1031,7 @@ export default function NadocodingPage() {
                     </span>
                   </div>
                   <div className="timelineTitle">{item.title}</div>
-                  <div className="timelineDesc">{item.desc}</div>
+                  <div className="timelineDesc curriculum-content">{item.desc}</div>
                 </div>
               </div>
             ))}
@@ -1039,14 +1060,14 @@ export default function NadocodingPage() {
               const isOpen = openFaq.has(idx);
               return (
                 <div key={idx} className="faqItem">
-                  <div className="faqQuestion" onClick={() => toggleFaq(idx)}>
+                  <div className="faqQuestion faq-question" onClick={() => toggleFaq(idx)}>
                     <span>Q. {item.q}</span>
                     <span className="faqArrow" data-open={isOpen ? "true" : "false"}>
                       ▼
                     </span>
                   </div>
                   {isOpen && (
-                    <div className="faqAnswer" style={{ whiteSpace: "pre-line" }}>
+                    <div className="faqAnswer faq-answer" style={{ whiteSpace: "pre-line" }}>
                       {item.a}
                     </div>
                   )}
@@ -1100,6 +1121,7 @@ export default function NadocodingPage() {
             299,000원
           </span>
           <span
+            className="price-early"
             style={{
               display: "inline-block",
               fontSize: 28,
@@ -1119,7 +1141,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      <div className="nadocodingFixedCtaBar" role="navigation" aria-label="사전 신청">
+      <div className="nadocodingFixedCtaBar sticky-bar" role="navigation" aria-label="사전 신청">
         <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-{dDay}</span>
         <button type="button" className="nadocodingFixedCtaBarBtn" onClick={scrollToForm}>
           무료로 사전 신청하기 →

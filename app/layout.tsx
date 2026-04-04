@@ -19,8 +19,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko" style={{ overscrollBehavior: "none" }}>
       <body>
-        <InAppBrowserBanner />
-        {children}
+        <div id="__next">
+          <InAppBrowserBanner />
+          {children}
+        </div>
       </body>
     </html>
   );

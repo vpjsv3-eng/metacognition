@@ -64,7 +64,7 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
 
   return (
     <div className="ideaDetail">
-      <span className="ideaLabel">실제 작동 방식</span>
+      <span className="ideaLabel idea-section-label">실제 작동 방식</span>
       <div className="tool-flow-box">
         <div className="tool-flow-box__inner">{rowContent}</div>
       </div>
@@ -107,7 +107,7 @@ function AccordionIdea({
           >
             {rank}
           </span>
-          <strong style={{ fontSize: 16, color: "var(--text)" }}>
+          <strong className="idea-title" style={{ fontSize: 16, color: "var(--text)" }}>
             {idea.name}
           </strong>
         </div>
@@ -127,19 +127,19 @@ function AccordionIdea({
         <div className="accordionBody" style={{ padding: "0 16px 16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div className="ideaDetail">
-              <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
-              <span>{idea.reason}</span>
+              <span className="ideaLabel idea-section-label">이 아이디어를 추천하는 이유</span>
+              <span className="idea-section-content">{idea.reason}</span>
             </div>
             <div className="ideaDetail">
-              <span className="ideaLabel">핵심 기능</span>
-              <span>{idea.core_feature}</span>
+              <span className="ideaLabel idea-section-label">핵심 기능</span>
+              <span className="idea-section-content">{idea.core_feature}</span>
             </div>
             <IdeaWorkflowSection idea={idea} />
           </div>
-          <div className="ideaMetaTags">
-            <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
-            <span className="ideaMetaTag">⏱ {idea.period}</span>
-            <span className="ideaMetaTag">🛠 {idea.tool}</span>
+            <div className="ideaMetaTags">
+            <span className="ideaMetaTag idea-tag">🎯 {idea.difficulty}</span>
+            <span className="ideaMetaTag idea-tag">⏱ {idea.period}</span>
+            <span className="ideaMetaTag idea-tag">🛠 {idea.tool}</span>
           </div>
         </div>
       )}
@@ -463,6 +463,7 @@ export default function CompletePage() {
             }}
           >
             <h2
+              className="persona-title"
               style={{
                 fontSize: 20,
                 fontWeight: 800,
@@ -473,6 +474,7 @@ export default function CompletePage() {
               {persona.title}
             </h2>
             <p
+              className="persona-summary"
               style={{
                 margin: "0 0 10px",
                 fontSize: 14,
@@ -544,19 +546,19 @@ export default function CompletePage() {
 
       {/* 1순위: 강조 카드 */}
       {firstIdea && (
-        <div className="ideaCard firstIdeaCard" style={{ marginBottom: 14 }}>
-          <div className="firstIdeaBanner">
+        <div className="ideaCard firstIdeaCard idea-card-container" style={{ marginBottom: 14 }}>
+          <div className="firstIdeaBanner idea-banner">
             ✨ 가장 추천하는 아이디어
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
             <span
-              className="rankBadge"
+              className="rankBadge rank-badge"
               style={{ background: "var(--accent)", color: "#fff" }}
             >
               추천 1순위
             </span>
           </div>
-          <strong style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
+          <strong className="idea-title" style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
             {firstIdea.name}
           </strong>
           <p style={{ margin: "0 0 14px", color: "var(--textSecondary)", fontSize: 15, lineHeight: 1.5 }}>
@@ -564,19 +566,19 @@ export default function CompletePage() {
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div className="ideaDetail firstIdeaReasonBg">
-              <span className="ideaLabel">이 아이디어를 추천하는 이유</span>
-              <span>{firstIdea.reason}</span>
+              <span className="ideaLabel idea-section-label">이 아이디어를 추천하는 이유</span>
+              <span className="idea-section-content">{firstIdea.reason}</span>
             </div>
             <div className="ideaDetail">
-              <span className="ideaLabel">핵심 기능</span>
-              <span>{firstIdea.core_feature}</span>
+              <span className="ideaLabel idea-section-label">핵심 기능</span>
+              <span className="idea-section-content">{firstIdea.core_feature}</span>
             </div>
             <IdeaWorkflowSection idea={firstIdea} />
           </div>
           <div className="ideaMetaTags">
-            <span className="ideaMetaTag">🎯 {firstIdea.difficulty}</span>
-            <span className="ideaMetaTag">⏱ {firstIdea.period}</span>
-            <span className="ideaMetaTag">🛠 {firstIdea.tool}</span>
+            <span className="ideaMetaTag idea-tag">🎯 {firstIdea.difficulty}</span>
+            <span className="ideaMetaTag idea-tag">⏱ {firstIdea.period}</span>
+            <span className="ideaMetaTag idea-tag">🛠 {firstIdea.tool}</span>
           </div>
         </div>
       )}
