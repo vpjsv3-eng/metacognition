@@ -9,7 +9,12 @@ import type {
   SurveyAnswer,
   AnswersMap,
 } from "../lib/types";
-import { SURVEY_QUESTIONS, type SurveyQuestion } from "../lib/questions";
+import {
+  SURVEY_QUESTIONS,
+  BASE_SURVEY_STEP_COUNT,
+  getSurveyProgressMainNumber,
+  type SurveyQuestion,
+} from "../lib/questions";
 import {
   safeLocalStorageGet,
   safeLocalStorageSet,
@@ -197,13 +202,23 @@ export default function SurveyForm() {
         );
         if (parent) {
           const parentAnswer = answers[parent.id];
-          const triggerIndices =
-            parent.branchTriggerIndices ??
-            (parent.branchTriggerIndex !== undefined
-              ? [parent.branchTriggerIndex]
-              : []);
-          if (!triggerIndices.includes(parentAnswer?.selectedIndex ?? -1)) {
-            continue;
+          if (parent.type === "multi" && parent.multiFollowUp) {
+            const mf = parent.multiFollowUp;
+            const idxs = parentAnswer?.selectedIndices ?? [];
+            const showSub =
+              idxs.length > 0 &&
+              !mf.skipIfAnyOf.some((i) => idxs.includes(i)) &&
+              mf.requireAnyOf.some((i) => idxs.includes(i));
+            if (!showSub) continue;
+          } else {
+            const triggerIndices =
+              parent.branchTriggerIndices ??
+              (parent.branchTriggerIndex !== undefined
+                ? [parent.branchTriggerIndex]
+                : []);
+            if (!triggerIndices.includes(parentAnswer?.selectedIndex ?? -1)) {
+              continue;
+            }
           }
         }
       }
@@ -217,59 +232,33 @@ export default function SurveyForm() {
   const currentQ = visibleQuestions[safeStep];
   const currentAnswer = currentQ ? answers[currentQ.id] : undefined;
 
-  const answeredCount = useMemo(() => {
-    return visibleQuestions.filter((q) => {
-      const a = answers[q.id];
-      if (!a) return false;
-      if (q.type === "text") return !!(a.textValue?.trim() || a.skipped);
-      if (q.type === "multi") {
-        if (a.skipped) return true;
-        if (!a.selectedIndices?.length) return false;
-        if (
-          q.hasCustomOption &&
-          a.selectedIndices.includes(q.options!.length - 1) &&
-          !a.customText?.trim()
-        )
-          return false;
-        return true;
-      }
-      if (a.selectedIndex === undefined || a.selectedIndex < 0) return false;
-      if (
-        q.hasCustomOption &&
-        a.selectedIndex === q.options!.length - 1 &&
-        !a.customText?.trim()
-      )
-        return false;
-      return true;
-    }).length;
-  }, [answers, visibleQuestions]);
-
-  const progress =
+  const progressPercent =
     phase === "profile_job" || phase === "profile_keywords"
       ? 0
-      : total > 0
-        ? ((safeStep + 1) / total) * 100
+      : currentQ
+        ? (getSurveyProgressMainNumber(currentQ.id) / BASE_SURVEY_STEP_COUNT) *
+          100
         : 0;
 
   useEffect(() => {
     if (phase !== "survey") return;
-    if (progress >= 50 && !pulseTriggered.current) {
+    if (progressPercent >= 50 && !pulseTriggered.current) {
       pulseTriggered.current = true;
       setShowPulse(true);
       const t = setTimeout(() => setShowPulse(false), 1000);
       return () => clearTimeout(t);
     }
-  }, [progress, phase]);
+  }, [progressPercent, phase]);
 
   useEffect(() => {
     if (phase !== "survey") return;
-    if (progress >= 50 && !motivationTriggered.current) {
+    if (progressPercent >= 50 && !motivationTriggered.current) {
       motivationTriggered.current = true;
       setShowMotivation(true);
       const t = setTimeout(() => setShowMotivation(false), 3000);
       return () => clearTimeout(t);
     }
-  }, [progress, phase]);
+  }, [progressPercent, phase]);
 
   useEffect(() => {
     if (phase !== "loading") return;
@@ -321,17 +310,26 @@ export default function SurveyForm() {
   }
 
   function toggleMultiOption(idx: number) {
+    const q = currentQ;
+    if (!q || q.type !== "multi") return;
     setAnswers((prev) => {
-      const curr = prev[currentQ.id]?.selectedIndices || [];
-      const next = curr.includes(idx)
-        ? curr.filter((i) => i !== idx)
-        : [...curr, idx];
+      const exclusive = q.exclusiveAloneIndices ?? [];
+      const curr = prev[q.id]?.selectedIndices || [];
+      let next: number[];
+      if (exclusive.includes(idx)) {
+        next = curr.includes(idx) ? [] : [idx];
+      } else {
+        const base = curr.filter((i) => !exclusive.includes(i));
+        next = base.includes(idx)
+          ? base.filter((i) => i !== idx)
+          : [...base, idx];
+      }
       return {
         ...prev,
-        [currentQ.id]: {
-          ...prev[currentQ.id],
+        [q.id]: {
+          ...prev[q.id],
           selectedIndices: next,
-          customText: prev[currentQ.id]?.customText || "",
+          customText: prev[q.id]?.customText || "",
           skipped: false,
         },
       };
@@ -1124,7 +1122,7 @@ export default function SurveyForm() {
       <div className="progressBar">
         <div
           className={`progressFill${showPulse ? " pulse" : ""}`}
-          style={{ width: `${progress}%` }}
+          style={{ width: `${progressPercent}%` }}
         />
       </div>
 
@@ -1145,7 +1143,8 @@ export default function SurveyForm() {
             }}
           >
             <span className="questionCounter">
-              {answeredCount}/{total} 문항 완료
+              Q{getSurveyProgressMainNumber(currentQ.id)}/
+              {BASE_SURVEY_STEP_COUNT}
             </span>
             <span
               style={{
@@ -1162,8 +1161,16 @@ export default function SurveyForm() {
             <div className="sectionTag">{currentQ.section}</div>
           )}
 
+          {currentQ.showRecommendationBadge && (
+            <div className="surveyRecommendationBadge">
+              ⭐ 이 답변이 추천 정확도를 높여요
+            </div>
+          )}
+
           <h2 className="questionTitle">
-            {currentQ.id.replace("-", "-")}. {currentQ.text}
+            {["Q6-1", "Q7-1", "Q9-1"].includes(currentQ.id)
+              ? currentQ.text
+              : `${currentQ.id}. ${currentQ.text}`}
           </h2>
 
           {currentQ.hint && (

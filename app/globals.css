@@ -75,6 +75,21 @@ a {
   margin-top: 16px;
 }
 
+.surveyRecommendationBadge {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid #fb923c;
+  background: #fff7ed;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ea580c;
+  line-height: 1.35;
+}
+
 /* ═══════════ Progress Bar ═══════════ */
 
 .progressBar {

@@ -26,7 +26,8 @@ JSON 키는 영어로, 값은 반드시 한국어로 작성하세요.
 동시에 잡을 수 있어요.'
 
 아이디어 추천에서는 반드시 사용자가 직접 입력한
-주관식 답변(Q5_1, Q6_1, Q8_1, Q9_1)을
+주관식 답변(Q6_1, Q7_1, Q8_1, Q9_1)과
+복수 선택 문항(Q6, Q7, Q9)의 맥락을
 최우선으로 활용하세요.
 
 각 아이디어에 대해 tool_flow 필드를 작성하세요.
@@ -97,31 +98,18 @@ function formatAnswer(val: string | string[] | undefined): string {
   return val || "미입력";
 }
 
+function subjectiveLine(answersMap: AnswersMap, key: string): string {
+  const raw = formatAnswer(answersMap[key]);
+  if (!raw || raw === "(건너뜀)" || raw === "미입력") return "미입력";
+  return raw;
+}
+
 function buildUserMessage(
   profile: DiagnosisPayload["profile"],
   answersMap: AnswersMap,
 ): string {
   const a = (key: string) => formatAnswer(answersMap[key]);
   const jobDetail = formatAnswer(answersMap["job_detail"]);
-
-  const q6 = a("Q6");
-  const q6Detail =
-    q6 === "있어요"
-      ? a("Q6_1") || "있다고 했으나 미입력"
-      : "없음";
-
-  const q7 = a("Q7");
-  const q7Detail =
-    q7 === "있어요"
-      ? a("Q7_1") || "있다고 했으나 미입력"
-      : a("Q7");
-
-  const q9 = a("Q9");
-  const q9Detail =
-    q9 === "있어요"
-      ? a("Q9_1") || "있다고 했으나 미입력"
-      : a("Q9");
-  const q9Blurry = a("Q9_2");
 
   const q10 = a("Q10");
   const q10Detail =
@@ -137,14 +125,16 @@ function buildUserMessage(
 자주 쓰는 앱 카테고리: ${a("Q2")}
 퇴근 후 활동: ${a("Q3")}
 주변에서 자주 받는 질문: ${a("Q4")}
-AI 서비스 만들기에 쓸 수 있는 시간: ${a("Q5")}
 
 [불편함과 니즈]
-반복적으로 귀찮은 것: ${q6Detail}
-찾았는데 없었던 서비스: ${q7Detail}
+반복 작업: ${a("Q6")}
+반복 작업 상황: ${subjectiveLine(answersMap, "Q6_1")}
+해결받고 싶은 불편함: ${a("Q7")}
+불편함 상황: ${subjectiveLine(answersMap, "Q7_1")}
+AI에게 원하는 도움: ${a("Q9")}
+원하는 도움 상황: ${subjectiveLine(answersMap, "Q9_1")}
+서비스 대상: ${a("Q5")}
 주변의 불평/걱정: ${a("Q8")}
-머릿속 앱 아이디어: ${q9Detail}
-흐릿한 아이디어: ${q9Blurry}
 
 [AI 활용 현황]
 AI 툴 사용 여부: ${q10}

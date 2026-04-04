@@ -1,5 +1,27 @@
 export type QuestionType = "single" | "multi" | "branch" | "text";
 
+/** 진행률 바·Qn/13 표시용 — 꼬리질문(Q6-1 등)은 부모 번호로만 센다 */
+export const BASE_SURVEY_STEP_COUNT = 13;
+
+export function getSurveyProgressMainNumber(questionId: string): number {
+  const followMap: Record<string, number> = {
+    "Q6-1": 6,
+    "Q7-1": 7,
+    "Q9-1": 9,
+    "Q10-1": 10,
+  };
+  if (followMap[questionId] !== undefined) return followMap[questionId]!;
+  const m = questionId.match(/^Q(\d+)/);
+  return m ? parseInt(m[1], 10) : 1;
+}
+
+export type MultiFollowUpRule = {
+  /** 이 인덱스 중 하나라도 선택되면 꼬리질문 후보 */
+  requireAnyOf: number[];
+  /** 이 인덱스가 하나라도 있으면 꼬리질문 숨김 (예: 딱히 없어요, 기타) */
+  skipIfAnyOf: number[];
+};
+
 export type SurveyQuestion = {
   id: string;
   section: string;
@@ -12,9 +34,15 @@ export type SurveyQuestion = {
   branchTriggerIndex?: number;
   branchTriggerIndices?: number[];
   subQuestionId?: string;
+  /** multi 문항에서 꼬리질문 노출 조건 */
+  multiFollowUp?: MultiFollowUpRule;
+  /** 선택 시 다른 선택을 모두 해제하는 인덱스(예: 딱히 없어요) */
+  exclusiveAloneIndices?: number[];
   parentQuestionId?: string;
   parentTriggerIndex?: number;
   hint?: string;
+  /** Q6/Q7/Q9 상단 추천 정확도 배지 */
+  showRecommendationBadge?: boolean;
 };
 
 export const SURVEY_QUESTIONS: SurveyQuestion[] = [
@@ -83,17 +111,18 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     hasCustomOption: true,
   },
 
-  // ── AI 실행 역량 ──
+  // ── 서비스 방향 ──
   {
     id: "Q5",
-    section: "AI 실행 역량",
-    text: "AI 서비스 만들기에 일주일에 얼마나 시간을 쓸 수 있어요?",
+    section: "서비스 방향",
+    text: "만약 AI 서비스를 만든다면 누구를 위한 서비스면 좋겠어요?",
     type: "single",
     options: [
-      "1~2시간 (틈틈이)",
-      "3~5시간 (주말 활용)",
-      "5시간 이상 (적극적으로)",
-      "아직 잘 모르겠어요",
+      "나 자신 (내 문제 해결)",
+      "직장 동료 / 같은 직군",
+      "가족 / 지인",
+      "불특정 다수 (일반 소비자)",
+      "아직 모르겠어요",
     ],
   },
 
@@ -101,38 +130,67 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: "Q6",
     section: "불편함 발굴",
-    text: '일하거나 생활하면서 "이거 매번 하기 귀찮은데..." 싶은 게 있나요?',
-    type: "branch",
-    options: ["있어요", "없어요", "생각해본 적 없어요"],
-    branchTriggerIndex: 0,
+    text: "하루 중 가장 반복적으로 하는 일이 뭔가요?",
+    type: "multi",
+    options: [
+      "이메일 / 메시지 확인 및 답장",
+      "보고서 / 문서 작성",
+      "일정 / 할 일 정리",
+      "SNS 콘텐츠 올리기",
+      "가계부 / 지출 기록",
+      "식단 / 운동 기록",
+      "딱히 없어요",
+      "기타 (직접 입력)",
+    ],
+    hasCustomOption: true,
     subQuestionId: "Q6-1",
-    hint: "예: 식비 자동 분류 가계부, 운동 루틴 추천,\n육아 일기 자동 정리",
+    multiFollowUp: {
+      requireAnyOf: [0, 1, 2, 3, 4, 5],
+      skipIfAnyOf: [6, 7],
+    },
+    exclusiveAloneIndices: [6],
+    showRecommendationBadge: true,
   },
   {
     id: "Q6-1",
     section: "불편함 발굴",
-    text: "어떤 게 귀찮으세요?",
+    text: "어떤 상황에서 주로 하시나요?\n대략적으로라도 적어줘도 괜찮아요 😊",
     type: "text",
     placeholder:
-      "예: 매일 회의록 정리, 거래처 이메일 답장, SNS 글 쓰기 등\n생각나는 대로 편하게 적어주세요.",
+      "예: 퇴근 후 집에서 매일 가계부 적어요,\n매주 월요일 팀 보고서 써요",
     skippable: true,
   },
   {
     id: "Q7",
     section: "불편함 발굴",
-    text: "뭔가를 검색했는데 딱 맞는 앱이나 서비스가 없어서 불편했던 적 있나요?",
-    type: "branch",
-    options: ["있어요", "없어요", "생각해본 적 없어요"],
-    branchTriggerIndex: 0,
+    text: "AI가 내 일상에서 어떤 불편함을 해결해줬으면 좋겠어요?",
+    type: "multi",
+    options: [
+      "출퇴근 / 이동할 때",
+      "요리하거나 장볼 때",
+      "업무 보고서 / 이메일 쓸 때",
+      "건강 / 운동 관리할 때",
+      "돈 관리할 때",
+      "육아 / 살림할 때",
+      "딱히 없어요",
+      "기타 (직접 입력)",
+    ],
+    hasCustomOption: true,
     subQuestionId: "Q7-1",
-    hint: "예: 매일 아침 뉴스 요약, 일정 자동 정리,\nSNS 콘텐츠 자동 생성 등",
+    multiFollowUp: {
+      requireAnyOf: [0, 1, 2, 3, 4, 5],
+      skipIfAnyOf: [6, 7],
+    },
+    exclusiveAloneIndices: [6],
+    showRecommendationBadge: true,
   },
   {
     id: "Q7-1",
     section: "불편함 발굴",
-    text: "어떤 걸 찾으셨어요?",
+    text: "구체적으로 어떤 상황인지 살짝만 알려줘도 괜찮아요 😊",
     type: "text",
-    placeholder: "어떤 상황이었는지 편하게 적어주세요.",
+    placeholder:
+      "예: 장 볼 때 뭘 사야 할지 항상 까먹어요,\n건강 관리를 어디서 시작해야 할지 모르겠어요",
     skippable: true,
   },
   {
@@ -155,30 +213,35 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: "Q9",
     section: "불편함 발굴",
-    text: '"이런 앱이 있으면 좋겠다"고 생각하거나 주변에 말한 적 있나요?',
-    type: "branch",
-    options: ["있어요", "있긴 한데 흐릿해요", "생각해본 적 없어요"],
-    branchTriggerIndex: 0,
+    text: "만약 AI가 내 생활을 도와준다면 어떤 걸 해줬으면 좋겠어요?",
+    type: "multi",
+    options: [
+      "매일 반복하는 업무 자동으로 처리",
+      "내가 관심 있는 정보만 모아서 요약",
+      "건강 / 식단 / 운동 맞춤 관리",
+      "돈 관리 및 절약 팁 제공",
+      "글쓰기 / 콘텐츠 제작 도움",
+      "육아 / 살림 관련 도움",
+      "딱히 없어요",
+      "기타 (직접 입력)",
+    ],
+    hasCustomOption: true,
     subQuestionId: "Q9-1",
-    hint: "예: 글쓰기 보조, 업무 요약, 이미지 생성",
+    multiFollowUp: {
+      requireAnyOf: [0, 1, 2, 3, 4, 5],
+      skipIfAnyOf: [6, 7],
+    },
+    exclusiveAloneIndices: [6],
+    showRecommendationBadge: true,
   },
   {
     id: "Q9-1",
     section: "불편함 발굴",
-    text: "어떤 앱이었나요?",
+    text: "어떤 상황에서 도움이 됐으면 하는지 조금만 더 알려줘도 괜찮아요 😊",
     type: "text",
-    placeholder: "간단하게 적어주세요. 완성된 아이디어가 아니어도 괜찮아요.",
+    placeholder:
+      "예: 매일 아침 오늘 먹을 것 추천받고 싶어요,\n유튜브 스크립트 쓰는 게 너무 힘들어요",
     skippable: true,
-  },
-  {
-    id: "Q9-2",
-    section: "불편함 발굴",
-    text: "어떤 분야나 상황인지만 알려줘도 괜찮아요",
-    type: "text",
-    placeholder: "예: 육아 관련, 업무 자동화,\n운동 도움 등 키워드만 적어도 돼요",
-    skippable: true,
-    parentQuestionId: "Q9",
-    parentTriggerIndex: 1,
   },
 
   // ── AI / 기술 관련 ──
