@@ -27,31 +27,6 @@ function getTodayString(): string {
   return `${y}.${m}.${dd}`;
 }
 
-/** 첫 2문장, 최대 60자 — 응원 메시지 축약 */
-function shortenEncouragement(text: string): string {
-  const normalized = text.trim().replace(/\s+/g, " ");
-  if (!normalized) return "";
-  const sentences = normalized.split(/(?<=[.!?])\s+/).filter(Boolean);
-  let out =
-    sentences.length >= 2
-      ? `${sentences[0]} ${sentences[1]}`.trim()
-      : (sentences[0] ?? normalized);
-  if (out.length > 60) out = out.slice(0, 60).trim();
-  return out;
-}
-
-/** 가능하면 문장 경계로 2줄 표시 */
-function encouragementTwoLines(text: string): string {
-  const s = shortenEncouragement(text);
-  if (!s) return "";
-  const parts = s.split(/(?<=[.!?])\s+/).filter(Boolean);
-  if (parts.length >= 2) return `${parts[0]}\n${parts.slice(1).join(" ")}`;
-  const mid = Math.min(32, Math.floor(s.length / 2));
-  const breakAt = s.lastIndexOf(" ", mid + 8);
-  if (breakAt > 12) return `${s.slice(0, breakAt).trim()}\n${s.slice(breakAt).trim()}`;
-  return s;
-}
-
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   const raw = idea.tool_flow?.trim();
   const parts =
@@ -62,25 +37,31 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
           .filter(Boolean)
       : null;
 
+  const rowContent =
+    parts && parts.length >= 2 ? (
+      <>
+        {parts.map((part, i) => (
+          <span
+            key={i}
+            style={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
+          >
+            {i > 0 ? (
+              <span className="toolFlowArrowInline" aria-hidden>
+                →
+              </span>
+            ) : null}
+            <span className="toolFlowStepInline">{part}</span>
+          </span>
+        ))}
+      </>
+    ) : (
+      <span className="toolFlowStepInline">{raw || idea.how_it_works}</span>
+    );
+
   return (
     <div className="ideaDetail">
       <span className="ideaLabel">실제 작동 방식</span>
-      {parts && parts.length >= 2 ? (
-        <div className="toolFlowBox">
-          {parts.map((part, i) => (
-            <span key={i}>
-              <span className="toolFlowStep">{part}</span>
-              {i < parts.length - 1 ? (
-                <span className="toolFlowArrow" aria-hidden>
-                  →
-                </span>
-              ) : null}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <div className="toolFlowBox">{raw || idea.how_it_works}</div>
-      )}
+      <div className="toolFlowBox toolFlowBox--row">{rowContent}</div>
     </div>
   );
 }
@@ -570,9 +551,9 @@ export default function CompletePage() {
             letterSpacing: -0.3,
           }}
         >
-          지금 추천받은 &lsquo;{firstIdea?.name || "AI 서비스"}&rsquo;
+          추천받은 &lsquo;{firstIdea?.name || "AI 서비스"}&rsquo;
           <br />
-          2주 안에 직접 만들 수 있어요
+          2주 안에 만들러 가기! 🚀
         </h3>
         <div
           style={{
@@ -587,8 +568,8 @@ export default function CompletePage() {
         >
           {[
             { keyword: "2주", sub: "완성", color: "#00C471" },
-            { keyword: "소수 정예", sub: "10명 한정", color: "#EF4444" },
-            { keyword: "전액 환불", sub: "배포 못하면", color: "#EF4444" },
+            { keyword: "소수 정예", sub: "10명 한정", color: "#00C471" },
+            { keyword: "전액 환불", sub: "배포 못하면", color: "#00C471" },
           ].map((cell, i) => (
             <div key={cell.sub} style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "stretch" }}>
               {i > 0 ? (
@@ -656,7 +637,7 @@ export default function CompletePage() {
             padding: "14px 16px",
           }}
         >
-          나도코딩 1기 자세히 보기 →
+          나도코딩 1기에서 만들기 →
         </button>
       </div>
 
@@ -718,16 +699,7 @@ export default function CompletePage() {
             나도 코딩 1기 자세히 보기
           </button>
           <div className="encourageBox">
-            <p
-              style={{
-                margin: 0,
-                fontSize: 15,
-                lineHeight: 1.65,
-                whiteSpace: "pre-line",
-              }}
-            >
-              {encouragementTwoLines(firstStep.encouragement)}
-            </p>
+            <p title={firstStep.encouragement}>{firstStep.encouragement}</p>
           </div>
         </div>
       )}
@@ -763,6 +735,12 @@ export default function CompletePage() {
           결과지 다시 받기
         </button>
       </div>
+
+      {firstStep && (
+        <div className="encourageBox" style={{ marginTop: 20, marginBottom: 8 }}>
+          <p title={firstStep.encouragement}>{firstStep.encouragement}</p>
+        </div>
+      )}
 
       {/* 결과지 다시 받기 모달 */}
       <div

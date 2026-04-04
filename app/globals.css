@@ -56,17 +56,21 @@ a {
 .surveyMain {
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 20px 80px;
+  padding: 20px 20px 80px;
 }
 
 .surveyWrap {
   max-width: 600px;
   margin: 0 auto;
-  padding: 5px 0 80px;
+  padding: 24px 0 80px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+}
+
+.surveyWrap .questionBlock {
+  margin-top: 16px;
 }
 
 /* ═══════════ Progress Bar ═══════════ */
@@ -1170,9 +1174,10 @@ label {
 .firstStepSection {
   margin-top: 32px;
   padding: 24px;
-  background: #FFFFFF;
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 14px;
+  overflow: visible;
 }
 
 .stepsContainer {
@@ -1210,10 +1215,25 @@ label {
 }
 
 .encourageBox {
-  background: var(--accentSoft);
-  border-radius: 10px;
-  padding: 16px 20px;
-  color: var(--text);
+  background: #e8faf2;
+  border-radius: 12px;
+  padding: 14px 16px 24px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.55;
+  overflow: visible;
+  height: auto;
+  max-height: none;
+}
+
+.encourageBox p {
+  margin: 0;
+  line-height: 1.55;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ═══════════ Encouragement Screen ═══════════ */
@@ -1480,23 +1500,34 @@ label {
 .toolFlowBox {
   background: #f1f5f9;
   border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
-  line-height: 1.65;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    monospace;
-  color: var(--text);
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #374151;
 }
 
-.toolFlowBox .toolFlowArrow {
-  display: block;
-  color: var(--accent);
+.toolFlowBox--row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  gap: 0;
+}
+
+.toolFlowBox--row .toolFlowArrowInline {
+  color: #00c471;
   font-weight: 700;
-  margin: 2px 0;
+  flex-shrink: 0;
+  padding: 0 6px;
 }
 
-.toolFlowBox .toolFlowStep {
-  display: block;
+.toolFlowBox--row .toolFlowStepInline {
+  color: #374151;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .personaCardCollapsed {
@@ -1528,11 +1559,11 @@ label {
 
 @media (max-width: 640px) {
   .surveyMain {
-    padding: 0 16px 60px;
+    padding: 20px 16px 60px;
   }
 
   .surveyWrap {
-    padding: 5px 0 60px;
+    padding: 24px 0 60px;
   }
 
   .questionTitle {
