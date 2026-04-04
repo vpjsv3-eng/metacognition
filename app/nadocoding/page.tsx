@@ -323,16 +323,17 @@ export default function NadocodingPage() {
         <div
           style={{
             display: "inline-block",
-            padding: "10px 20px",
-            borderRadius: 999,
-            background: "var(--accent)",
+            padding: "12px 24px",
+            borderRadius: 100,
+            background: "#00C471",
             color: "#ffffff",
             fontSize: 16,
             fontWeight: 700,
             marginBottom: 20,
+            boxShadow: "0 4px 12px rgba(0, 196, 113, 0.4)",
           }}
         >
-          나도 코딩 부트캠프 1기 모집
+          나도 코딩 올인원 부트캠프 1기 모집
         </div>
 
         <h1
@@ -373,20 +374,24 @@ export default function NadocodingPage() {
         >
           {[
             {
-              num: "2주",
+              kw: "2주",
               label: "기획→구현→배포\n한 사이클 완성",
+              kwColor: "var(--accent)" as const,
             },
             {
-              num: "10명",
+              kw: "10명",
               label: "소수 정예로\n밀착 관리해요",
+              kwColor: "var(--accent)" as const,
             },
             {
-              num: "2회",
-              label: "오프라인 세션\n혼자 안 해도 돼요",
+              kw: "온+오프",
+              label: "온라인 + 오프라인\n완벽한 밀착 관리",
+              kwColor: "var(--accent)" as const,
             },
             {
-              num: "월 2~3만",
-              label: "AI 툴 비용\n그게 전부예요",
+              kw: "전액 환불",
+              label: "배포 못하면\n100% 환불 보장",
+              kwColor: "#EF4444" as const,
             },
           ].map((item, i) => (
             <div
@@ -399,8 +404,8 @@ export default function NadocodingPage() {
                 textAlign: "center",
               }}
             >
-              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--accent)" }}>
-                {item.num}
+              <div style={{ fontSize: 18, fontWeight: 800, color: item.kwColor }}>
+                {item.kw}
               </div>
               <div
                 style={{
@@ -530,115 +535,122 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ③ AI 시대 — 다크 VS */}
-      <section
-        className="nadocodingSectionBleed"
-        style={{ marginBottom: 24, background: "#111827", padding: "36px 20px 28px" }}
-      >
-        <h2
-          style={{
-            fontSize: 28,
-            fontWeight: 800,
-            margin: "0 0 24px",
-            textAlign: "center",
-            color: "#ffffff",
-            lineHeight: 1.35,
-            letterSpacing: -0.4,
-          }}
-        >
-          AI 시대,
-          <br />
-          만드는 사람이 됩니다
-        </h2>
+      {/* ③ AI 시대 — 라이트 VS */}
+      <section style={{ marginBottom: 24 }}>
         <div
           style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "stretch",
-            gap: 8,
+            background: "#F8F9FA",
+            borderRadius: 14,
+            padding: "28px 20px 24px",
           }}
         >
-          <div
+          <h2
             style={{
-              flex: 1,
-              minWidth: 0,
-              padding: "16px 10px",
-              borderRadius: 12,
-              background: "#374151",
+              fontSize: 28,
+              fontWeight: 800,
+              margin: "0 0 24px",
               textAlign: "center",
+              color: "#111827",
+              lineHeight: 1.35,
+              letterSpacing: -0.4,
             }}
           >
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#F9FAFB",
-                marginBottom: 8,
-                lineHeight: 1.35,
-              }}
-            >
-              😰 AI를 쓰는 사람
-            </div>
-            <div style={{ fontSize: 12, color: "#D1D5DB", lineHeight: 1.55 }}>
-              남이 만든 서비스를 사용
-              <br />
-              트렌드를 따라가기 바쁜 사람
-            </div>
-          </div>
+            AI 시대,
+            <br />
+            만드는 사람이 됩니다
+          </h2>
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 20,
-              fontWeight: 800,
-              color: "#ffffff",
-              flexShrink: 0,
-              width: 32,
-            }}
-          >
-            VS
-          </div>
-          <div
-            style={{
-              flex: 1,
-              minWidth: 0,
-              padding: "16px 10px",
-              borderRadius: 12,
-              background: "#00C471",
-              textAlign: "center",
+              flexDirection: "row",
+              alignItems: "stretch",
+              gap: 8,
             }}
           >
             <div
               style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: "#ffffff",
-                marginBottom: 8,
-                lineHeight: 1.35,
+                flex: 1,
+                minWidth: 0,
+                padding: "16px 10px",
+                borderRadius: 12,
+                background: "#F3F4F6",
+                border: "1px solid #E5E7EB",
+                textAlign: "center",
               }}
             >
-              🚀 AI로 만드는 사람
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: "#111827",
+                  marginBottom: 8,
+                  lineHeight: 1.35,
+                }}
+              >
+                😰 AI를 쓰는 사람
+              </div>
+              <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.55 }}>
+                남이 만든 서비스 사용
+                <br />
+                트렌드를 따라가기 바쁜 사람
+              </div>
             </div>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.95)", lineHeight: 1.55 }}>
-              직접 서비스를 만드는 사람
-              <br />
-              트렌드를 이끄는 사람
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 20,
+                fontWeight: 800,
+                color: "#00C471",
+                flexShrink: 0,
+                width: 32,
+              }}
+            >
+              VS
+            </div>
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: "16px 10px",
+                borderRadius: 12,
+                background: "#E8FAF2",
+                border: "2px solid #00C471",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: "#111827",
+                  marginBottom: 8,
+                  lineHeight: 1.35,
+                }}
+              >
+                🚀 AI로 만드는 사람
+              </div>
+              <div style={{ fontSize: 12, color: "#111827", lineHeight: 1.55 }}>
+                직접 서비스를 만드는 사람
+                <br />
+                트렌드를 이끄는 사람
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          style={{
-            marginTop: 20,
-            padding: "14px 16px",
-            borderRadius: 12,
-            background: "#ffffff",
-            textAlign: "center",
-          }}
-        >
-          <span style={{ fontSize: 14, fontWeight: 800, color: "#00C471", lineHeight: 1.5 }}>
-            나도코딩은 오른쪽을 선택한 사람들을 위한 과정이에요
-          </span>
+          <div
+            style={{
+              marginTop: 20,
+              padding: 16,
+              background: "#E8FAF2",
+              borderLeft: "4px solid #00C471",
+              borderRadius: "0 8px 8px 0",
+            }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 800, color: "#00C471", lineHeight: 1.55 }}>
+              나도코딩은 오른쪽을 선택한 사람들을 위한 과정이에요
+            </span>
+          </div>
         </div>
       </section>
 

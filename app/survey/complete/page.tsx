@@ -27,6 +27,31 @@ function getTodayString(): string {
   return `${y}.${m}.${dd}`;
 }
 
+/** 첫 2문장, 최대 60자 — 응원 메시지 축약 */
+function shortenEncouragement(text: string): string {
+  const normalized = text.trim().replace(/\s+/g, " ");
+  if (!normalized) return "";
+  const sentences = normalized.split(/(?<=[.!?])\s+/).filter(Boolean);
+  let out =
+    sentences.length >= 2
+      ? `${sentences[0]} ${sentences[1]}`.trim()
+      : (sentences[0] ?? normalized);
+  if (out.length > 60) out = out.slice(0, 60).trim();
+  return out;
+}
+
+/** 가능하면 문장 경계로 2줄 표시 */
+function encouragementTwoLines(text: string): string {
+  const s = shortenEncouragement(text);
+  if (!s) return "";
+  const parts = s.split(/(?<=[.!?])\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0]}\n${parts.slice(1).join(" ")}`;
+  const mid = Math.min(32, Math.floor(s.length / 2));
+  const breakAt = s.lastIndexOf(" ", mid + 8);
+  if (breakAt > 12) return `${s.slice(0, breakAt).trim()}\n${s.slice(breakAt).trim()}`;
+  return s;
+}
+
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   const raw = idea.tool_flow?.trim();
   const parts =
@@ -551,38 +576,61 @@ export default function CompletePage() {
         </h3>
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 8,
+            background: "#FFFFFF",
+            border: "1px solid #E5E7EB",
+            borderRadius: 12,
+            padding: "16px 4px",
             marginBottom: 20,
-            textAlign: "center",
+            display: "flex",
+            alignItems: "stretch",
           }}
         >
           {[
-            { num: "2주", sub: "완성" },
-            { num: "0원", sub: "코딩 비용" },
-            { num: "10명", sub: "함께" },
-          ].map((cell) => (
-            <div key={cell.sub} style={{ flex: 1, minWidth: 0 }}>
+            { keyword: "2주", sub: "완성", color: "#00C471" },
+            { keyword: "소수 정예", sub: "10명 한정", color: "#EF4444" },
+            { keyword: "전액 환불", sub: "배포 못하면", color: "#EF4444" },
+          ].map((cell, i) => (
+            <div key={cell.sub} style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "stretch" }}>
+              {i > 0 ? (
+                <div
+                  style={{
+                    width: 1,
+                    flexShrink: 0,
+                    background: "#E5E7EB",
+                    alignSelf: "stretch",
+                  }}
+                  aria-hidden
+                />
+              ) : null}
               <div
                 style={{
-                  fontSize: 22,
-                  fontWeight: 800,
-                  color: "var(--text)",
-                  letterSpacing: -0.5,
+                  flex: 1,
+                  textAlign: "center",
+                  padding: "4px 6px",
+                  minWidth: 0,
                 }}
               >
-                {cell.num}
-              </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "var(--textSecondary)",
-                  marginTop: 4,
-                  lineHeight: 1.35,
-                }}
-              >
-                {cell.sub}
+                <div
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 800,
+                    color: cell.color,
+                    letterSpacing: -0.4,
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {cell.keyword}
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#6B7280",
+                    marginTop: 6,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {cell.sub}
+                </div>
               </div>
             </div>
           ))}
@@ -654,9 +702,31 @@ export default function CompletePage() {
               </div>
             ))}
           </div>
+          <button
+            className="btnAccent"
+            type="button"
+            onClick={() => router.push("/nadocoding")}
+            style={{
+              width: "100%",
+              marginTop: 20,
+              marginBottom: 14,
+              fontSize: 16,
+              fontWeight: 700,
+              padding: "14px 20px",
+            }}
+          >
+            나도 코딩 1기 자세히 보기
+          </button>
           <div className="encourageBox">
-            <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>
-              {firstStep.encouragement}
+            <p
+              style={{
+                margin: 0,
+                fontSize: 15,
+                lineHeight: 1.65,
+                whiteSpace: "pre-line",
+              }}
+            >
+              {encouragementTwoLines(firstStep.encouragement)}
             </p>
           </div>
         </div>
