@@ -95,10 +95,45 @@ a {
 /* ═══════════ Card ═══════════ */
 
 .card {
-  background: #FFFFFF;
-  border: 1px solid var(--border);
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 24px;
+}
+
+/* 나도코딩 / 결과 페이지 공통 — 연한 회색 내부 카드 */
+.cardPlainInner {
+  padding: 18px 20px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.heroStatBox {
+  padding: 14px 10px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.heroStatBox--emphasis {
+  background: #e8faf2;
+  border: 2px solid #00c471;
+}
+
+.promoStatCell--emphasis {
+  border-radius: 10px;
+  border: 2px solid #00c471 !important;
+  background: #e8faf2;
+  padding: 8px 4px !important;
+}
+
+.curriculumStepCard {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  margin-bottom: 4px;
 }
 
 /* ═══════════ Question Block (animated) ═══════════ */
@@ -177,8 +212,8 @@ a {
   gap: 14px;
   padding: 16px 18px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: #FFFFFF;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
   cursor: pointer;
   user-select: none;
   transition: border-color 0.2s, background 0.2s;
@@ -188,7 +223,7 @@ a {
 
 .optionCard:hover {
   border-color: var(--borderHover);
-  background: #FAFAFA;
+  background: #e5e7eb;
 }
 
 .optionCard[data-selected="true"] {
@@ -490,8 +525,8 @@ textarea {
 .keywordChip {
   padding: 10px 14px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: #FFFFFF;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
   color: var(--textSecondary);
   cursor: pointer;
   user-select: none;
@@ -770,9 +805,9 @@ label {
 }
 
 .ideaCard {
-  background: #FFFFFF;
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   padding: 22px;
   transition: border-color 0.2s;
 }
@@ -917,12 +952,12 @@ label {
 .timelineDot {
   position: absolute;
   left: -24px;
-  top: 4px;
+  top: 10px;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: var(--accent);
-  border: 3px solid white;
+  border: 3px solid #f3f4f6;
   box-shadow: 0 0 0 2px var(--accent);
 }
 
@@ -963,11 +998,11 @@ label {
 }
 
 .faqItem {
-  border: 1px solid var(--border);
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   margin-bottom: 8px;
   overflow: hidden;
-  background: #FFFFFF;
+  background: #f3f4f6;
 }
 
 .faqQuestion {
@@ -985,7 +1020,7 @@ label {
 }
 
 .faqQuestion:hover {
-  background: var(--surface);
+  background: #e5e7eb;
 }
 
 .faqArrow {
@@ -1072,8 +1107,8 @@ label {
   gap: 12px;
   padding: 16px 18px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: #FFFFFF;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
   font-size: 14px;
   line-height: 1.5;
   color: var(--text);
@@ -1092,8 +1127,8 @@ label {
   gap: 14px;
   padding: 18px 20px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: #FFFFFF;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
   font-size: 15px;
   color: var(--text);
   line-height: 1.5;
@@ -1107,9 +1142,9 @@ label {
 /* ═══════════ Persona Card ═══════════ */
 
 .personaCard {
-  background: var(--accentSoft);
-  border: 1px solid var(--accent);
-  border-radius: 14px;
+  background: #e8faf2;
+  border: 2px solid #00c471;
+  border-radius: 12px;
   padding: 22px 24px;
   margin-bottom: 8px;
 }
@@ -1164,7 +1199,7 @@ label {
 .ideaMetaTag {
   padding: 4px 10px;
   border-radius: 999px;
-  background: var(--surface);
+  background: #e5e7eb;
   font-size: 12px;
   color: var(--textSecondary);
 }
@@ -1174,9 +1209,9 @@ label {
 .firstStepSection {
   margin-top: 32px;
   padding: 24px;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   overflow: visible;
 }
 
@@ -1217,19 +1252,26 @@ label {
 .encourageBox {
   background: #e8faf2;
   border-radius: 12px;
-  padding: 14px 16px 24px;
+  padding: 14px 16px;
   font-size: 14px;
   color: #374151;
   line-height: 1.55;
   overflow: visible;
   height: auto;
   max-height: none;
+  margin-top: 14px;
+}
+
+.encourageBox--promo {
+  margin-top: 16px;
+  text-align: left;
 }
 
 .encourageBox p {
   margin: 0;
   line-height: 1.55;
   word-break: break-word;
+  font-style: italic;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1407,14 +1449,17 @@ label {
   color: white;
   text-align: center;
   padding: 8px 16px;
-  border-radius: 14px 14px 0 0;
+  border-radius: 12px 12px 0 0;
   margin: -22px -22px 16px;
   font-size: 14px;
   font-weight: 700;
 }
 
 .firstIdeaCard {
-  box-shadow: 0 4px 20px rgba(0, 196, 113, 0.15);
+  background: #e8faf2 !important;
+  border: 2px solid #00c471 !important;
+  border-radius: 12px;
+  box-shadow: none;
 }
 
 .firstIdeaReasonBg {
@@ -1490,8 +1535,9 @@ label {
 /* ═══════════ Promotion Section ═══════════ */
 
 .promoSection {
-  background: #E8FAF2;
-  border-radius: 16px;
+  background: #e8faf2;
+  border: 2px solid #00c471;
+  border-radius: 12px;
   padding: 24px 20px;
   text-align: center;
   margin: 20px 0;
@@ -1555,7 +1601,51 @@ label {
   margin-right: calc(50% - 50vw);
 }
 
+.nadocodingHero {
+  text-align: center;
+  padding: 40px 0 44px;
+}
+
 /* ═══════════ Mobile ═══════════ */
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 16px;
+  }
+
+  .survey-container,
+  .result-container,
+  .nadocoding-container {
+    padding-top: 20px;
+  }
+
+  .progressBar {
+    top: 12px;
+  }
+
+  .surveyWrap .questionBlock {
+    padding-top: 20px;
+  }
+
+  .resultPageHeader {
+    padding-top: 20px;
+  }
+
+  .nadocodingHero {
+    padding: 24px 0 44px;
+  }
+
+  .container,
+  .resultContainer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .surveyMain {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
 
 @media (max-width: 640px) {
   .surveyMain {

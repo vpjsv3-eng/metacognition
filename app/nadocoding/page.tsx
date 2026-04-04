@@ -306,7 +306,10 @@ export default function NadocodingPage() {
   let faqFlatIdx = 0;
 
   return (
-    <main className="container nadocodingPageWithBottomCta" style={{ maxWidth: 600 }}>
+    <main
+      className="container nadocodingPageWithBottomCta nadocoding-container"
+      style={{ maxWidth: 600 }}
+    >
       {showScrollTop && (
         <button
           type="button"
@@ -319,7 +322,7 @@ export default function NadocodingPage() {
       )}
 
       {/* ① 히어로 섹션 */}
-      <section style={{ textAlign: "center", padding: "40px 0 44px" }}>
+      <section className="nadocodingHero">
         <div
           style={{
             display: "inline-block",
@@ -391,20 +394,21 @@ export default function NadocodingPage() {
             {
               kw: "전액 환불",
               label: "배포 못하면\n100% 환불 보장",
-              kwColor: "#EF4444" as const,
+              kwColor: "#00C471" as const,
             },
           ].map((item, i) => (
             <div
               key={i}
-              style={{
-                padding: "14px 10px",
-                borderRadius: 12,
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-                textAlign: "center",
-              }}
+              className={i === 3 ? "heroStatBox heroStatBox--emphasis" : "heroStatBox"}
+              style={{ textAlign: "center" }}
             >
-              <div style={{ fontSize: 18, fontWeight: 800, color: item.kwColor }}>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: i === 3 ? "#00C471" : item.kwColor,
+                }}
+              >
                 {item.kw}
               </div>
               <div
@@ -638,19 +642,6 @@ export default function NadocodingPage() {
               </div>
             </div>
           </div>
-          <div
-            style={{
-              marginTop: 20,
-              padding: 16,
-              background: "#E8FAF2",
-              borderLeft: "4px solid #00C471",
-              borderRadius: "0 8px 8px 0",
-            }}
-          >
-            <span style={{ fontSize: 14, fontWeight: 800, color: "#00C471", lineHeight: 1.55 }}>
-              나도코딩은 오른쪽을 선택한 사람들을 위한 과정이에요
-            </span>
-          </div>
         </div>
       </section>
 
@@ -680,15 +671,7 @@ export default function NadocodingPage() {
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {SERVICE_EXAMPLES.map((ex, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "18px 20px",
-                  borderRadius: 12,
-                  border: "1px solid var(--border)",
-                  background: "#FFFFFF",
-                }}
-              >
+              <div key={i} className="cardPlainInner">
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <span style={{ fontSize: 24 }}>{ex.emoji}</span>
                   <strong style={{ fontSize: 15, color: "var(--text)" }}>{ex.name}</strong>
@@ -771,15 +754,7 @@ export default function NadocodingPage() {
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {DIFFERENTIATORS.map((d, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "18px 20px",
-                  borderRadius: 12,
-                  border: "1px solid var(--border)",
-                  background: "#FFFFFF",
-                }}
-              >
+              <div key={i} className="cardPlainInner">
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                   <span style={{ fontSize: 22 }}>{d.icon}</span>
                   <strong style={{ fontSize: 15, color: "var(--text)" }}>{d.title}</strong>
@@ -818,14 +793,8 @@ export default function NadocodingPage() {
 
           {/* 메인 강사 */}
           <div
-            style={{
-              padding: "24px 20px",
-              borderRadius: 14,
-              border: "1px solid var(--border)",
-              background: "#FFFFFF",
-              marginBottom: 12,
-              textAlign: "center",
-            }}
+            className="cardPlainInner"
+            style={{ marginBottom: 12, textAlign: "center", padding: "24px 20px", borderRadius: 14 }}
           >
             <div
               style={{
@@ -904,13 +873,8 @@ export default function NadocodingPage() {
 
           {/* 보조 강사 */}
           <div
-            style={{
-              padding: "24px 20px",
-              borderRadius: 14,
-              border: "1px solid var(--border)",
-              background: "#FFFFFF",
-              textAlign: "center",
-            }}
+            className="cardPlainInner"
+            style={{ textAlign: "center", padding: "24px 20px", borderRadius: 14 }}
           >
             <div
               style={{
@@ -983,15 +947,7 @@ export default function NadocodingPage() {
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {REVIEWS.map((review, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "20px",
-                  borderRadius: 12,
-                  border: "1px solid var(--border)",
-                  background: "#FFFFFF",
-                }}
-              >
+              <div key={i} className="cardPlainInner" style={{ padding: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <strong style={{ fontSize: 14, color: "var(--text)" }}>{review.name}</strong>
                   <span style={{ fontSize: 14, letterSpacing: 2 }}>⭐⭐⭐⭐⭐</span>
@@ -1030,26 +986,28 @@ export default function NadocodingPage() {
             {CURRICULUM.map((item, i) => (
               <div key={i} className="timelineItem">
                 <div className="timelineDot" />
-                <div className="timelineLabel">
-                  {item.label}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      marginLeft: 8,
-                      padding: "2px 8px",
-                      borderRadius: 999,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: item.mode === "offline" ? "var(--accent)" : "var(--surface)",
-                      color: item.mode === "offline" ? "#fff" : "var(--textSecondary)",
-                      border: item.mode === "offline" ? "none" : "1px solid var(--border)",
-                    }}
-                  >
-                    {item.mode === "offline" ? "오프라인" : "온라인"}
-                  </span>
+                <div className="curriculumStepCard">
+                  <div className="timelineLabel">
+                    {item.label}
+                    <span
+                      style={{
+                        display: "inline-block",
+                        marginLeft: 8,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        background: item.mode === "offline" ? "var(--accent)" : "#e5e7eb",
+                        color: item.mode === "offline" ? "#fff" : "var(--textSecondary)",
+                        border: item.mode === "offline" ? "none" : "1px solid var(--border)",
+                      }}
+                    >
+                      {item.mode === "offline" ? "오프라인" : "온라인"}
+                    </span>
+                  </div>
+                  <div className="timelineTitle">{item.title}</div>
+                  <div className="timelineDesc">{item.desc}</div>
                 </div>
-                <div className="timelineTitle">{item.title}</div>
-                <div className="timelineDesc">{item.desc}</div>
               </div>
             ))}
           </div>

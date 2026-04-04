@@ -297,7 +297,7 @@ export default function CompletePage() {
 
   if (!result) {
     return (
-      <main className="resultContainer">
+      <main className="resultContainer result-container">
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
             AI가 아이디어를 분석하는 중...
@@ -317,7 +317,7 @@ export default function CompletePage() {
   const dDay = getEarlybirdDDay();
 
   return (
-    <main className="resultContainer resultWithBottomCta">
+    <main className="resultContainer resultWithBottomCta result-container">
       {isRestoredResult && (
         <div
           style={{
@@ -356,7 +356,7 @@ export default function CompletePage() {
       )}
 
       {/* ═══ 개인화 헤더 (개선) ═══ */}
-      <div style={{ textAlign: "center", margin: "16px 0 28px" }}>
+      <div className="resultPageHeader" style={{ textAlign: "center", margin: "16px 0 28px" }}>
         <h1
           style={{
             fontSize: 28,
@@ -499,10 +499,7 @@ export default function CompletePage() {
 
       {/* 1순위: 강조 카드 */}
       {firstIdea && (
-        <div
-          className="ideaCard firstIdeaCard"
-          style={{ borderColor: "var(--accent)", borderWidth: 2, marginBottom: 14 }}
-        >
+        <div className="ideaCard firstIdeaCard" style={{ marginBottom: 14 }}>
           <div className="firstIdeaBanner">
             ✨ 가장 추천하는 아이디어
           </div>
@@ -557,7 +554,7 @@ export default function CompletePage() {
         </h3>
         <div
           style={{
-            background: "#FFFFFF",
+            background: "#F3F4F6",
             border: "1px solid #E5E7EB",
             borderRadius: 12,
             padding: "16px 4px",
@@ -584,6 +581,7 @@ export default function CompletePage() {
                 />
               ) : null}
               <div
+                className={i === 2 ? "promoStatCell promoStatCell--emphasis" : "promoStatCell"}
                 style={{
                   flex: 1,
                   textAlign: "center",
@@ -639,6 +637,11 @@ export default function CompletePage() {
         >
           나도코딩 1기에서 만들기 →
         </button>
+        {firstStep && (
+          <div className="encourageBox encourageBox--promo">
+            <p title={firstStep.encouragement}>{firstStep.encouragement}</p>
+          </div>
+        )}
       </div>
 
       {/* 2~5순위: 아코디언 */}
@@ -690,7 +693,6 @@ export default function CompletePage() {
             style={{
               width: "100%",
               marginTop: 20,
-              marginBottom: 14,
               fontSize: 16,
               fontWeight: 700,
               padding: "14px 20px",
@@ -698,9 +700,6 @@ export default function CompletePage() {
           >
             나도 코딩 1기 자세히 보기
           </button>
-          <div className="encourageBox">
-            <p title={firstStep.encouragement}>{firstStep.encouragement}</p>
-          </div>
         </div>
       )}
 
@@ -735,12 +734,6 @@ export default function CompletePage() {
           결과지 다시 받기
         </button>
       </div>
-
-      {firstStep && (
-        <div className="encourageBox" style={{ marginTop: 20, marginBottom: 8 }}>
-          <p title={firstStep.encouragement}>{firstStep.encouragement}</p>
-        </div>
-      )}
 
       {/* 결과지 다시 받기 모달 */}
       <div
