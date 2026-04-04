@@ -1,10 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
+const EMAIL_SENT_KEY = "emailSent";
+const EMAIL_SENDING_KEY = "emailSending";
+
+const EARLYBIRD_DEADLINE = new Date("2026-04-06T23:59:59+09:00").getTime();
+
+function getEarlybirdDDay(): number {
+  const diff = EARLYBIRD_DEADLINE - Date.now();
+  if (diff <= 0) return 0;
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
 
 function getEmailId(email?: string): string {
   if (!email) return "사용자";
@@ -121,7 +131,6 @@ export default function CompletePage() {
   const [emailStatus, setEmailStatus] = useState<
     "idle" | "sending" | "sent" | "failed"
   >("idle");
-  const emailSentRef = useRef(false);
   const router = useRouter();
 
   const [resendModalOpen, setResendModalOpen] = useState(false);
@@ -161,18 +170,31 @@ export default function CompletePage() {
   }, []);
 
   useEffect(() => {
-    if (!result || emailSentRef.current) return;
-    const email = result.profile?.email;
-    if (!email) return;
+    if (!result) return;
+    const emailAddr = result.profile?.email;
+    if (!emailAddr) return;
 
-    emailSentRef.current = true;
+    try {
+      if (localStorage.getItem(EMAIL_SENT_KEY) === "true") {
+        setEmailStatus("sent");
+        return;
+      }
+      if (localStorage.getItem(EMAIL_SENDING_KEY) === "1") {
+        setEmailStatus("sending");
+        return;
+      }
+      localStorage.setItem(EMAIL_SENDING_KEY, "1");
+    } catch {
+      // localStorage 불가 시에도 발송 시도
+    }
+
     setEmailStatus("sending");
 
     fetch("/api/send-result", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email,
+        email: emailAddr,
         persona: result.persona,
         ideas: result.ideas,
         first_step: result.first_step,
@@ -180,7 +202,13 @@ export default function CompletePage() {
     })
       .then((res) => res.json())
       .then((data) => {
+        try {
+          localStorage.removeItem(EMAIL_SENDING_KEY);
+        } catch {}
         if (data.ok && !data.skipped) {
+          try {
+            localStorage.setItem(EMAIL_SENT_KEY, "true");
+          } catch {}
           setEmailStatus("sent");
         } else if (data.skipped) {
           setEmailStatus("failed");
@@ -189,6 +217,9 @@ export default function CompletePage() {
         }
       })
       .catch(() => {
+        try {
+          localStorage.removeItem(EMAIL_SENDING_KEY);
+        } catch {}
         setEmailStatus("failed");
       });
   }, [result]);
@@ -248,8 +279,10 @@ export default function CompletePage() {
   const firstIdea = result.ideas[0];
   const otherIdeas = result.ideas.slice(1);
 
+  const dDay = getEarlybirdDDay();
+
   return (
-    <main className="resultContainer">
+    <main className="resultContainer resultWithBottomCta">
       {isRestoredResult && (
         <div
           style={{
@@ -268,6 +301,10 @@ export default function CompletePage() {
             onClick={() => {
               localStorage.removeItem("diagnosis_result");
               localStorage.removeItem("diagnosis_result_savedAt");
+              try {
+                localStorage.removeItem(EMAIL_SENT_KEY);
+                localStorage.removeItem(EMAIL_SENDING_KEY);
+              } catch {}
               router.push("/");
             }}
             style={{
@@ -338,7 +375,14 @@ export default function CompletePage() {
 
       {/* ═══ PART 1: 나의 성향 분석 (축소) ═══ */}
       {persona && (
-        <div className="personaCard" style={{ padding: "18px 20px", marginBottom: 12 }}>
+        <div
+          className="personaCard"
+          style={{
+            padding: "18px 20px",
+            marginBottom: 12,
+            overflow: "visible",
+          }}
+        >
           <h2
             style={{
               fontSize: 20,
@@ -355,17 +399,25 @@ export default function CompletePage() {
               fontSize: 14,
               lineHeight: 1.7,
               color: "var(--text)",
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
+              display: "block",
+              overflow: "visible",
             }}
           >
             {persona.summary}
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            <span className="personaStrengthBadge" style={{ fontSize: 12, padding: "4px 12px" }}>💪 {persona.strength}</span>
-            <span className="personaNeedsBadge" style={{ fontSize: 12, padding: "4px 12px" }}>🎯 {persona.painpoint}</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <span
+              className="personaStrengthBadge"
+              style={{ fontSize: 12, padding: "4px 12px", display: "inline-block", overflow: "visible", whiteSpace: "normal" }}
+            >
+              💪 {persona.strength}
+            </span>
+            <span
+              className="personaNeedsBadge"
+              style={{ fontSize: 12, padding: "4px 12px", display: "inline-block", overflow: "visible", whiteSpace: "normal" }}
+            >
+              🎯 {persona.painpoint}
+            </span>
           </div>
         </div>
       )}
@@ -574,6 +626,23 @@ export default function CompletePage() {
       </div>
 
       {/* 결과지 다시 받기 모달 */}
+      <div
+        className="resultFixedCtaBar"
+        role="navigation"
+        aria-label="얼리버드 신청"
+      >
+        <span className="resultFixedCtaBarLabel">
+          🔥 얼리버드 마감 D-{dDay}
+        </span>
+        <button
+          type="button"
+          className="resultFixedCtaBarBtn"
+          onClick={() => router.push("/nadocoding")}
+        >
+          바로 신청하기 →
+        </button>
+      </div>
+
       {resendModalOpen && (
         <div className="modalOverlay" onClick={() => !resending && setResendModalOpen(false)}>
           <div className="modalContent" onClick={(e) => e.stopPropagation()}>

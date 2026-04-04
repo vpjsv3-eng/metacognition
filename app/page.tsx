@@ -67,7 +67,13 @@ export default function LandingPage() {
         <button
           className="btn"
           type="button"
-          onClick={() => router.push("/survey")}
+          onClick={() => {
+            try {
+              localStorage.removeItem("emailSent");
+              localStorage.removeItem("emailSending");
+            } catch {}
+            router.push("/survey");
+          }}
           style={{
             fontSize: 18,
             padding: "18px 48px",

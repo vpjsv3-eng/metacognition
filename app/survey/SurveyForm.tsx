@@ -68,6 +68,17 @@ const LOADING_STEPS = [
   "결과지 준비 중...",
 ];
 
+const EMAIL_SENT_KEY = "emailSent";
+
+/** 문항 전환 후 DOM 갱신 뒤 최상단으로 스크롤 (모바일 대응 포함) */
+function scrollSurveyToTop() {
+  setTimeout(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, 0);
+}
+
 export default function SurveyForm() {
   const router = useRouter();
 
@@ -151,6 +162,9 @@ export default function SurveyForm() {
 
   function clearProgress() {
     localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(EMAIL_SENT_KEY);
+    } catch {}
     setShowResumeModal(false);
   }
 
@@ -289,7 +303,7 @@ export default function SurveyForm() {
     setError(null);
     setCurrentStep(step);
     setAnimKey((k) => k + 1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollSurveyToTop();
   }
 
   function selectSingleOption(idx: number) {
@@ -340,6 +354,7 @@ export default function SurveyForm() {
   function goPrev() {
     if (phase === "survey" && safeStep === 0) {
       setPhase("profile_keywords");
+      scrollSurveyToTop();
       return;
     }
     if (safeStep > 0) navigate(safeStep - 1);
@@ -438,6 +453,7 @@ export default function SurveyForm() {
     }
 
     setPhase("email_input");
+    scrollSurveyToTop();
   }
 
   function handleEmailSubmit() {
@@ -456,6 +472,7 @@ export default function SurveyForm() {
       return;
     }
     setPhase("email_confirm");
+    scrollSurveyToTop();
   }
 
   function buildAnswerList(): SurveyAnswer[] {
@@ -549,6 +566,9 @@ export default function SurveyForm() {
 
   async function onSubmit() {
     setError(null);
+    try {
+      localStorage.removeItem(EMAIL_SENT_KEY);
+    } catch {}
     const profile = getProfile();
     const updatedProfile = { ...profile, email: email.trim() };
 
@@ -699,6 +719,7 @@ export default function SurveyForm() {
                   setPhase("profile_keywords");
                   setAnimKey((k) => k + 1);
                   setTimeout(saveProgress, 0);
+                  scrollSurveyToTop();
                 }}
               >
                 다음 →
@@ -754,6 +775,7 @@ export default function SurveyForm() {
                   setPhase("survey");
                   setAnimKey((k) => k + 1);
                   setTimeout(saveProgress, 0);
+                  scrollSurveyToTop();
                 }}
               >
                 다음 →
@@ -766,6 +788,7 @@ export default function SurveyForm() {
                     onClick={() => {
                       setProfileError(null);
                       setPhase("profile_job");
+                      scrollSurveyToTop();
                     }}
                   >
                     ← 이전
@@ -914,6 +937,7 @@ export default function SurveyForm() {
               onClick={() => {
                 setPhase("survey");
                 setEmailError(null);
+                scrollSurveyToTop();
               }}
               style={{ marginTop: 8, display: "block", width: "100%", textAlign: "center" }}
             >
@@ -971,7 +995,10 @@ export default function SurveyForm() {
               <button
                 className="btnGhost"
                 type="button"
-                onClick={() => setPhase("email_input")}
+                onClick={() => {
+                  setPhase("email_input");
+                  scrollSurveyToTop();
+                }}
                 style={{ textAlign: "center" }}
               >
                 수정할게요
