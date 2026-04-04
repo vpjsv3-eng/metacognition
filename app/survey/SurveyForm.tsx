@@ -118,6 +118,9 @@ export default function SurveyForm() {
   const [showMotivation, setShowMotivation] = useState(false);
   const motivationTriggered = useRef(false);
 
+  const [q7EncourageOpen, setQ7EncourageOpen] = useState(false);
+  const pendingNavigateStepRef = useRef<number | null>(null);
+
   const [showResumeModal, setShowResumeModal] = useState(false);
   const resumeChecked = useRef(false);
 
@@ -228,17 +231,26 @@ export default function SurveyForm() {
   }, [answers]);
 
   const total = visibleQuestions.length;
-  const safeStep = Math.min(currentStep, total - 1);
-  const currentQ = visibleQuestions[safeStep];
+  const safeStep = total > 0 ? Math.min(currentStep, total - 1) : 0;
+  const currentQ = total > 0 ? visibleQuestions[safeStep] : undefined;
   const currentAnswer = currentQ ? answers[currentQ.id] : undefined;
+
+  const progressLabelQuestionId =
+    currentQ?.id ?? visibleQuestions[0]?.id ?? "Q1";
 
   const progressPercent =
     phase === "profile_job" || phase === "profile_keywords"
       ? 0
-      : currentQ
-        ? (getSurveyProgressMainNumber(currentQ.id) / BASE_SURVEY_STEP_COUNT) *
-          100
-        : 0;
+      : (getSurveyProgressMainNumber(progressLabelQuestionId) /
+          BASE_SURVEY_STEP_COUNT) *
+        100;
+
+  useEffect(() => {
+    if (phase !== "survey" || total <= 0) return;
+    if (currentStep >= total) {
+      setCurrentStep(total - 1);
+    }
+  }, [phase, total, currentStep]);
 
   useEffect(() => {
     if (phase !== "survey") return;
@@ -297,7 +309,26 @@ export default function SurveyForm() {
     scrollSurveyToTop();
   }
 
+  function shouldShowQ7Encouragement(fromQId: string, nextStepIndex: number) {
+    const nextQ = visibleQuestions[nextStepIndex];
+    return (
+      nextQ?.id === "Q8" &&
+      (fromQId === "Q7" || fromQId === "Q7-1")
+    );
+  }
+
+  function finishQ7Encouragement() {
+    setQ7EncourageOpen(false);
+    const step = pendingNavigateStepRef.current;
+    pendingNavigateStepRef.current = null;
+    if (step !== null) {
+      navigate(step);
+      setTimeout(saveProgress, 0);
+    }
+  }
+
   function selectSingleOption(idx: number) {
+    if (!currentQ) return;
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: {
@@ -338,6 +369,7 @@ export default function SurveyForm() {
   }
 
   function setCustomText(text: string) {
+    if (!currentQ) return;
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: { ...prev[currentQ.id], customText: text },
@@ -345,6 +377,7 @@ export default function SurveyForm() {
   }
 
   function setTextValue(text: string) {
+    if (!currentQ) return;
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: { ...prev[currentQ.id], textValue: text },
@@ -361,6 +394,7 @@ export default function SurveyForm() {
   }
 
   function goNext() {
+    if (!currentQ) return;
     setError(null);
     const a = currentAnswer;
 
@@ -403,12 +437,19 @@ export default function SurveyForm() {
     }
 
     if (safeStep < total - 1) {
-      navigate(safeStep + 1);
+      const nextIdx = safeStep + 1;
+      if (shouldShowQ7Encouragement(currentQ.id, nextIdx)) {
+        pendingNavigateStepRef.current = nextIdx;
+        setQ7EncourageOpen(true);
+        return;
+      }
+      navigate(nextIdx);
       setTimeout(saveProgress, 0);
     }
   }
 
   function skipQuestion() {
+    if (!currentQ) return;
     setAnswers((prev) => ({
       ...prev,
       [currentQ.id]: {
@@ -421,12 +462,19 @@ export default function SurveyForm() {
     setError(null);
 
     if (safeStep < total - 1) {
-      navigate(safeStep + 1);
+      const nextIdx = safeStep + 1;
+      if (shouldShowQ7Encouragement(currentQ.id, nextIdx)) {
+        pendingNavigateStepRef.current = nextIdx;
+        setQ7EncourageOpen(true);
+        return;
+      }
+      navigate(nextIdx);
       setTimeout(saveProgress, 0);
     }
   }
 
   function startEmailFlow() {
+    if (!currentQ) return;
     setError(null);
     const a = currentAnswer;
 
@@ -1101,50 +1149,35 @@ export default function SurveyForm() {
   }
 
   // ── Survey screen ──
-  if (!currentQ) return null;
+  if (phase === "survey") {
+    const stickyQNum = getSurveyProgressMainNumber(progressLabelQuestionId);
 
-  const isLast = safeStep === total - 1;
-  const showCustomInput = (() => {
-    if (!currentQ.hasCustomOption || !currentQ.options) return false;
-    const lastIdx = currentQ.options.length - 1;
-    if (currentQ.type === "multi") {
-      return currentAnswer?.selectedIndices?.includes(lastIdx) ?? false;
-    }
-    return currentAnswer?.selectedIndex === lastIdx;
-  })();
+    const showCustomInput =
+      currentQ &&
+      (() => {
+        if (!currentQ.hasCustomOption || !currentQ.options) return false;
+        const lastIdx = currentQ.options.length - 1;
+        if (currentQ.type === "multi") {
+          return currentAnswer?.selectedIndices?.includes(lastIdx) ?? false;
+        }
+        return currentAnswer?.selectedIndex === lastIdx;
+      })();
 
-  const prevSection =
-    safeStep > 0 ? visibleQuestions[safeStep - 1].section : null;
-  const showSection = currentQ.section !== prevSection;
+    const prevSection =
+      currentQ && safeStep > 0
+        ? visibleQuestions[safeStep - 1].section
+        : null;
+    const showSection =
+      !!currentQ && currentQ.section !== prevSection;
 
-  return (
-    <>
-      <div className="progressBar">
-        <div
-          className={`progressFill${showPulse ? " pulse" : ""}`}
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
+    const isLast = total > 0 && currentQ ? safeStep === total - 1 : false;
 
-      {showMotivation && (
-        <div className="motivationMessage">
-          절반 왔어요 👏 거의 다 왔어요, 조금만 더요!
-        </div>
-      )}
-
-      <div className="surveyWrap">
-        <div className="questionBlock" key={animKey}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
+    return (
+      <>
+        <div className="surveyProgressSticky">
+          <div className="surveyProgressStickyRow">
             <span className="questionCounter">
-              Q{getSurveyProgressMainNumber(currentQ.id)}/
-              {BASE_SURVEY_STEP_COUNT}
+              Q{stickyQNum}/{BASE_SURVEY_STEP_COUNT}
             </span>
             <span
               style={{
@@ -1156,151 +1189,213 @@ export default function SurveyForm() {
               AI 분석 진행 중
             </span>
           </div>
-
-          {showSection && (
-            <div className="sectionTag">{currentQ.section}</div>
-          )}
-
-          {currentQ.showRecommendationBadge && (
-            <div className="surveyRecommendationBadge">
-              ⭐ 이 답변이 추천 정확도를 높여요
-            </div>
-          )}
-
-          <h2 className="questionTitle">
-            {["Q6-1", "Q7-1", "Q9-1"].includes(currentQ.id)
-              ? currentQ.text
-              : `${currentQ.id}. ${currentQ.text}`}
-          </h2>
-
-          {currentQ.hint && (
-            <p
-              style={{
-                margin: "4px 0 12px",
-                fontSize: 13,
-                color: "var(--textHint)",
-                lineHeight: 1.65,
-                whiteSpace: "pre-line",
-              }}
-            >
-              {currentQ.hint}
-            </p>
-          )}
-
-          {currentQ.type === "multi" && (
-            <span className="multiBadge">복수 선택 가능</span>
-          )}
-
-          {currentQ.type === "text" ? (
-            <textarea
-              className="textInput"
-              value={currentAnswer?.textValue ?? ""}
-              onChange={(e) => setTextValue(e.target.value)}
-              placeholder={currentQ.placeholder}
-              rows={4}
-            />
-          ) : (
+          <div className="surveyProgressTrack">
             <div
-              className="optionList"
-              role={currentQ.type === "multi" ? "group" : "radiogroup"}
-              aria-label={`문항 ${currentQ.id}`}
-            >
-              {currentQ.options!.map((opt, idx) => {
-                const isMulti = currentQ.type === "multi";
-                const selected = isMulti
-                  ? (currentAnswer?.selectedIndices?.includes(idx) ?? false)
-                  : currentAnswer?.selectedIndex === idx;
-                return (
-                  <label
-                    key={idx}
-                    className="optionCard"
-                    data-selected={selected ? "true" : "false"}
-                  >
-                    <input
-                      type={isMulti ? "checkbox" : "radio"}
-                      name={`q-${currentQ.id}`}
-                      value={idx}
-                      checked={selected}
-                      onChange={() =>
-                        isMulti
-                          ? toggleMultiOption(idx)
-                          : selectSingleOption(idx)
-                      }
-                      style={{ display: "none" }}
-                    />
-                    <span className="optionText">{opt}</span>
-                    <span className="optionCheck">
-                      {selected ? "✓" : ""}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-
-          {showCustomInput && (
-            <input
-              type="text"
-              className="customInput"
-              value={currentAnswer?.customText ?? ""}
-              onChange={(e) => setCustomText(e.target.value)}
-              placeholder="내용을 직접 입력해 주세요"
-              autoFocus
+              className={`surveyProgressFill${showPulse ? " pulse" : ""}`}
+              style={{ width: `${progressPercent}%` }}
             />
-          )}
-
-          {error && <p className="errorText">{error}</p>}
-
-          <div className="navArea">
-            {!isLast ? (
-              <button
-                className="btnPrimary"
-                type="button"
-                onClick={goNext}
-                disabled={submitting}
-              >
-                다음 →
-              </button>
-            ) : (
-              <button
-                className="btnPrimary"
-                type="button"
-                onClick={startEmailFlow}
-                disabled={submitting}
-              >
-                결과 보기
-              </button>
-            )}
-
-            <div className="navBar">
-              <div>
-                {(safeStep > 0 || phase === "survey") && (
-                  <button
-                    className="btnGhost"
-                    type="button"
-                    onClick={goPrev}
-                    disabled={submitting}
-                  >
-                    ← 이전
-                  </button>
-                )}
-              </div>
-              <div>
-                {currentQ.skippable && (
-                  <button
-                    className="btnSkip"
-                    type="button"
-                    onClick={skipQuestion}
-                    disabled={submitting}
-                  >
-                    건너뛰기
-                  </button>
-                )}
-              </div>
-            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
+
+        {showMotivation && (
+          <div className="motivationMessage">
+            절반 왔어요 👏 거의 다 왔어요, 조금만 더요!
+          </div>
+        )}
+
+        {q7EncourageOpen && (
+          <div
+            className="q7EncourageOverlay"
+            role="presentation"
+            onClick={finishQ7Encouragement}
+          >
+            <div
+              className="q7EncourageModal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="q7-encourage-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="q7EncourageEmoji" aria-hidden>
+                🎉
+              </span>
+              <h3 id="q7-encourage-title" className="q7EncourageTitle">
+                거의 다 왔어요!
+              </h3>
+              <p className="q7EncourageSubtitle">
+                조금만 더 하면 끝이에요
+                <br />
+                완료하시면 나에게 딱 맞는
+                <br />
+                AI 서비스 아이디어 5개를 드릴게요!
+              </p>
+              <button
+                type="button"
+                className="q7EncourageBtn"
+                onClick={finishQ7Encouragement}
+              >
+                계속하기 →
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="surveyWrap surveyWrap--withStickyProgress">
+          {!currentQ ? (
+            <div className="questionBlock">
+              <p style={{ color: "var(--textSecondary)", fontSize: 15 }}>
+                문항을 불러오는 중이에요…
+              </p>
+            </div>
+          ) : (
+            <div className="questionBlock" key={animKey}>
+              {showSection && (
+                <div className="sectionTag">{currentQ.section}</div>
+              )}
+
+              {currentQ.showRecommendationBadge && (
+                <div className="surveyRecommendationBadge">
+                  ⭐ 이 답변이 추천 정확도를 높여요
+                </div>
+              )}
+
+              <h2 className="questionTitle">
+                {["Q6-1", "Q7-1", "Q9-1"].includes(currentQ.id)
+                  ? currentQ.text
+                  : `${currentQ.id}. ${currentQ.text}`}
+              </h2>
+
+              {currentQ.hint && (
+                <p
+                  style={{
+                    margin: "4px 0 12px",
+                    fontSize: 13,
+                    color: "var(--textHint)",
+                    lineHeight: 1.65,
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {currentQ.hint}
+                </p>
+              )}
+
+              {currentQ.type === "multi" && (
+                <span className="multiBadge">복수 선택 가능</span>
+              )}
+
+              {currentQ.type === "text" ? (
+                <textarea
+                  className="textInput"
+                  value={currentAnswer?.textValue ?? ""}
+                  onChange={(e) => setTextValue(e.target.value)}
+                  placeholder={currentQ.placeholder}
+                  rows={4}
+                />
+              ) : (
+                <div
+                  className="optionList"
+                  role={currentQ.type === "multi" ? "group" : "radiogroup"}
+                  aria-label={`문항 ${currentQ.id}`}
+                >
+                  {currentQ.options!.map((opt, idx) => {
+                    const isMulti = currentQ.type === "multi";
+                    const selected = isMulti
+                      ? (currentAnswer?.selectedIndices?.includes(idx) ??
+                        false)
+                      : currentAnswer?.selectedIndex === idx;
+                    return (
+                      <label
+                        key={idx}
+                        className="optionCard"
+                        data-selected={selected ? "true" : "false"}
+                      >
+                        <input
+                          type={isMulti ? "checkbox" : "radio"}
+                          name={`q-${currentQ.id}`}
+                          value={idx}
+                          checked={selected}
+                          onChange={() =>
+                            isMulti
+                              ? toggleMultiOption(idx)
+                              : selectSingleOption(idx)
+                          }
+                          style={{ display: "none" }}
+                        />
+                        <span className="optionText">{opt}</span>
+                        <span className="optionCheck">
+                          {selected ? "✓" : ""}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+
+              {showCustomInput && (
+                <input
+                  type="text"
+                  className="customInput"
+                  value={currentAnswer?.customText ?? ""}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  placeholder="내용을 직접 입력해 주세요"
+                  autoFocus
+                />
+              )}
+
+              {error && <p className="errorText">{error}</p>}
+
+              <div className="navArea">
+                {!isLast ? (
+                  <button
+                    className="btnPrimary"
+                    type="button"
+                    onClick={goNext}
+                    disabled={submitting}
+                  >
+                    다음 →
+                  </button>
+                ) : (
+                  <button
+                    className="btnPrimary"
+                    type="button"
+                    onClick={startEmailFlow}
+                    disabled={submitting}
+                  >
+                    결과 보기
+                  </button>
+                )}
+
+                <div className="navBar">
+                  <div>
+                    <button
+                      className="btnGhost"
+                      type="button"
+                      onClick={goPrev}
+                      disabled={submitting}
+                    >
+                      ← 이전
+                    </button>
+                  </div>
+                  <div>
+                    {currentQ.skippable && (
+                      <button
+                        className="btnSkip"
+                        type="button"
+                        onClick={skipQuestion}
+                        disabled={submitting}
+                      >
+                        건너뛰기
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  return null;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 import { getEarlybirdDDay } from "../../lib/earlybird";
@@ -58,6 +58,18 @@ function ideaToolsLabel(idea: ServiceIdea): string {
 }
 
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
+  const toolFlowBoxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = toolFlowBoxRef.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => {
+      e.stopPropagation();
+    };
+    el.addEventListener("touchmove", stop, { passive: true });
+    return () => el.removeEventListener("touchmove", stop);
+  }, []);
+
   const raw = idea.tool_flow?.trim();
   const parts =
     raw && raw.includes("→")
@@ -95,7 +107,7 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   return (
     <div className="ideaDetail">
       <span className="ideaLabel idea-section-label">실제 작동 방식</span>
-      <div className="tool-flow-box">
+      <div ref={toolFlowBoxRef} className="tool-flow-box">
         <div className="tool-flow-box__inner">{rowContent}</div>
       </div>
       <p className="tool-flow-box-hint">← 밀어서 더 보기</p>

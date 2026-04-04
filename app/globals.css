@@ -109,6 +109,107 @@ a {
   border-radius: 0 2px 2px 0;
 }
 
+/* 설문 진행 중 — sticky 헤더 + 트랙 (모바일 기준) */
+.surveyProgressSticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #ffffff;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.surveyProgressStickyRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.surveyProgressTrack {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.surveyProgressFill {
+  height: 100%;
+  max-width: 100%;
+  background: #00c471;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.surveyProgressFill.pulse {
+  animation: progressPulse 1s ease-in-out;
+}
+
+.surveyWrap--withStickyProgress {
+  padding-top: 4px;
+}
+
+.q7EncourageOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.q7EncourageModal {
+  width: 100%;
+  max-width: 340px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.q7EncourageEmoji {
+  display: block;
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.q7EncourageTitle {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.q7EncourageSubtitle {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--textSecondary);
+}
+
+.q7EncourageBtn {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #00c471;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.q7EncourageBtn:active {
+  opacity: 0.92;
+}
+
 /* ═══════════ Card ═══════════ */
 
 .card {
@@ -1656,17 +1757,22 @@ label {
   max-width: min(100%, calc(100vw - 48px));
   overflow-x: scroll !important;
   overflow-y: hidden;
-  touch-action: pan-x pan-y !important;
+  touch-action: pan-x !important;
+  cursor: grab;
   overscroll-behavior-x: auto;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: #00c471 #e5e7eb;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.tool-flow-box:active {
+  cursor: grabbing;
 }
 
 .tool-flow-box::-webkit-scrollbar {
-  height: 4px;
-  display: block;
+  height: 3px;
+  display: block !important;
 }
 
 .tool-flow-box::-webkit-scrollbar-track {
@@ -1774,6 +1880,80 @@ label {
   text-align: center;
 }
 
+/* 나도코딩 — AI 시대 VS 카드 행 (모바일 기준) */
+.nadocodingVsRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 12px;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.nadocodingVsCard {
+  flex: 1;
+  min-width: 0;
+  padding: 16px 12px;
+  border-radius: 12px;
+  text-align: center;
+  box-sizing: border-box;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.nadocodingVsCardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nadocodingVsCardBody {
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  color: #6b7280;
+}
+
+.nadocodingVsCard--emphasis .nadocodingVsCardBody {
+  color: #111827;
+}
+
+.nadocodingVsDivider {
+  flex-shrink: 0;
+  align-self: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #00c471;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+@media (max-width: 375px) {
+  .nadocodingVsCardTitle {
+    font-size: 13px;
+  }
+
+  .nadocodingVsCardBody {
+    font-size: 12px;
+  }
+
+  .nadocodingVsDivider {
+    font-size: 18px;
+  }
+}
+
 /* ═══════════ Mobile ═══════════ */
 
 @media (max-width: 768px) {
@@ -1789,6 +1969,13 @@ label {
 
   .progressBar {
     top: 12px;
+  }
+
+  .surveyProgressSticky {
+    margin-left: -16px;
+    margin-right: -16px;
+    width: calc(100% + 32px);
+    max-width: none;
   }
 
   .surveyWrap .questionBlock {
@@ -1918,8 +2105,10 @@ label {
   .tool-flow-box {
     max-width: calc(100vw - 48px) !important;
     overflow-x: scroll !important;
-    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
     overscroll-behavior-x: auto !important;
+    cursor: grab !important;
   }
 
   .tool-flow-box__inner,

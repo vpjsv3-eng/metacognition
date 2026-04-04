@@ -371,9 +371,12 @@ export default function NadocodingPage() {
               kwColor: "var(--accent)" as const,
             },
             {
-              kw: "10명",
-              label: "소수 정예로\n밀착 관리해요",
-              kwColor: "var(--accent)" as const,
+              kw: "검증된",
+              label: "현직 AI 전문가가\n직접 가르쳐요",
+              kwColor: "#00C471" as const,
+              kwFontSize: 24,
+              descFontSize: 13,
+              descColor: "#374151",
             },
             {
               kw: "온+오프",
@@ -397,7 +400,7 @@ export default function NadocodingPage() {
               <div
                 className="stat-number"
                 style={{
-                  fontSize: 18,
+                  fontSize: (item as { kwFontSize?: number }).kwFontSize ?? 18,
                   fontWeight: 800,
                   color: item.kwColor,
                 }}
@@ -407,8 +410,10 @@ export default function NadocodingPage() {
               <div
                 className="stat-desc"
                 style={{
-                  fontSize: 11,
-                  color: "var(--textSecondary)",
+                  fontSize: (item as { descFontSize?: number }).descFontSize ?? 11,
+                  color:
+                    (item as { descColor?: string }).descColor ??
+                    "var(--textSecondary)",
                   marginTop: 6,
                   lineHeight: 1.45,
                   ...(typeof item.label === "string"
@@ -573,94 +578,33 @@ export default function NadocodingPage() {
               <span style={{ color: "#00C471" }}>만드는 사람</span>이 됩니다
             </span>
           </h2>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-              alignItems: "stretch",
-              gap: 8,
-              justifyContent: "center",
-            }}
-          >
+          <div className="nadocodingVsRow">
             <div
-              className="vs-card"
+              className="vs-card nadocodingVsCard"
               style={{
-                flex: "1 1 120px",
-                minWidth: 0,
-                padding: "16px 10px",
-                borderRadius: 12,
                 background: "#F9FAFB",
                 border: "1px solid #E5E7EB",
-                textAlign: "center",
-                opacity: 0.8,
-                maxWidth: "100%",
+                opacity: 0.9,
               }}
             >
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#111827",
-                  marginBottom: 8,
-                  lineHeight: 1.35,
-                }}
-              >
-                😰 AI를 쓰는 사람
-              </div>
-              <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.55 }}>
+              <div className="nadocodingVsCardTitle">😰 AI를 쓰는 사람</div>
+              <div className="nadocodingVsCardBody">
                 남이 만든 서비스 사용
                 <br />
                 트렌드를 따라가기 바쁜 사람
               </div>
             </div>
+            <div className="nadocodingVsDivider">VS</div>
             <div
-              className="vs-text"
+              className="vs-card nadocodingVsCard nadocodingVsCard--emphasis"
               style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                alignSelf: "center",
-                fontSize: 24,
-                fontWeight: 700,
-                color: "#00C471",
-                flexShrink: 0,
-                width: "min(40px, 100%)",
-                height: "min(40px, 100%)",
-                maxWidth: "100%",
-                aspectRatio: "1",
-                borderRadius: "50%",
-                background: "#FFFFFF",
-              }}
-            >
-              VS
-            </div>
-            <div
-              className="vs-card"
-              style={{
-                flex: "1 1 120px",
-                minWidth: 0,
-                padding: "16px 10px",
-                borderRadius: 12,
                 background: "#FFFFFF",
                 border: "2px solid #00C471",
                 boxShadow: "0 4px 12px rgba(0, 196, 113, 0.2)",
-                textAlign: "center",
-                maxWidth: "100%",
               }}
             >
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#111827",
-                  marginBottom: 8,
-                  lineHeight: 1.35,
-                }}
-              >
-                🚀 AI로 만드는 사람
-              </div>
-              <div style={{ fontSize: 12, color: "#111827", lineHeight: 1.55 }}>
+              <div className="nadocodingVsCardTitle">🚀 AI로 만드는 사람</div>
+              <div className="nadocodingVsCardBody">
                 직접 서비스를 만드는 사람
                 <br />
                 트렌드를 이끄는 사람
