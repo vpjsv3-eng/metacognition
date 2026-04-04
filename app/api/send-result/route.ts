@@ -166,7 +166,9 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!isValidEmail(email)) {
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+    console.error("[send-result] 이메일 유효성 검사 실패:", trimmedEmail);
     return NextResponse.json(
       { ok: false, error: "올바른 이메일 형식이 아닙니다." },
       { status: 400 },
@@ -174,7 +176,7 @@ export async function POST(req: Request) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-  console.log("RESEND_API_KEY 존재:", !!apiKey);
+  console.log("[send-result] RESEND_API_KEY 존재:", !!apiKey);
 
   if (!apiKey) {
     console.log("[send-result] RESEND_API_KEY 미설정 — 이메일 발송 건너뜀");
@@ -182,20 +184,30 @@ export async function POST(req: Request) {
   }
 
   const resend = new Resend(apiKey);
-  const displayName = getDisplayName(email);
+  const displayName = getDisplayName(trimmedEmail);
 
   try {
     const { data, error } = await resend.emails.send({
       from: "onboarding@resend.dev",
-      to: email,
+      to: trimmedEmail,
       subject: `[나도코딩] ${displayName}님의 AI 서비스 아이디어 진단 결과가 도착했어요`,
-      html: buildEmailHtml(email, persona, ideas, first_step),
+      html: buildEmailHtml(trimmedEmail, persona, ideas, first_step),
     });
 
     if (error) {
-      console.error("[send-result] 이메일 발송 실패:", JSON.stringify(error, null, 2));
+      const errorMsg = typeof error === "object" ? JSON.stringify(error, null, 2) : String(error);
+      console.error("[send-result] 이메일 발송 실패:", errorMsg);
+
+      const statusCode = (error as { statusCode?: number }).statusCode;
+      if (statusCode === 429) {
+        return NextResponse.json(
+          { ok: false, error: "일일 발송 한도를 초과했습니다. 잠시 후 다시 시도해주세요.", errorDetail: "rate_limit" },
+          { status: 429 },
+        );
+      }
+
       return NextResponse.json(
-        { ok: false, error: "이메일 발송에 실패했습니다." },
+        { ok: false, error: "이메일 발송에 실패했습니다.", errorDetail: errorMsg },
         { status: 500 },
       );
     }
@@ -203,9 +215,10 @@ export async function POST(req: Request) {
     console.log("[send-result] 이메일 발송 성공:", JSON.stringify(data));
     return NextResponse.json({ ok: true, data });
   } catch (e) {
-    console.error("[send-result] Resend 오류:", e);
+    const errMessage = e instanceof Error ? e.message : String(e);
+    console.error("[send-result] Resend 오류:", errMessage, e);
     return NextResponse.json(
-      { ok: false, error: "이메일 발송 중 오류가 발생했습니다." },
+      { ok: false, error: "이메일 발송 중 오류가 발생했습니다.", errorDetail: errMessage },
       { status: 500 },
     );
   }

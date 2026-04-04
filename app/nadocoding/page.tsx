@@ -3,12 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
 
-const TARGET_LIST = [
-  { icon: "🤔", text: "AI에 관심은 있지만 뭘 만들어야 할지 모르는 분" },
-  { icon: "💻", text: "코딩을 전혀 몰라도 내 서비스를 만들고 싶은 분" },
-  { icon: "🚀", text: "2주 안에 배포된 내 AI 서비스를 갖고 싶은 분" },
-];
-
 type CurriculumItem = {
   label: string;
   title: string;
@@ -115,6 +109,54 @@ const DIFFERENTIATORS = [
     icon: "👨‍👩‍👧",
     title: "혼자 하지 않아요",
     desc: "막히면 디스코드에서 바로 질문.\n같은 목표를 가진 동료들과\n함께 완주해요.",
+  },
+];
+
+const SERVICE_EXAMPLES = [
+  {
+    emoji: "📰",
+    name: "AI 뉴스 큐레이터",
+    desc: "매일 아침 관심 분야 뉴스를\nAI가 요약해서 보내주는 앱",
+    tags: ["#직장인", "#정보수집"],
+  },
+  {
+    emoji: "✍️",
+    name: "유튜브 스크립트 생성기",
+    desc: "주제만 입력하면 AI가\n영상 스크립트를 써주는 도구",
+    tags: ["#크리에이터", "#콘텐츠"],
+  },
+  {
+    emoji: "🍽️",
+    name: "식단 분석 챗봇",
+    desc: "오늘 먹은 것을 입력하면\n영양 분석과 추천을 해주는 앱",
+    tags: ["#건강", "#라이프스타일"],
+  },
+  {
+    emoji: "📧",
+    name: "비즈니스 이메일 작성기",
+    desc: "상황만 입력하면 깔끔한\n업무 이메일을 자동 생성",
+    tags: ["#직장인", "#업무자동화"],
+  },
+  {
+    emoji: "👶",
+    name: "육아 일기 자동 정리",
+    desc: "오늘 있었던 일을 입력하면\n예쁜 육아 일기로 정리해주는 앱",
+    tags: ["#부모", "#육아"],
+  },
+];
+
+const REVIEWS = [
+  {
+    name: "김O진 · 직장인",
+    text: "솔직히 처음엔 2주 만에 뭘 만들겠어 싶었어요. 근데 OT 날 처음으로 배포 성공하고 나서 생각이 완전히 바뀌었어요. 나도 할 수 있구나 싶었달까요.",
+  },
+  {
+    name: "박O현 · 프리랜서",
+    text: "AI 툴은 써봤는데 뭘 만들어야 할지 몰라서 항상 멈췄거든요. 진단으로 내 아이디어를 찾고 그걸 직접 만들었을 때 짜릿했어요.",
+  },
+  {
+    name: "이O은 · 취업 준비생",
+    text: "포트폴리오가 없어서 고민이었는데 2주 만에 실제 배포된 서비스가 생겼어요. 면접에서도 이걸 보여줄 수 있을 것 같아요.",
   },
 ];
 
@@ -237,7 +279,6 @@ export default function NadocodingPage() {
   const curriculumRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<Set<number>>(new Set());
   const [showSticky, setShowSticky] = useState(false);
-  const heroRef = useRef<HTMLElement>(null);
 
   const countdown = useCountdown();
 
@@ -253,10 +294,6 @@ export default function NadocodingPage() {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
   }
 
-  function scrollToCurriculum() {
-    curriculumRef.current?.scrollIntoView({ behavior: "smooth" });
-  }
-
   function toggleFaq(idx: number) {
     setOpenFaq((prev) => {
       const next = new Set(prev);
@@ -270,42 +307,26 @@ export default function NadocodingPage() {
 
   return (
     <main className="container" style={{ maxWidth: 600, paddingBottom: showSticky ? 140 : 80 }}>
-      {/* 카운트다운 타이머 */}
-      <div className="countdownTimer">
-        {countdown ? (
-          <>
-            🔥 얼리버드 마감까지{" "}
-            {countdown.days}일 {String(countdown.hours).padStart(2, "0")}시간{" "}
-            {String(countdown.minutes).padStart(2, "0")}분{" "}
-            {String(countdown.seconds).padStart(2, "0")}초
-          </>
-        ) : (
-          "얼리버드가 종료됐어요"
-        )}
-      </div>
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: 14,
-          fontWeight: 600,
-          color: "#E53E3E",
-          lineHeight: 1.6,
-          margin: "0 0 16px",
-          padding: "0 16px",
-        }}
-      >
-        ⚠️ 늦기 전에 지금 무료로 알림 신청하세요!
-        <br />
-        마감 후에는 정가 299,000원으로 변경돼요.
-      </p>
-
       {/* ① 히어로 섹션 */}
-      <section ref={heroRef} className="heroSection">
-        <div className="recruitBadge">🔥 1기 모집 중 · 선착순 10명</div>
+      <section style={{ textAlign: "center", padding: "40px 0 44px" }}>
+        <div
+          style={{
+            display: "inline-block",
+            padding: "8px 18px",
+            borderRadius: 999,
+            background: "#EF4444",
+            color: "white",
+            fontSize: 15,
+            fontWeight: 700,
+            marginBottom: 20,
+          }}
+        >
+          🔥 얼리버드 마감 D-{countdown ? countdown.days : 0} · 선착순 10명
+        </div>
 
         <h1
           style={{
-            fontSize: 32,
+            fontSize: 28,
             fontWeight: 800,
             margin: "0 0 12px",
             letterSpacing: -0.5,
@@ -313,69 +334,101 @@ export default function NadocodingPage() {
             color: "var(--text)",
           }}
         >
-          코딩 몰라도 괜찮아요
+          아이디어도 없고 코딩도 몰라도
           <br />
-          나도 코딩 1기
+          2주 안에 내 AI 서비스가 생깁니다
         </h1>
         <p
           style={{
             fontSize: 16,
-            margin: "0 0 20px",
+            margin: "0 0 28px",
             lineHeight: 1.7,
             color: "var(--textSecondary)",
           }}
         >
-          아이디어 발굴부터 AI 서비스 배포까지
+          아이디어 발굴부터 실제 서비스 배포까지
           <br />
-          처음 하는 사람도 2주면 완성합니다
+          올인원 과정
         </p>
 
-        <p
+        {/* 숫자 강조 4개 */}
+        <div
           style={{
-            fontSize: 14,
-            color: "var(--textSecondary)",
-            margin: "0 0 20px",
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 12,
+            marginBottom: 28,
           }}
         >
-          📅 2026년 4월 오픈 예정 | 👥 1기 모집 선착순 10명 한정
-        </p>
+          {[
+            { num: "2주", label: "과정 기간" },
+            { num: "10명", label: "소수 정예" },
+            { num: "2회", label: "오프라인 세션" },
+            { num: "월 2~3만", label: "AI 툴 비용 전부" },
+          ].map((item, i) => (
+            <div
+              key={i}
+              style={{
+                padding: "16px 8px",
+                borderRadius: 12,
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--accent)" }}>
+                {item.num}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--textSecondary)", marginTop: 4 }}>
+                {item.label}
+              </div>
+            </div>
+          ))}
+        </div>
 
-        <div style={{ margin: "0 0 24px" }}>
+        {/* 카운트다운 */}
+        <div className="countdownTimer" style={{ marginBottom: 20 }}>
+          {countdown ? (
+            <>
+              ⏰ 얼리버드 마감까지{" "}
+              {countdown.days}일 {String(countdown.hours).padStart(2, "0")}시간{" "}
+              {String(countdown.minutes).padStart(2, "0")}분{" "}
+              {String(countdown.seconds).padStart(2, "0")}초
+            </>
+          ) : (
+            "얼리버드가 종료됐어요"
+          )}
+        </div>
+
+        {/* 가격 */}
+        <div style={{ margin: "0 0 20px" }}>
           <span className="priceOriginal">299,000원</span>
           <span className="priceEarlybird">99,000원</span>
           <p
             style={{
               margin: "6px 0 0",
-              fontSize: 13,
-              color: "var(--textHint)",
+              fontSize: 14,
+              fontWeight: 600,
+              color: "#EF4444",
             }}
           >
-            사전 신청자 한정 특별가
+            지금 신청하면 200,000원 절약
           </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <button
-            className="btnPrimary"
-            type="button"
-            onClick={scrollToForm}
-            style={{ fontSize: 16 }}
-          >
-            무료로 사전 신청하기
-          </button>
-          <button
-            className="btnOutline"
-            type="button"
-            onClick={scrollToCurriculum}
-          >
-            과정 자세히 보기
-          </button>
-        </div>
+        <button
+          className="btnPrimary"
+          type="button"
+          onClick={scrollToForm}
+          style={{ fontSize: 16, marginBottom: 16 }}
+        >
+          지금 얼리버드 신청하기
+        </button>
 
-        {/* 히어로 미니 신청 폼 */}
+        {/* 미니 신청 폼 */}
         <div
           style={{
-            marginTop: 28,
+            marginTop: 12,
             padding: "20px",
             borderRadius: 14,
             border: "1px solid var(--border)",
@@ -398,7 +451,122 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ② 이런 분들을 위해 만들었어요 */}
+      {/* ② 공감 후킹 섹션 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 20px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            혹시 이런 생각 해본 적 있나요?
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {[
+              "ChatGPT로 뭔가 만들어보고 싶은데\n뭘 만들어야 할지 모르겠어",
+              "AI 서비스 만드는 건 개발자만\n할 수 있는 거 아닌가?",
+              "아이디어는 있는데 구현을\n못하니까 그냥 포기했어",
+              "AI 뭔가 해야 할 것 같은데\n어디서 시작해야 할지 모르겠어",
+            ].map((text, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  fontSize: 15,
+                  color: "var(--text)",
+                  lineHeight: 1.6,
+                }}
+              >
+                <span style={{ color: "var(--accent)", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                <span style={{ whiteSpace: "pre-line" }}>{text}</span>
+              </div>
+            ))}
+          </div>
+          <p
+            style={{
+              margin: "24px 0 0",
+              textAlign: "center",
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--accent)",
+              lineHeight: 1.6,
+            }}
+          >
+            나도 코딩 1기는 정확히 이런 분들을 위해 만들었어요
+          </p>
+        </div>
+      </section>
+
+      {/* ③ 왜 지금 해야 하나 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 20px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            AI 시대, 만드는 사람이 됩니다
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div
+              style={{
+                padding: "20px 16px",
+                borderRadius: 12,
+                background: "#F3F4F6",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--textSecondary)", marginBottom: 8 }}>
+                AI를 쓰는 사람
+              </div>
+              <div style={{ fontSize: 13, color: "var(--textHint)", lineHeight: 1.6 }}>
+                남이 만든 서비스를 사용
+              </div>
+            </div>
+            <div
+              style={{
+                padding: "20px 16px",
+                borderRadius: 12,
+                background: "var(--accentSoft)",
+                border: "2px solid var(--accent)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--accent)", marginBottom: 8 }}>
+                AI로 만드는 사람
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
+                내가 직접 서비스를 만들고
+                <br />
+                기회를 만드는 사람
+              </div>
+            </div>
+          </div>
+          <p
+            style={{
+              margin: "20px 0 0",
+              textAlign: "center",
+              fontSize: 14,
+              color: "var(--textSecondary)",
+              lineHeight: 1.6,
+            }}
+          >
+            나도코딩은 후자를 선택한 사람들을 위한 과정이에요
+          </p>
+        </div>
+      </section>
+
+      {/* ④ 이런 분들을 위해 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -410,69 +578,49 @@ export default function NadocodingPage() {
               color: "var(--text)",
             }}
           >
-            이런 분들을 위해 만들었어요
+            이런 분이라면 딱 맞아요
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {TARGET_LIST.map((item, i) => (
+            {[
+              { icon: "🤔", text: "AI에 관심은 있지만\n뭘 만들어야 할지 모르는 분" },
+              { icon: "💻", text: "코딩을 전혀 몰라도\n내 서비스를 만들고 싶은 분" },
+              { icon: "🚀", text: "2주 안에 배포된\n내 AI 서비스를 갖고 싶은 분" },
+            ].map((item, i) => (
               <div key={i} className="targetCard">
                 <span className="targetIcon">{item.icon}</span>
-                <span>{item.text}</span>
+                <span style={{ whiteSpace: "pre-line" }}>{item.text}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ③ 2주 후 내 모습 */}
+      {/* ⑤ 수강생이 만들게 될 서비스 예시 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
             style={{
               fontSize: 18,
               fontWeight: 700,
-              margin: "0 0 16px",
+              margin: "0 0 4px",
               textAlign: "center",
               color: "var(--text)",
             }}
           >
-            2주 후 내 모습
+            이런 서비스를 직접 만들게 돼요
           </h2>
-          <div
+          <p
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            {BENEFITS.map((b, i) => (
-              <div key={i} className="benefitCard" style={{ flexDirection: "column", alignItems: "flex-start", gap: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span className="benefitIcon">{b.icon}</span>
-                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{b.title}</strong>
-                </div>
-                <span style={{ fontSize: 13, color: "var(--textSecondary)", paddingLeft: 34 }}>{b.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ④ 나도 코딩이 다른 이유 */}
-      <section style={{ marginBottom: 24 }}>
-        <div className="card" style={{ padding: 28 }}>
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              margin: "0 0 16px",
+              margin: "0 0 20px",
               textAlign: "center",
-              color: "var(--text)",
+              fontSize: 13,
+              color: "var(--textSecondary)",
             }}
           >
-            나도 코딩이 다른 이유
-          </h2>
+            코딩 없이, 바이브 코딩 툴로만 만든 실제 예시
+          </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {DIFFERENTIATORS.map((d, i) => (
+            {SERVICE_EXAMPLES.map((ex, i) => (
               <div
                 key={i}
                 style={{
@@ -482,39 +630,45 @@ export default function NadocodingPage() {
                   background: "#FFFFFF",
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    marginBottom: 8,
-                  }}
-                >
-                  <span style={{ fontSize: 22 }}>{d.icon}</span>
-                  <strong
-                    style={{ fontSize: 15, color: "var(--text)" }}
-                  >
-                    {d.title}
-                  </strong>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <span style={{ fontSize: 24 }}>{ex.emoji}</span>
+                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{ex.name}</strong>
                 </div>
                 <p
                   style={{
-                    margin: 0,
+                    margin: "0 0 10px",
                     fontSize: 14,
                     color: "var(--textSecondary)",
-                    lineHeight: 1.65,
+                    lineHeight: 1.6,
                     whiteSpace: "pre-line",
                   }}
                 >
-                  {d.desc}
+                  {ex.desc}
                 </p>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {ex.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: 999,
+                        background: "var(--accentSoft)",
+                        color: "var(--accent)",
+                        fontSize: 12,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ⑤ 2주 커리큘럼 */}
+      {/* ⑥ 2주 커리큘럼 */}
       <section ref={curriculumRef} style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -542,18 +696,9 @@ export default function NadocodingPage() {
                       borderRadius: 999,
                       fontSize: 11,
                       fontWeight: 600,
-                      background:
-                        item.mode === "offline"
-                          ? "var(--accent)"
-                          : "var(--surface)",
-                      color:
-                        item.mode === "offline"
-                          ? "#fff"
-                          : "var(--textSecondary)",
-                      border:
-                        item.mode === "offline"
-                          ? "none"
-                          : "1px solid var(--border)",
+                      background: item.mode === "offline" ? "var(--accent)" : "var(--surface)",
+                      color: item.mode === "offline" ? "#fff" : "var(--textSecondary)",
+                      border: item.mode === "offline" ? "none" : "1px solid var(--border)",
                     }}
                   >
                     {item.mode === "offline" ? "오프라인" : "온라인"}
@@ -567,7 +712,292 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑥ FAQ */}
+      {/* ⑦ 2주 후 내 모습 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 16px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            2주 후 내 모습
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {BENEFITS.map((b, i) => (
+              <div key={i} className="benefitCard" style={{ flexDirection: "column", alignItems: "flex-start", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span className="benefitIcon">{b.icon}</span>
+                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{b.title}</strong>
+                </div>
+                <span style={{ fontSize: 13, color: "var(--textSecondary)", paddingLeft: 34 }}>{b.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ⑧ 나도코딩이 다른 이유 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 16px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            나도 코딩이 다른 이유
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {DIFFERENTIATORS.map((d, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "18px 20px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border)",
+                  background: "#FFFFFF",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <span style={{ fontSize: 22 }}>{d.icon}</span>
+                  <strong style={{ fontSize: 15, color: "var(--text)" }}>{d.title}</strong>
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 14,
+                    color: "var(--textSecondary)",
+                    lineHeight: 1.65,
+                    whiteSpace: "pre-line",
+                  }}
+                >
+                  {d.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ⑨ 강사 소개 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 20px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            검증된 전문가와 함께해요
+          </h2>
+
+          {/* 메인 강사 */}
+          <div
+            style={{
+              padding: "24px 20px",
+              borderRadius: 14,
+              border: "1px solid var(--border)",
+              background: "#FFFFFF",
+              marginBottom: 12,
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: "50%",
+                background: "#1F2937",
+                margin: "0 auto 12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 50,
+                  background: "#4B5563",
+                  borderRadius: "50% 50% 0 0",
+                  position: "absolute",
+                  bottom: 10,
+                }}
+              />
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  background: "#6B7280",
+                  borderRadius: "50%",
+                  position: "absolute",
+                  top: 20,
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "white",
+                  bottom: 8,
+                  background: "rgba(0,0,0,0.5)",
+                  padding: "2px 10px",
+                  borderRadius: 999,
+                }}
+              >
+                🔒 곧 공개됩니다
+              </span>
+            </div>
+            <strong style={{ fontSize: 16, color: "var(--text)", display: "block", marginBottom: 6 }}>
+              메인 강사 (공개 예정)
+            </strong>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "4px 12px",
+                borderRadius: 999,
+                background: "var(--accentSoft)",
+                color: "var(--accent)",
+                fontSize: 12,
+                fontWeight: 600,
+                marginBottom: 12,
+              }}
+            >
+              검증된 현직 AI 개발자
+            </span>
+            <div style={{ fontSize: 14, color: "var(--textSecondary)", lineHeight: 1.8, textAlign: "left", paddingLeft: 20 }}>
+              · 국내 AI 앱 3개 직접 런칭
+              <br />
+              · 실무 중심 커리큘럼 설계
+              <br />
+              · 현직 AI 서비스 기획 및 개발
+            </div>
+          </div>
+
+          {/* 보조 강사 */}
+          <div
+            style={{
+              padding: "24px 20px",
+              borderRadius: 14,
+              border: "1px solid var(--border)",
+              background: "#FFFFFF",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: "50%",
+                background: "var(--accent)",
+                margin: "0 auto 12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 32,
+                fontWeight: 800,
+                color: "white",
+              }}
+            >
+              J
+            </div>
+            <strong style={{ fontSize: 16, color: "var(--text)", display: "block", marginBottom: 6 }}>
+              제이 (J)
+            </strong>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "4px 12px",
+                borderRadius: 999,
+                background: "var(--accentSoft)",
+                color: "var(--accent)",
+                fontSize: 12,
+                fontWeight: 600,
+                marginBottom: 12,
+              }}
+            >
+              나도코딩 1기 총괄
+            </span>
+            <div style={{ fontSize: 14, color: "var(--textSecondary)", lineHeight: 1.8, textAlign: "left", paddingLeft: 20 }}>
+              · 전) 교육 기획 & 운영 전문가
+              <br />
+              · 커리큘럼 설계 및 수강생 관리 담당
+              <br />
+              · 아이디어 발굴 → 배포 전 과정 퍼실리테이터
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ⑩ 수강 후기 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 4px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            먼저 경험해본 분들의 이야기
+          </h2>
+          <p
+            style={{
+              margin: "0 0 20px",
+              textAlign: "center",
+              fontSize: 13,
+              color: "var(--textSecondary)",
+            }}
+          >
+            베타 테스터 후기
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {REVIEWS.map((review, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "20px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border)",
+                  background: "#FFFFFF",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <strong style={{ fontSize: 14, color: "var(--text)" }}>{review.name}</strong>
+                  <span style={{ fontSize: 14, letterSpacing: 2 }}>⭐⭐⭐⭐⭐</span>
+                </div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 14,
+                    color: "var(--textSecondary)",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  &ldquo;{review.text}&rdquo;
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ⑪ FAQ */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -588,15 +1018,9 @@ export default function NadocodingPage() {
               const isOpen = openFaq.has(idx);
               return (
                 <div key={idx} className="faqItem">
-                  <div
-                    className="faqQuestion"
-                    onClick={() => toggleFaq(idx)}
-                  >
+                  <div className="faqQuestion" onClick={() => toggleFaq(idx)}>
                     <span>Q. {item.q}</span>
-                    <span
-                      className="faqArrow"
-                      data-open={isOpen ? "true" : "false"}
-                    >
+                    <span className="faqArrow" data-open={isOpen ? "true" : "false"}>
                       ▼
                     </span>
                   </div>
@@ -619,7 +1043,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑦ 사전 신청 폼 */}
+      {/* ⑫ 최하단 신청 폼 */}
       <section ref={formRef} className="greenCtaSection">
         <h2
           style={{
@@ -628,7 +1052,7 @@ export default function NadocodingPage() {
             margin: "0 0 8px",
           }}
         >
-          사전 무료 신청하기
+          지금 신청하면 얼리버드 99,000원
         </h2>
         <p
           style={{
@@ -637,36 +1061,38 @@ export default function NadocodingPage() {
             lineHeight: 1.6,
           }}
         >
-          지금 신청해두시면 1기 오픈 시 가장 먼저 알려드려요
-          <br />
-          얼리버드 할인가 99,000원도 자동으로 적용돼요 🎉
+          1기 오픈 시 가장 먼저 안내드릴게요
+        </p>
+        <p
+          style={{
+            margin: "0 0 16px",
+            fontSize: 14,
+            fontWeight: 700,
+            color: "#FDE68A",
+          }}
+        >
+          ⚠️ 선착순 10명 마감 시 조기 종료
         </p>
 
-        <div style={{ margin: "12px 0 8px", textAlign: "center" }}>
+        <div style={{ margin: "12px 0 16px", textAlign: "center" }}>
           <span className="priceOriginal" style={{ color: "rgba(255,255,255,0.6)" }}>
             299,000원
           </span>
-          <span style={{ fontSize: 28, fontWeight: 800, color: "#FCA5A5" }}>
+          <span
+            style={{
+              display: "inline-block",
+              fontSize: 28,
+              fontWeight: 800,
+              color: "#EF4444",
+              background: "white",
+              padding: "4px 16px",
+              borderRadius: 8,
+            }}
+          >
             99,000원
           </span>
         </div>
 
-        <div
-          style={{
-            margin: "12px auto 20px",
-            maxWidth: 380,
-            padding: "12px 16px",
-            borderRadius: 10,
-            background: "rgba(255,255,255,0.15)",
-            fontSize: 13,
-            lineHeight: 1.6,
-            textAlign: "center",
-          }}
-        >
-          💡 지금은 결제가 필요 없어요
-          <br />
-          신청만 해두시면 오픈 알림 + 얼리버드 혜택이 자동 적용돼요
-        </div>
         <div style={{ maxWidth: 400, margin: "0 auto" }}>
           <CtaForm onGreenBg source="nadocoding_page" />
         </div>
@@ -676,14 +1102,14 @@ export default function NadocodingPage() {
       {showSticky && (
         <div className="stickyBar">
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
-            🔥 얼리버드 마감 D-3
+            🔥 얼리버드 마감 D-{countdown ? countdown.days : 0}
           </span>
           <button
             className="btnPrimary"
             type="button"
             onClick={scrollToForm}
           >
-            사전 무료 신청하기
+            무료로 사전 신청하기
           </button>
         </div>
       )}

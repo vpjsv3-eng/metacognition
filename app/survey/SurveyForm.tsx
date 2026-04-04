@@ -30,16 +30,16 @@ const JOB_DETAIL_PLACEHOLDERS: Record<string, string> = {
 const STORAGE_KEY = "survey_progress";
 
 const KEYWORD_OPTIONS = [
-  "절약/재테크에 관심 많아요",
-  "새로운 걸 배우는 걸 좋아해요",
-  "부업이나 수익화에 관심 있어요",
-  "반복적인 업무를 줄이고 싶어요",
-  "글쓰기/콘텐츠 만들기를 즐겨요",
-  "운동/건강 관리에 신경 써요",
-  "육아나 가족 관련 정보를 많이 찾아봐요",
-  "요리/인테리어 등 라이프스타일에 관심 많아요",
-  "직무 역량을 키우고 싶어요",
-  "창업/사업 아이디어를 구상 중이에요",
+  "재테크 / 절약",
+  "배우는 걸 좋아해요",
+  "부업 / 수익화",
+  "업무 자동화",
+  "콘텐츠 제작",
+  "건강 / 운동",
+  "육아 / 가족",
+  "라이프스타일",
+  "직무 역량 향상",
+  "창업 / 사이드 프로젝트",
 ];
 
 type AnswerState = {
@@ -262,7 +262,7 @@ export default function SurveyForm() {
         if (prev < LOADING_STEPS.length - 1) return prev + 1;
         return prev;
       });
-    }, 1200);
+    }, 2000);
     return () => clearInterval(interval);
   }, [phase]);
 
@@ -289,6 +289,7 @@ export default function SurveyForm() {
     setError(null);
     setCurrentStep(step);
     setAnimKey((k) => k + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function selectSingleOption(idx: number) {
@@ -982,7 +983,7 @@ export default function SurveyForm() {
     );
   }
 
-  // ── Loading screen with cat GIF ──
+  // ── Loading screen with CSS animation ──
   if (phase === "loading") {
     return (
       <>
@@ -991,22 +992,25 @@ export default function SurveyForm() {
         </div>
         <div className="loadingWrap">
           <div className="loadingContent">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif"
-              alt="AI 분석 중"
-              width={180}
-              height={180}
-              style={{ borderRadius: 16, marginBottom: 16, objectFit: "cover" }}
-              onError={(e) => {
-                const img = e.target as HTMLImageElement;
-                if (img.src.includes("3oEjI6SIIHBdRxXI40")) {
-                  img.src = "https://media.giphy.com/media/l3nWhI38IWDofyDrW/giphy.gif";
-                } else if (img.src.includes("l3nWhI38IWDofyDrW")) {
-                  img.src = "https://media.giphy.com/media/RkDkBsVvWDkFPJAKPY/giphy.gif";
-                }
-              }}
-            />
+            <span style={{ fontSize: 64, display: "block", marginBottom: 12 }}>🤖</span>
+
+            <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 24 }}>
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: "var(--accent)",
+                    display: "inline-block",
+                    animation: `loadingPulse 1.2s ease-in-out infinite`,
+                    animationDelay: `${i * 0.3}s`,
+                  }}
+                />
+              ))}
+            </div>
+
             <h2
               style={{
                 fontSize: 20,
@@ -1015,7 +1019,7 @@ export default function SurveyForm() {
                 color: "var(--text)",
               }}
             >
-              AI가 답변을 분석하고 있어요 🤖
+              AI가 답변을 분석하고 있어요
             </h2>
 
             <div
@@ -1051,7 +1055,7 @@ export default function SurveyForm() {
                       i <= loadingStep
                         ? "translateY(0)"
                         : "translateY(8px)",
-                    transition: "opacity 0.5s ease, transform 0.5s ease",
+                    transition: "opacity 0.6s ease, transform 0.6s ease",
                     margin: 0,
                     fontSize: 14,
                     color:

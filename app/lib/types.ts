@@ -26,6 +26,7 @@ export type ServiceIdea = {
   reason: string;
   core_feature: string;
   how_it_works: string;
+  impact?: string;
   difficulty: string;
   period: string;
   tool: string;

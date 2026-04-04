@@ -30,17 +30,16 @@ function AccordionIdea({
   const rank = idea.rank ?? index + 2;
 
   return (
-    <div className="ideaCard">
+    <div className="ideaCard" style={{ padding: 0 }}>
       <div
-        className="accordionHeader"
         onClick={() => setOpen((v) => !v)}
-        style={{ padding: "16px" }}
+        style={{ padding: "16px", cursor: "pointer" }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span
             style={{
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               borderRadius: "50%",
               background: "var(--accentSoft)",
               color: "var(--accent)",
@@ -48,41 +47,26 @@ function AccordionIdea({
               alignItems: "center",
               justifyContent: "center",
               fontWeight: "bold",
-              fontSize: 18,
+              fontSize: 16,
               flexShrink: 0,
             }}
           >
             {rank}
           </span>
-          <div style={{ minWidth: 0 }}>
-            <strong style={{ fontSize: 16, color: "var(--text)", display: "block" }}>
-              {idea.name}
-            </strong>
-            <p
-              style={{
-                margin: "4px 0 0",
-                color: "var(--textSecondary)",
-                fontSize: 14,
-                lineHeight: 1.4,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {idea.oneline}
-            </p>
-          </div>
+          <strong style={{ fontSize: 16, color: "var(--text)" }}>
+            {idea.name}
+          </strong>
         </div>
-        <button
-          className="accordionToggle"
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen((v) => !v);
+        <p
+          style={{
+            margin: "8px 0 0",
+            color: "var(--textSecondary)",
+            fontSize: 14,
+            lineHeight: 1.5,
           }}
         >
-          {open ? "▲ 접기" : "▼ 자세히 보기"}
-        </button>
+          {idea.oneline}
+        </p>
       </div>
 
       {open && (
@@ -106,34 +90,28 @@ function AccordionIdea({
             <span className="ideaMetaTag">⏱ {idea.period}</span>
             <span className="ideaMetaTag">🛠 {idea.tool}</span>
           </div>
-          <div className="ideaCta">
-            <p
-              style={{
-                margin: "0 0 8px",
-                fontSize: 13,
-                color: "var(--textSecondary)",
-              }}
-            >
-              🔒 이 아이디어로 직접 만들어보고 싶다면?
-            </p>
-            <a
-              href="/nadocoding"
-              style={{
-                display: "inline-block",
-                padding: "8px 16px",
-                borderRadius: 8,
-                background: "var(--accent)",
-                color: "white",
-                fontSize: 13,
-                fontWeight: 600,
-                textDecoration: "none",
-              }}
-            >
-              나도 코딩 1기 자세히 보기 →
-            </a>
-          </div>
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: "100%",
+          padding: "12px 16px",
+          border: "none",
+          borderTop: "1px solid var(--border)",
+          background: "var(--surface)",
+          color: "var(--accent)",
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: "pointer",
+          borderRadius: "0 0 14px 14px",
+          textAlign: "center",
+        }}
+      >
+        {open ? "▲ 접기" : "▼ 자세히 보기"}
+      </button>
     </div>
   );
 }
@@ -358,14 +336,14 @@ export default function CompletePage() {
         )}
       </div>
 
-      {/* ═══ PART 1: 나의 성향 분석 (개선) ═══ */}
+      {/* ═══ PART 1: 나의 성향 분석 (축소) ═══ */}
       {persona && (
-        <div className="personaCard">
+        <div className="personaCard" style={{ padding: "18px 20px", marginBottom: 12 }}>
           <h2
             style={{
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: 800,
-              margin: "0 0 12px",
+              margin: "0 0 8px",
               color: "var(--text)",
             }}
           >
@@ -373,17 +351,21 @@ export default function CompletePage() {
           </h2>
           <p
             style={{
-              margin: "0 0 16px",
-              fontSize: 15,
-              lineHeight: 1.8,
+              margin: "0 0 10px",
+              fontSize: 14,
+              lineHeight: 1.7,
               color: "var(--text)",
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
             }}
           >
             {persona.summary}
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            <span className="personaStrengthBadge">💪 강점: {persona.strength}</span>
-            <span className="personaNeedsBadge">🎯 핵심 니즈: {persona.painpoint}</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <span className="personaStrengthBadge" style={{ fontSize: 12, padding: "4px 12px" }}>💪 {persona.strength}</span>
+            <span className="personaNeedsBadge" style={{ fontSize: 12, padding: "4px 12px" }}>🎯 {persona.painpoint}</span>
           </div>
         </div>
       )}
@@ -453,9 +435,12 @@ export default function CompletePage() {
             fontWeight: 700,
             margin: "0 0 8px",
             color: "var(--text)",
+            lineHeight: 1.5,
           }}
         >
-          이 아이디어, 직접 만들어볼 수 있어요
+          지금 추천받은 &lsquo;{firstIdea?.name || "AI 서비스"}&rsquo;
+          <br />
+          2주 안에 직접 만들 수 있어요
         </h3>
         <p
           style={{
@@ -465,11 +450,9 @@ export default function CompletePage() {
             color: "var(--textSecondary)",
           }}
         >
-          코딩 몰라도 괜찮아요.
+          코딩 한 줄 없이, AI 툴로만 만들어요
           <br />
-          2주 안에 기획 → 구현 → 배포까지
-          <br />
-          나도 코딩 1기에서 함께해요.
+          4월 18일 토요일, 10명과 함께 시작해요
         </p>
         <div
           style={{
@@ -477,15 +460,27 @@ export default function CompletePage() {
             flexDirection: "column",
             gap: 6,
             alignItems: "center",
-            marginBottom: 20,
+            marginBottom: 16,
             fontSize: 14,
             color: "var(--text)",
           }}
         >
           <span>✅ 코딩 지식 0이어도 OK</span>
           <span>✅ 2주 안에 실제 배포까지</span>
-          <span>✅ 선착순 10명 · 얼리버드 신청 중</span>
+          <span>✅ 선착순 10명 · 지금 얼리버드 신청 중</span>
         </div>
+        <p
+          style={{
+            margin: "0 0 16px",
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: "var(--textSecondary)",
+          }}
+        >
+          나도코딩은 아이디어 발굴부터 AI 서비스 배포까지
+          <br />
+          코딩 없이 2주 안에 완성하는 올인원 과정이에요.
+        </p>
         <button
           className="btn"
           type="button"

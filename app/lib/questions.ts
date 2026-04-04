@@ -47,6 +47,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       "쇼핑 / 커머스",
       "콘텐츠 / 엔터테인먼트 (유튜브, 넷플릭스 등)",
       "커뮤니티 / SNS",
+      "AI 툴 (ChatGPT, Claude 등)",
       "기타 (직접 입력)",
     ],
     hasCustomOption: true,
@@ -210,8 +211,8 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: "Q11",
     section: "AI / 기술 관련",
-    text: "지금 가장 원하는 게 뭐예요? (복수 선택)",
-    type: "multi",
+    text: "지금 가장 원하는 게 뭐예요?",
+    type: "single",
     options: [
       "시간적 여유",
       "부업 수입",
