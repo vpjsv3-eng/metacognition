@@ -5,71 +5,76 @@ import CtaForm from "../components/CtaForm";
 import { EARLYBIRD_DEADLINE_MS, getEarlybirdDDay } from "../lib/earlybird";
 import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
-type CurriculumItem = {
-  label: string;
+type CurriculumAccordionItem = {
+  mainBadge: { text: string; variant: "outside" | "day" };
   title: string;
-  desc: string;
-  mode: "online" | "offline";
+  subBadge: { text: string; variant: "offline" | "online" | "session" };
+  detail: string;
 };
 
-const CURRICULUM: CurriculumItem[] = [
+const CURRICULUM_ACCORDION: CurriculumAccordionItem[] = [
   {
-    label: "WEEK 0 (4.13 월 ~ 4.17 금)",
-    title: "사전 준비",
-    mode: "online",
-    desc: `사전 VOD 3편 시청 + 과제 제출
-· VOD 1: AI 시대에 왜 직접 만들어야 하는가 (15분)
-· VOD 2: 바이브 코딩이란? Lovable / Bolt 툴 소개 (15분)
-· VOD 3: AI 프롬프트 잘 쓰는 법 기초 (15분)
-· 과제: 진단 결과를 참고해서
-  내가 만들고 싶은 서비스 아이디어 3가지 적어오기`,
+    mainBadge: { text: "과정 외 준비", variant: "outside" },
+    title: "4.13 월 ~ 4.17 금 | 사전 준비",
+    subBadge: { text: "온라인", variant: "online" },
+    detail: `· 사전 VOD 3편 시청
+  - AI 시대에 왜 직접 만들어야 하는가 (15분)
+  - 바이브 코딩이란? Lovable / Bolt 소개 (15분)
+  - AI 프롬프트 잘 쓰는 법 기초 (15분)
+· Lovable / GitHub / Vercel 회원가입 + 툴 세팅
+· 진단 결과 참고해서 만들고 싶은
+  서비스 아이디어 3가지 제출`,
   },
   {
-    label: "DAY 1 (4.18 토)",
-    title: "개강 OT",
-    mode: "offline",
-    desc: `14:00 오프닝 + 자기소개
-15:00 툴 세팅 (GitHub / Vercel / Lovable)
-16:00 클론 바이브 코딩 실습 → 첫 배포 성공 경험
-17:00 기획서 작성 → 내가 만들 서비스 확정`,
+    mainBadge: { text: "DAY 1", variant: "day" },
+    title: "4.18 토 | 개강 OT",
+    subBadge: { text: "오프라인", variant: "offline" },
+    detail: `· OT + 자기소개
+· 클론 바이브 코딩 실습 (첫 배포 경험)
+· 기획안 템플릿 배포 + 작성 시작`,
   },
   {
-    label: "DAY 2 (4.19 일)",
-    title: "기획서 확정",
-    mode: "online",
-    desc: `기획서 디스코드 제출
-운영진 피드백 제공`,
+    mainBadge: { text: "DAY 2-3", variant: "day" },
+    title: "4.19 일 ~ 4.20 월 | 기획안 작성",
+    subBadge: { text: "온라인", variant: "online" },
+    detail: `· 기획안 템플릿 완성 + 제출
+· 강사 개별 피드백 제공
+· 디스코드 질문 → 강사 답변`,
   },
   {
-    label: "DAY 3-4 (4.20 월 ~ 4.21 화)",
-    title: "구현 시작",
-    mode: "online",
-    desc: `Lovable로 화면 만들기
-핵심 기능 구현 시작
-디스코드 실시간 질의응답`,
+    mainBadge: { text: "DAY 4", variant: "day" },
+    title: "4.22 수 오후 8~10시 | 기획안 중간 점검",
+    subBadge: { text: "온라인 세션", variant: "session" },
+    detail: `· 기획안 피드백 반영 확인
+· 구현 방향 확정
+· 막히는 것 실시간 해결
+· 세션 종료 후 구현 시작`,
   },
   {
-    label: "DAY 5 (4.21 화)",
-    title: "중간 체크인",
-    mode: "online",
-    desc: `진행 상황 디스코드 공유
-막히는 것 실시간 질의응답`,
+    mainBadge: { text: "DAY 5-9", variant: "day" },
+    title: "4.23 목 ~ 4.27 월 | 구현 + 배포",
+    subBadge: { text: "온라인", variant: "online" },
+    detail: `· Lovable / Bolt로 서비스 구현
+· 디스코드 질문 → 강사 실시간 답변
+· 4.26 일 오후 2~4시
+  서비스 중간 점검 온라인 세션
+  (진행 상황 공유 + 피드백 + 방향 수정)`,
   },
   {
-    label: "DAY 6-8 (4.22 수 ~ 4.24 금)",
-    title: "구현 완료 + 배포",
-    mode: "online",
-    desc: `핵심 기능 마무리
-Vercel 배포 완료
-발표 자료 제출 (4.24 금 마감)`,
+    mainBadge: { text: "DAY 10-12", variant: "day" },
+    title: "4.28 화 ~ 4.30 목 | 서비스 완성",
+    subBadge: { text: "온라인", variant: "online" },
+    detail: `· 핵심 기능 마무리
+· Vercel 최종 배포 완료
+· 5.1 금 발표 자료 제출 마감`,
   },
   {
-    label: "DAY 9 (4.25 토)",
-    title: "성과 공유회 + 수료식",
-    mode: "offline",
-    desc: `1기 수강생 서비스 발표
-질의응답 + 피드백
-수료증 수여 + 단체사진`,
+    mainBadge: { text: "DAY 13", variant: "day" },
+    title: "5.2 토 | 성과 공유회 + 수료식",
+    subBadge: { text: "오프라인", variant: "offline" },
+    detail: `· 수강생 서비스 발표 (인당 5분)
+· 질의응답 + 피드백
+· 수료증 수여 + 단체사진`,
   },
 ];
 
@@ -181,7 +186,7 @@ const FAQ_DATA: FaqCategory[] = [
       },
       {
         q: "2주 안에 진짜 서비스가 만들어지나요?",
-        a: "네, 실제로 링크가 생겨요 🔗\n핵심 기능 1개짜리 MVP를 목표로 해서\n주변에 공유할 수 있는 수준까지 만들어요.",
+        a: "네, 실제로 링크가 생겨요 🔗\n4.18 개강부터 5.2 수료까지\n기획 → 구현 → 배포 한 사이클을\n완성해드려요.",
       },
       {
         q: "어떤 서비스를 만들게 되나요?",
@@ -194,7 +199,7 @@ const FAQ_DATA: FaqCategory[] = [
     items: [
       {
         q: "오프라인 참석이 꼭 필요한가요?",
-        a: "4.18(토) OT와 4.25(토) 성과공유회는 오프라인이에요.\n가능하면 참석을 권장드려요.\n불가피한 경우 개별 안내드릴게요.",
+        a: "4.18(토) OT와 5.2(토) 성과공유회는 오프라인이에요.\n가능하면 참석을 권장드려요.\n불가피한 경우 개별 안내드릴게요.",
       },
       {
         q: "직장인도 병행할 수 있나요?",
@@ -245,7 +250,7 @@ const FAQ_DATA: FaqCategory[] = [
       },
       {
         q: "수료증이 나오나요?",
-        a: "네! 4.25 성과공유회 당일 드려요.\n포트폴리오로도 활용할 수 있어요.",
+        a: "네! 5.2 성과공유회 당일 드려요.\n포트폴리오로도 활용할 수 있어요.",
       },
       {
         q: "수료 후에도 동료들과 연결되나요?",
@@ -277,6 +282,7 @@ function useCountdown() {
 export default function NadocodingPage() {
   const formRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<Set<number>>(new Set());
+  const [openCurriculum, setOpenCurriculum] = useState<Set<number>>(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const countdown = useCountdown();
@@ -299,6 +305,15 @@ export default function NadocodingPage() {
 
   function toggleFaq(idx: number) {
     setOpenFaq((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }
+
+  function toggleCurriculum(idx: number) {
+    setOpenCurriculum((prev) => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx);
       else next.add(idx);
@@ -341,7 +356,7 @@ export default function NadocodingPage() {
         >
           나도 코딩 올인원 부트캠프 1기 모집
         </div>
-        <p className="nadocodingHeroDate date">4월 18일 (토) ~ 4월 25일 (토)</p>
+        <p className="nadocodingHeroDate date">4월 18일 (토) ~ 5월 2일 (토)</p>
 
         <h1 className="nadocodingHeroTitle">
           아이디어 발굴부터
@@ -955,41 +970,67 @@ export default function NadocodingPage() {
             style={{
               fontSize: 18,
               fontWeight: 700,
-              margin: "0 0 24px",
+              margin: "0 0 4px",
               textAlign: "center",
               color: "var(--text)",
             }}
           >
             2주 커리큘럼
           </h2>
-          <div className="timeline">
-            {CURRICULUM.map((item, i) => (
-              <div key={i} className="timelineItem">
-                <div className="timelineDot" />
-                <div className="curriculumStepCard">
-                  <div className="timelineLabel curriculum-week">
-                    {item.label}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        marginLeft: 8,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: item.mode === "offline" ? "var(--accent)" : "#e5e7eb",
-                        color: item.mode === "offline" ? "#fff" : "var(--textSecondary)",
-                        border: item.mode === "offline" ? "none" : "1px solid var(--border)",
-                      }}
+          <p
+            style={{
+              margin: "0 0 20px",
+              textAlign: "center",
+              fontSize: 13,
+              color: "var(--textSecondary)",
+              lineHeight: 1.5,
+            }}
+          >
+            사전 준비부터 수료까지
+          </p>
+          <div>
+            {CURRICULUM_ACCORDION.map((item, i) => {
+              const isOpen = openCurriculum.has(i);
+              const subClass =
+                item.subBadge.variant === "offline"
+                  ? "nadocodingCurriculumSubBadge--offline"
+                  : item.subBadge.variant === "session"
+                    ? "nadocodingCurriculumSubBadge--session"
+                    : "nadocodingCurriculumSubBadge--online";
+              const mainClass =
+                item.mainBadge.variant === "outside"
+                  ? "nadocodingCurriculumMainBadge--outside"
+                  : "nadocodingCurriculumMainBadge--day";
+              return (
+                <div
+                  key={i}
+                  className={`nadocodingCurriculumCard${isOpen ? " nadocodingCurriculumCard--open" : ""}`}
+                >
+                  <div className="nadocodingCurriculumCardHead">
+                    <button
+                      type="button"
+                      className="nadocodingCurriculumToggle"
+                      onClick={() => toggleCurriculum(i)}
+                      aria-expanded={isOpen}
                     >
-                      {item.mode === "offline" ? "오프라인" : "온라인"}
-                    </span>
+                      {isOpen ? "접기 ▲" : "자세히 보기 ▼"}
+                    </button>
+                    <div className="nadocodingCurriculumBadgeRow">
+                      <span className={`nadocodingCurriculumMainBadge ${mainClass}`}>
+                        {item.mainBadge.text}
+                      </span>
+                      <span className={`nadocodingCurriculumSubBadge ${subClass}`}>
+                        {item.subBadge.text}
+                      </span>
+                    </div>
+                    <div className="nadocodingCurriculumTitle">{item.title}</div>
                   </div>
-                  <div className="timelineTitle">{item.title}</div>
-                  <div className="timelineDesc curriculum-content">{item.desc}</div>
+                  {isOpen ? (
+                    <div className="nadocodingCurriculumDetail">{item.detail}</div>
+                  ) : null}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

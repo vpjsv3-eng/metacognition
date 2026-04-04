@@ -1759,7 +1759,7 @@ label {
   overflow-y: hidden;
   touch-action: pan-x !important;
   cursor: grab;
-  overscroll-behavior-x: auto;
+  overscroll-behavior-x: contain !important;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: #00c471 #e5e7eb;
@@ -1886,7 +1886,7 @@ label {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: stretch;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
   width: 100%;
   max-width: 100%;
@@ -1896,7 +1896,7 @@ label {
 .nadocodingVsCard {
   flex: 1;
   min-width: 0;
-  padding: 16px 12px;
+  padding: 14px 10px;
   border-radius: 12px;
   text-align: center;
   box-sizing: border-box;
@@ -1905,14 +1905,14 @@ label {
 }
 
 .nadocodingVsCardTitle {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 8px;
   line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
 }
 
 .nadocodingVsCardBody {
@@ -1920,6 +1920,7 @@ label {
   line-height: 1.6;
   word-break: keep-all;
   overflow-wrap: break-word;
+  white-space: normal;
   color: #6b7280;
 }
 
@@ -1930,7 +1931,7 @@ label {
 .nadocodingVsDivider {
   flex-shrink: 0;
   align-self: center;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #00c471;
   padding: 0 4px;
@@ -1941,17 +1942,123 @@ label {
 }
 
 @media (max-width: 375px) {
-  .nadocodingVsCardTitle {
-    font-size: 13px;
-  }
-
   .nadocodingVsCardBody {
     font-size: 12px;
   }
+}
 
-  .nadocodingVsDivider {
-    font-size: 18px;
-  }
+/* 나도코딩 — 2주 커리큘럼 아코디언 */
+.nadocodingCurriculumCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.nadocodingCurriculumCard--open {
+  border: 1px solid #00c471;
+  background: #f0fdf4;
+}
+
+.nadocodingCurriculumCardHead {
+  margin-bottom: 0;
+}
+
+.nadocodingCurriculumCardHead::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.nadocodingCurriculumToggle {
+  float: right;
+  color: #00c471;
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 0 0 8px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.nadocodingCurriculumBadgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-right: 4px;
+}
+
+.nadocodingCurriculumMainBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.nadocodingCurriculumMainBadge--day {
+  background: #00c471;
+  color: #fff;
+}
+
+.nadocodingCurriculumMainBadge--outside {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.nadocodingCurriculumSubBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.nadocodingCurriculumSubBadge--offline {
+  background: #00c471;
+  color: #fff;
+}
+
+.nadocodingCurriculumSubBadge--online {
+  background: #e8faf2;
+  color: #00c471;
+}
+
+.nadocodingCurriculumSubBadge--session {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.nadocodingCurriculumTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.nadocodingCurriculumDetail {
+  margin: 12px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 196, 113, 0.2);
+  font-size: 14px;
+  line-height: 1.65;
+  color: #374151;
+  word-break: keep-all;
+  white-space: pre-line;
+}
+
+.nadocodingCurriculumCard:not(.nadocodingCurriculumCard--open) .nadocodingCurriculumDetail {
+  border-top-color: #e5e7eb;
 }
 
 /* ═══════════ Mobile ═══════════ */
@@ -2107,7 +2214,7 @@ label {
     overflow-x: scroll !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-x !important;
-    overscroll-behavior-x: auto !important;
+    overscroll-behavior-x: contain !important;
     cursor: grab !important;
   }
 

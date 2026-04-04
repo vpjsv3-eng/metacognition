@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 import { getEarlybirdDDay } from "../../lib/earlybird";
@@ -58,18 +58,6 @@ function ideaToolsLabel(idea: ServiceIdea): string {
 }
 
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
-  const toolFlowBoxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = toolFlowBoxRef.current;
-    if (!el) return;
-    const stop = (e: TouchEvent) => {
-      e.stopPropagation();
-    };
-    el.addEventListener("touchmove", stop, { passive: true });
-    return () => el.removeEventListener("touchmove", stop);
-  }, []);
-
   const raw = idea.tool_flow?.trim();
   const parts =
     raw && raw.includes("→")
@@ -107,7 +95,7 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   return (
     <div className="ideaDetail">
       <span className="ideaLabel idea-section-label">실제 작동 방식</span>
-      <div ref={toolFlowBoxRef} className="tool-flow-box">
+      <div className="tool-flow-box">
         <div className="tool-flow-box__inner">{rowContent}</div>
       </div>
       <p className="tool-flow-box-hint">← 밀어서 더 보기</p>
@@ -312,6 +300,27 @@ export default function CompletePage() {
         safeLocalStorageRemove(EMAIL_SENDING_KEY);
         setEmailStatus("failed");
       });
+  }, [result]);
+
+  useEffect(() => {
+    if (!result) return;
+    const boxes = document.querySelectorAll(".tool-flow-box");
+    const cleanups: (() => void)[] = [];
+    boxes.forEach((box) => {
+      const onTouchStart = (e: Event) => {
+        e.stopPropagation();
+      };
+      const onTouchMove = (e: Event) => {
+        e.stopPropagation();
+      };
+      box.addEventListener("touchstart", onTouchStart, { passive: true });
+      box.addEventListener("touchmove", onTouchMove, { passive: true });
+      cleanups.push(() => {
+        box.removeEventListener("touchstart", onTouchStart);
+        box.removeEventListener("touchmove", onTouchMove);
+      });
+    });
+    return () => cleanups.forEach((fn) => fn());
   }, [result]);
 
   async function handleResend() {

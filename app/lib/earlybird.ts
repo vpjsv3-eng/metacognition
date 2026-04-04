@@ -1,5 +1,5 @@
 export const EARLYBIRD_DEADLINE_MS = new Date(
-  "2026-04-06T23:59:59+09:00",
+  "2026-05-02T23:59:59+09:00",
 ).getTime();
 
 /** 마감일 기준 남은 일 수 (0 이상, 마감 지나면 0) */
