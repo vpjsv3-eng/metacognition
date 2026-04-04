@@ -1542,11 +1542,11 @@ label {
 .toolFlowBox--row {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  white-space: nowrap;
+  overflow: visible;
+  overflow-x: visible;
+  white-space: normal;
   gap: 0;
 }
 
@@ -1559,8 +1559,8 @@ label {
 
 .toolFlowBox--row .toolFlowStepInline {
   color: #374151;
-  white-space: nowrap;
-  flex-shrink: 0;
+  white-space: normal;
+  min-width: 0;
 }
 
 .personaCardCollapsed {
@@ -1593,6 +1593,16 @@ label {
   padding: 40px 0 44px;
 }
 
+.nadocodingHeroTitle {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 28px;
+  letter-spacing: -0.5px;
+  line-height: 1.4;
+  color: #111827;
+  text-align: center;
+}
+
 /* ═══════════ Mobile ═══════════ */
 
 @media (max-width: 768px) {
@@ -1620,6 +1630,10 @@ label {
 
   .nadocodingHero {
     padding: 24px 0 44px;
+  }
+
+  .nadocodingHeroTitle {
+    font-size: 28px;
   }
 
   .container,

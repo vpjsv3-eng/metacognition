@@ -332,39 +332,28 @@ export default function NadocodingPage() {
             color: "#ffffff",
             fontSize: 16,
             fontWeight: 700,
-            marginBottom: 20,
+            marginBottom: 0,
             boxShadow: "0 4px 12px rgba(0, 196, 113, 0.4)",
           }}
         >
           나도 코딩 올인원 부트캠프 1기 모집
         </div>
-
-        <h1
-          style={{
-            fontSize: 28,
-            fontWeight: 800,
-            margin: "0 0 12px",
-            letterSpacing: -0.5,
-            lineHeight: 1.4,
-            color: "var(--text)",
-          }}
-        >
-          아이디어도 없고 코딩도 몰라도
-          <br />
-          2주 안에 내 AI 서비스가 생깁니다
-        </h1>
         <p
           style={{
-            fontSize: 16,
-            margin: "0 0 28px",
-            lineHeight: 1.7,
-            color: "var(--textSecondary)",
+            fontSize: 14,
+            color: "#6B7280",
+            margin: "8px 0 16px",
+            textAlign: "center",
           }}
         >
+          4월 18일 (토) ~ 4월 25일 (토)
+        </p>
+
+        <h1 className="nadocodingHeroTitle">
           아이디어 발굴부터 실제 서비스 배포까지
           <br />
           코딩 없이 2주 완성 올인원 과정
-        </p>
+        </h1>
 
         {/* 4개 박스 */}
         <div
@@ -393,7 +382,14 @@ export default function NadocodingPage() {
             },
             {
               kw: "전액 환불",
-              label: "배포 못하면\n100% 환불 보장",
+              label: (
+                <>
+                  배포 못하면
+                  <br />
+                  <span style={{ color: "#EF4444", fontWeight: 700 }}>100%</span>{" "}
+                  환불 보장
+                </>
+              ),
               kwColor: "#00C471" as const,
             },
           ].map((item, i) => (
@@ -413,7 +409,9 @@ export default function NadocodingPage() {
                   color: "var(--textSecondary)",
                   marginTop: 6,
                   lineHeight: 1.45,
-                  whiteSpace: "pre-line",
+                  ...(typeof item.label === "string"
+                    ? { whiteSpace: "pre-line" as const }
+                    : {}),
                 }}
               >
                 {item.label}
@@ -539,43 +537,61 @@ export default function NadocodingPage() {
       <section style={{ marginBottom: 24 }}>
         <div
           style={{
-            background: "#FFFFFF",
-            borderRadius: 14,
-            padding: "28px 20px 24px",
+            background: "linear-gradient(135deg, #E8FAF2 0%, #F0FDF4 100%)",
+            borderRadius: 20,
+            padding: "40px 24px",
           }}
         >
           <h2
             style={{
-              fontSize: 28,
-              fontWeight: 800,
               margin: "0 0 24px",
               textAlign: "center",
-              color: "#111827",
               lineHeight: 1.35,
               letterSpacing: -0.4,
             }}
           >
-            AI 시대,
-            <br />
-            만드는 사람이 됩니다
+            <span
+              style={{
+                display: "block",
+                fontSize: 18,
+                fontWeight: 700,
+                color: "#111827",
+                marginBottom: 4,
+              }}
+            >
+              AI 시대,
+            </span>
+            <span
+              style={{
+                display: "block",
+                fontSize: 36,
+                fontWeight: 800,
+                color: "#111827",
+              }}
+            >
+              <span style={{ color: "#00C471" }}>만드는 사람</span>이 됩니다
+            </span>
           </h2>
           <div
             style={{
               display: "flex",
               flexDirection: "row",
+              flexWrap: "wrap",
               alignItems: "stretch",
               gap: 8,
+              justifyContent: "center",
             }}
           >
             <div
               style={{
-                flex: 1,
+                flex: "1 1 120px",
                 minWidth: 0,
                 padding: "16px 10px",
                 borderRadius: 12,
-                background: "#F3F4F6",
+                background: "#F9FAFB",
                 border: "1px solid #E5E7EB",
                 textAlign: "center",
+                opacity: 0.8,
               }}
             >
               <div
@@ -600,23 +616,28 @@ export default function NadocodingPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 20,
-                fontWeight: 800,
+                alignSelf: "center",
+                fontSize: 24,
+                fontWeight: 700,
                 color: "#00C471",
                 flexShrink: 0,
-                width: 32,
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                background: "#FFFFFF",
               }}
             >
               VS
             </div>
             <div
               style={{
-                flex: 1,
+                flex: "1 1 120px",
                 minWidth: 0,
                 padding: "16px 10px",
                 borderRadius: 12,
-                background: "#E8FAF2",
+                background: "#FFFFFF",
                 border: "2px solid #00C471",
+                boxShadow: "0 4px 12px rgba(0, 196, 113, 0.2)",
                 textAlign: "center",
               }}
             >

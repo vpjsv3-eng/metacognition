@@ -43,7 +43,12 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
         {parts.map((part, i) => (
           <span
             key={i}
-            style={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              minWidth: 0,
+            }}
           >
             {i > 0 ? (
               <span className="toolFlowArrowInline" aria-hidden>
@@ -564,11 +569,22 @@ export default function CompletePage() {
           }}
         >
           {[
-            { keyword: "2주", sub: "완성", color: "#00C471" },
-            { keyword: "소수 정예", sub: "10명 한정", color: "#00C471" },
-            { keyword: "전액 환불", sub: "배포 못하면", color: "#00C471" },
+            { keyword: "2주", sub: "완성", color: "#00C471", key: "2w" },
+            { keyword: "소수 정예", sub: "10명 한정", color: "#00C471", key: "10" },
+            {
+              keyword: "전액 환불",
+              sub: (
+                <>
+                  배포 못하면
+                  <br />
+                  <span style={{ color: "#EF4444", fontWeight: 700 }}>100%</span> 환불 보장
+                </>
+              ),
+              color: "#00C471",
+              key: "refund",
+            },
           ].map((cell, i) => (
-            <div key={cell.sub} style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "stretch" }}>
+            <div key={cell.key} style={{ display: "flex", flex: 1, minWidth: 0, alignItems: "stretch" }}>
               {i > 0 ? (
                 <div
                   style={{
