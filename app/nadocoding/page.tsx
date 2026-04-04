@@ -308,7 +308,7 @@ export default function NadocodingPage() {
   return (
     <main
       className="container nadocodingPageWithBottomCta nadocoding-container nadocoding-page"
-      style={{ maxWidth: 600 }}
+      style={{ maxWidth: "min(600px, 100%)", width: "100%" }}
     >
       {showScrollTop && (
         <button
@@ -622,8 +622,10 @@ export default function NadocodingPage() {
                 fontWeight: 700,
                 color: "#00C471",
                 flexShrink: 0,
-                width: 40,
-                height: 40,
+                width: "min(40px, 100%)",
+                height: "min(40px, 100%)",
+                maxWidth: "100%",
+                aspectRatio: "1",
                 borderRadius: "50%",
                 background: "#FFFFFF",
               }}
@@ -819,9 +821,12 @@ export default function NadocodingPage() {
             style={{ marginBottom: 12, textAlign: "center", padding: "24px 20px", borderRadius: 14 }}
           >
             <div
+              className="instructor-avatar-main"
               style={{
-                width: 100,
-                height: 100,
+                width: "min(100px, 100%)",
+                height: "min(100px, 100%)",
+                maxWidth: "100%",
+                aspectRatio: "1",
                 borderRadius: "50%",
                 background: "#1F2937",
                 margin: "0 auto 12px",
@@ -900,9 +905,12 @@ export default function NadocodingPage() {
             style={{ textAlign: "center", padding: "24px 20px", borderRadius: 14 }}
           >
             <div
+              className="instructor-avatar-sub"
               style={{
-                width: 80,
-                height: 80,
+                width: "min(80px, 100%)",
+                height: "min(80px, 100%)",
+                maxWidth: "100%",
+                aspectRatio: "1",
                 borderRadius: "50%",
                 background: "var(--accent)",
                 margin: "0 auto 12px",
@@ -1136,7 +1144,7 @@ export default function NadocodingPage() {
           </span>
         </div>
 
-        <div style={{ maxWidth: 400, margin: "0 auto" }}>
+        <div className="nadocoding-form-wrap" style={{ maxWidth: "min(400px, 100%)", width: "100%", margin: "0 auto" }}>
           <CtaForm onGreenBg source="nadocoding_page" />
         </div>
       </section>

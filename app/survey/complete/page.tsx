@@ -91,9 +91,11 @@ function AccordionIdea({
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span
+            className="accordion-rank-circle"
             style={{
               width: 36,
               height: 36,
+              maxWidth: "100%",
               borderRadius: "50%",
               background: "var(--accentSoft)",
               color: "var(--accent)",
@@ -136,10 +138,10 @@ function AccordionIdea({
             </div>
             <IdeaWorkflowSection idea={idea} />
           </div>
-            <div className="ideaMetaTags">
+            <div className="ideaMetaTags ideaMetaTags--accordion">
             <span className="ideaMetaTag idea-tag">🎯 {idea.difficulty}</span>
-            <span className="ideaMetaTag idea-tag">⏱ {idea.period}</span>
-            <span className="ideaMetaTag idea-tag">🛠 {idea.tool}</span>
+            <span className="ideaMetaTag idea-tag">⏰ {idea.period}</span>
+            <span className="ideaMetaTag idea-tag">🔧 {idea.tool}</span>
           </div>
         </div>
       )}
@@ -550,35 +552,37 @@ export default function CompletePage() {
           <div className="firstIdeaBanner idea-banner">
             ✨ 가장 추천하는 아이디어
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-            <span
-              className="rankBadge rank-badge"
-              style={{ background: "var(--accent)", color: "#fff" }}
-            >
-              추천 1순위
-            </span>
-          </div>
-          <strong className="idea-title" style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
-            {firstIdea.name}
-          </strong>
-          <p style={{ margin: "0 0 14px", color: "var(--textSecondary)", fontSize: 15, lineHeight: 1.5 }}>
-            {firstIdea.oneline}
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div className="ideaDetail firstIdeaReasonBg">
-              <span className="ideaLabel idea-section-label">이 아이디어를 추천하는 이유</span>
-              <span className="idea-section-content">{firstIdea.reason}</span>
+          <div className="firstIdeaCardBody">
+            <div className="firstIdeaRankRow">
+              <span
+                className="rankBadge rank-badge"
+                style={{ background: "var(--accent)", color: "#fff" }}
+              >
+                추천 1순위
+              </span>
             </div>
-            <div className="ideaDetail">
-              <span className="ideaLabel idea-section-label">핵심 기능</span>
-              <span className="idea-section-content">{firstIdea.core_feature}</span>
+            <strong className="idea-title" style={{ fontSize: 18, color: "var(--text)", display: "block", marginBottom: 4 }}>
+              {firstIdea.name}
+            </strong>
+            <p style={{ margin: "0 0 14px", color: "var(--textSecondary)", fontSize: 15, lineHeight: 1.5 }}>
+              {firstIdea.oneline}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div className="ideaDetail firstIdeaReasonBg">
+                <span className="ideaLabel idea-section-label">이 아이디어를 추천하는 이유</span>
+                <span className="idea-section-content">{firstIdea.reason}</span>
+              </div>
+              <div className="ideaDetail">
+                <span className="ideaLabel idea-section-label">핵심 기능</span>
+                <span className="idea-section-content">{firstIdea.core_feature}</span>
+              </div>
+              <IdeaWorkflowSection idea={firstIdea} />
             </div>
-            <IdeaWorkflowSection idea={firstIdea} />
-          </div>
-          <div className="ideaMetaTags">
-            <span className="ideaMetaTag idea-tag">🎯 {firstIdea.difficulty}</span>
-            <span className="ideaMetaTag idea-tag">⏱ {firstIdea.period}</span>
-            <span className="ideaMetaTag idea-tag">🛠 {firstIdea.tool}</span>
+            <div className="ideaMetaTags ideaMetaTags--firstIdea">
+              <span className="ideaMetaTag idea-tag">🎯 {firstIdea.difficulty}</span>
+              <span className="ideaMetaTag idea-tag">⏰ {firstIdea.period}</span>
+              <span className="ideaMetaTag idea-tag">🔧 {firstIdea.tool}</span>
+            </div>
           </div>
         </div>
       )}
