@@ -416,16 +416,9 @@ export default function NadocodingPage() {
 
         {/* 카운트다운 */}
         <div className="countdownTimer" style={{ marginBottom: 20 }}>
-          {countdown ? (
-            <>
-              ⏰ 얼리버드 마감까지{" "}
-              {countdown.days}일 {String(countdown.hours).padStart(2, "0")}시간{" "}
-              {String(countdown.minutes).padStart(2, "0")}분{" "}
-              {String(countdown.seconds).padStart(2, "0")}초
-            </>
-          ) : (
-            "얼리버드가 종료됐어요"
-          )}
+          {countdown
+            ? `⏰ 얼리버드 마감까지 ${countdown.days}일${String(countdown.hours).padStart(2, "0")}시간${String(countdown.minutes).padStart(2, "0")}분${String(countdown.seconds).padStart(2, "0")}초`
+            : "얼리버드가 종료됐어요"}
         </div>
 
         {/* 가격 */}

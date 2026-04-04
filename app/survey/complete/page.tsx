@@ -392,24 +392,62 @@ export default function CompletePage() {
         {emailStatus === "sent" && (
           <div
             style={{
-              display: "inline-flex",
+              display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: 6,
-              padding: "6px 16px",
-              borderRadius: 999,
-              background: "var(--accentSoft)",
+              gap: 10,
             }}
           >
-            <span style={{ color: "var(--accent)", fontSize: 16 }}>✅</span>
-            <span style={{ fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>
-              {email}으로 결과지 발송 완료
-            </span>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 16px",
+                borderRadius: 999,
+                background: "var(--accentSoft)",
+              }}
+            >
+              <span style={{ color: "var(--accent)", fontSize: 16 }}>✅</span>
+              <span style={{ fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>
+                결과지가 {email} 으로 발송됐어요 📩
+              </span>
+            </div>
+            <button
+              type="button"
+              className="resultResendBtn"
+              onClick={() => {
+                setResendDone(false);
+                setResendModalOpen(true);
+              }}
+            >
+              📩 결과지 다시 받기
+            </button>
           </div>
         )}
         {emailStatus === "failed" && (
-          <p style={{ margin: 0, fontSize: 13, color: "var(--textHint)" }}>
-            이메일 발송에 실패했어요. 아래 &quot;결과지 다시 받기&quot; 버튼을 눌러주세요.
-          </p>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 13, color: "var(--textHint)", textAlign: "center" }}>
+              이메일 발송에 실패했어요. 버튼을 눌러 다시 시도해주세요.
+            </p>
+            <button
+              type="button"
+              className="resultResendBtn"
+              onClick={() => {
+                setResendDone(false);
+                setResendModalOpen(true);
+              }}
+            >
+              📩 결과지 다시 받기
+            </button>
+          </div>
         )}
       </div>
 
@@ -670,37 +708,43 @@ export default function CompletePage() {
         ))}
       </div>
 
-      {/* 하단 버튼 */}
-      <div
-        style={{
-          display: "flex",
-          gap: 10,
-          alignItems: "center",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          marginTop: 32,
-        }}
-      >
-        <button
-          className="btnAccent"
-          type="button"
-          onClick={() => router.push("/nadocoding")}
-          style={{ fontSize: 15, padding: "14px 24px" }}
-        >
-          나도 코딩 1기 자세히 보기
-        </button>
-        <button
-          className="btnSecondary"
-          type="button"
-          onClick={() => {
-            setResendDone(false);
-            setResendModalOpen(true);
-          }}
-          style={{ fontSize: 14 }}
-        >
-          결과지 다시 받기
-        </button>
-      </div>
+      {/* ═══ 지금 바로 시작 (버튼 없음 — 하단 고정 CTA 활용) ═══ */}
+      {firstStep && (
+        <div className="firstStepSection">
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              margin: "0 0 8px",
+              color: "var(--text)",
+            }}
+          >
+            ✅ 지금 바로 시작해보세요
+          </h2>
+          <p style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text)" }}>
+            가장 추천하는 아이디어:{" "}
+            <strong style={{ color: "var(--accent)" }}>{firstStep.idea_name}</strong>
+          </p>
+          <p
+            style={{
+              margin: "0 0 20px",
+              fontSize: 14,
+              color: "var(--textSecondary)",
+              lineHeight: 1.6,
+            }}
+          >
+            {firstStep.reason}
+          </p>
+          <div className="stepsContainer">
+            {firstStep.steps.map((step, i) => (
+              <div key={i} className="stepItem">
+                <span className="stepNum">{i + 1}</span>
+                <span className="stepText">{step.replace(/^\d+단계:\s*/, "")}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 결과지 다시 받기 모달 */}
       <div
