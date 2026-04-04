@@ -9,6 +9,7 @@ import {
   safeLocalStorageSet,
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
+import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -25,6 +26,35 @@ function getTodayString(): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${y}.${m}.${dd}`;
+}
+
+const TOOL_NAME_IN_STEP =
+  /ChatGPT|GPT|Lovable|Bolt|Vercel|Figma|Cursor|Perplexity|Claude|Zapier|Make/i;
+
+/** tool_flow에서 단계별 툴 이름 추출 후 ", "로 연결 (순서 유지, 중복 제거) */
+function formatToolsFromToolFlow(toolFlow?: string): string {
+  const raw = toolFlow?.trim();
+  if (!raw) return "";
+  const steps = raw
+    .split(/\s*→\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const found: string[] = [];
+  const seen = new Set<string>();
+  for (const step of steps) {
+    const match = step.match(TOOL_NAME_IN_STEP);
+    if (!match) continue;
+    const name = match[0];
+    if (seen.has(name)) continue;
+    seen.add(name);
+    found.push(name);
+  }
+  return found.join(", ");
+}
+
+function ideaToolsLabel(idea: ServiceIdea): string {
+  const fromFlow = formatToolsFromToolFlow(idea.tool_flow);
+  return fromFlow || idea.tool?.trim() || "";
 }
 
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
@@ -141,7 +171,9 @@ function AccordionIdea({
             <div className="ideaMetaTags ideaMetaTags--accordion">
             <span className="ideaMetaTag idea-tag">🎯 {idea.difficulty}</span>
             <span className="ideaMetaTag idea-tag">⏰ {idea.period}</span>
-            <span className="ideaMetaTag idea-tag">🔧 {idea.tool}</span>
+            <span className="ideaMetaTag idea-tag">
+              🔧 {ideaToolsLabel(idea)}
+            </span>
           </div>
         </div>
       )}
@@ -183,6 +215,8 @@ export default function CompletePage() {
   const [isRestoredResult, setIsRestoredResult] = useState(false);
   const [personaExpanded, setPersonaExpanded] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useBlockHorizontalTouchScroll();
 
   useEffect(() => {
     function onScroll() {
@@ -581,7 +615,9 @@ export default function CompletePage() {
             <div className="ideaMetaTags ideaMetaTags--firstIdea">
               <span className="ideaMetaTag idea-tag">🎯 {firstIdea.difficulty}</span>
               <span className="ideaMetaTag idea-tag">⏰ {firstIdea.period}</span>
-              <span className="ideaMetaTag idea-tag">🔧 {firstIdea.tool}</span>
+              <span className="ideaMetaTag idea-tag">
+                🔧 {ideaToolsLabel(firstIdea)}
+              </span>
             </div>
           </div>
         </div>

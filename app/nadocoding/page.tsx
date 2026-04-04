@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
 import { EARLYBIRD_DEADLINE_MS, getEarlybirdDDay } from "../lib/earlybird";
+import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
 type CurriculumItem = {
   label: string;
@@ -280,6 +281,8 @@ export default function NadocodingPage() {
 
   const countdown = useCountdown();
   const dDay = getEarlybirdDDay();
+
+  useBlockHorizontalTouchScroll();
 
   useEffect(() => {
     function handleScroll() {
