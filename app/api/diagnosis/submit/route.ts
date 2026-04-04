@@ -29,6 +29,27 @@ JSON 키는 영어로, 값은 반드시 한국어로 작성하세요.
 주관식 답변(Q5_1, Q6_1, Q8_1, Q9_1)을
 최우선으로 활용하세요.
 
+각 아이디어에 대해 tool_flow 필드를 작성하세요.
+실제 바이브 코딩으로 만드는 과정을
+구체적인 툴 이름과 함께 3단계로 작성하세요.
+반드시 화살표 문자 → 로 단계를 구분하세요. (예: 첫 단계 → 둘째 단계 → 셋째 단계)
+
+tool_flow 예시:
+- 뉴스 요약 앱:
+  'Perplexity로 뉴스 수집 → Lovable로 UI 제작 → Vercel로 배포'
+- 이메일 작성기:
+  'ChatGPT 프롬프트 설계 → Bolt로 웹앱 구현 → Vercel로 배포'
+- 챗봇:
+  'Claude API 연동 → Lovable로 채팅 UI → Vercel로 배포'
+- 대시보드:
+  'ChatGPT 데이터 설계 → Cursor로 구현 → Vercel로 배포'
+- 자동화 도구:
+  'Zapier 자동화 설계 → Bolt로 인터페이스 → Vercel로 배포'
+
+반드시 실제 존재하는 툴 이름을 사용하고
+모르는 사람이 봐도 '전문적이다'라고
+느낄 수 있는 수준으로 작성하세요.
+
 결과는 반드시 아래 JSON 형식으로만 출력하세요.
 다른 텍스트, 마크다운, 백틱 없이 JSON만 출력하세요.
 
@@ -47,15 +68,16 @@ JSON 키는 영어로, 값은 반드시 한국어로 작성하세요.
       "reason": "이 사람의 구체적인 답변을 직접 언급하며 왜 이 아이디어가 맞는지 2~3문장",
       "core_feature": "핵심 기능 1가지 (구체적으로)",
       "how_it_works": "실제 사용 시나리오 1~2문장",
+      "tool_flow": "툴A로 ○○ → 툴B로 △△ → Vercel로 배포",
       "impact": "이 서비스를 만들면 이 사람의 삶에 어떤 변화가 생기는지 1문장",
       "difficulty": "쉬움 / 보통",
       "period": "예상 제작 기간",
       "tool": "추천 툴"
     },
-    { "rank": 2, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." },
-    { "rank": 3, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." },
-    { "rank": 4, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." },
-    { "rank": 5, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." }
+    { "rank": 2, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "tool_flow": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." },
+    { "rank": 3, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "tool_flow": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." },
+    { "rank": 4, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "tool_flow": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." },
+    { "rank": 5, "name": "...", "oneline": "...", "reason": "...", "core_feature": "...", "how_it_works": "...", "tool_flow": "...", "impact": "...", "difficulty": "...", "period": "...", "tool": "..." }
   ],
   "first_step": {
     "idea_name": "1순위 아이디어 이름",

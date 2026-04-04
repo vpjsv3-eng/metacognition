@@ -4,7 +4,7 @@ import SurveyForm from "./SurveyForm";
 
 export default function SurveyPage() {
   return (
-    <main className="container">
+    <main className="surveyMain">
       <SurveyForm />
     </main>
   );

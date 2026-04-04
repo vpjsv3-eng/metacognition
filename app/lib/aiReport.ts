@@ -240,6 +240,10 @@ export function generateIdeasFallback(
     reason: `${profile.job}(으)로 활동 중인 당신은 ${s.idea.reasonFragment} 분이에요. 바이브 코딩 툴로 빠르게 만들 수 있어요.`,
     core_feature: s.idea.core_feature,
     how_it_works: s.idea.how_it_works,
+    tool_flow:
+      s.idea.tool === "Lovable"
+        ? "ChatGPT로 화면 흐름과 프롬프트 설계 → Lovable로 UI 제작 → Vercel로 배포"
+        : "ChatGPT로 기능 명세 정리 → Bolt로 웹앱 구현 → Vercel로 배포",
     difficulty: s.idea.difficulty,
     period: s.idea.period,
     tool: s.idea.tool,

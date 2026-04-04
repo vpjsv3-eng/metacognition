@@ -26,6 +26,8 @@ export type ServiceIdea = {
   reason: string;
   core_feature: string;
   how_it_works: string;
+  /** 바이브 코딩 툴 플로우 (예: A → B → C) */
+  tool_flow?: string;
   impact?: string;
   difficulty: string;
   period: string;

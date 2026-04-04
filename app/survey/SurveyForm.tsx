@@ -1141,7 +1141,7 @@ export default function SurveyForm() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 16,
+              marginBottom: 8,
             }}
           >
             <span className="questionCounter">

@@ -27,6 +27,39 @@ function getTodayString(): string {
   return `${y}.${m}.${dd}`;
 }
 
+function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
+  const raw = idea.tool_flow?.trim();
+  const parts =
+    raw && raw.includes("→")
+      ? raw
+          .split(/\s*→\s*/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : null;
+
+  return (
+    <div className="ideaDetail">
+      <span className="ideaLabel">실제 작동 방식</span>
+      {parts && parts.length >= 2 ? (
+        <div className="toolFlowBox">
+          {parts.map((part, i) => (
+            <span key={i}>
+              <span className="toolFlowStep">{part}</span>
+              {i < parts.length - 1 ? (
+                <span className="toolFlowArrow" aria-hidden>
+                  →
+                </span>
+              ) : null}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="toolFlowBox">{raw || idea.how_it_works}</div>
+      )}
+    </div>
+  );
+}
+
 function AccordionIdea({
   idea,
   index,
@@ -88,10 +121,7 @@ function AccordionIdea({
               <span className="ideaLabel">핵심 기능</span>
               <span>{idea.core_feature}</span>
             </div>
-            <div className="ideaDetail">
-              <span className="ideaLabel">실제 작동 방식</span>
-              <span>{idea.how_it_works}</span>
-            </div>
+            <IdeaWorkflowSection idea={idea} />
           </div>
           <div className="ideaMetaTags">
             <span className="ideaMetaTag">🎯 {idea.difficulty}</span>
@@ -136,6 +166,17 @@ export default function CompletePage() {
   const [resending, setResending] = useState(false);
   const [resendDone, setResendDone] = useState(false);
   const [isRestoredResult, setIsRestoredResult] = useState(false);
+  const [personaExpanded, setPersonaExpanded] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setShowScrollTop(window.scrollY > 300);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     safeLocalStorageRemove(SURVEY_STORAGE_KEY);
@@ -359,52 +400,82 @@ export default function CompletePage() {
         )}
       </div>
 
-      {/* ═══ PART 1: 나의 성향 분석 (축소) ═══ */}
+      {/* ═══ PART 1: 나의 성향 분석 (접기/펼치기) ═══ */}
       {persona && (
-        <div
-          className="personaCard"
-          style={{
-            padding: "18px 20px",
-            marginBottom: 12,
-            overflow: "visible",
-          }}
-        >
-          <h2
+        <div className="personaCard personaCardCollapsed" style={{ marginBottom: 10, padding: "16px 18px 0" }}>
+          <div
             style={{
-              fontSize: 20,
-              fontWeight: 800,
-              margin: "0 0 8px",
-              color: "var(--text)",
+              maxHeight: personaExpanded ? undefined : 120,
+              overflow: personaExpanded ? "visible" : "hidden",
+              position: "relative",
+              paddingBottom: personaExpanded ? 12 : 0,
             }}
           >
-            {persona.title}
-          </h2>
-          <p
-            style={{
-              margin: "0 0 10px",
-              fontSize: 14,
-              lineHeight: 1.7,
-              color: "var(--text)",
-              display: "block",
-              overflow: "visible",
-            }}
-          >
-            {persona.summary}
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <span
-              className="personaStrengthBadge"
-              style={{ fontSize: 12, padding: "4px 12px", display: "inline-block", overflow: "visible", whiteSpace: "normal" }}
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 800,
+                margin: "0 0 8px",
+                color: "var(--text)",
+              }}
             >
-              💪 {persona.strength}
-            </span>
-            <span
-              className="personaNeedsBadge"
-              style={{ fontSize: 12, padding: "4px 12px", display: "inline-block", overflow: "visible", whiteSpace: "normal" }}
+              {persona.title}
+            </h2>
+            <p
+              style={{
+                margin: "0 0 10px",
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: "var(--text)",
+              }}
             >
-              🎯 {persona.painpoint}
-            </span>
+              {persona.summary}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span
+                className="personaStrengthBadge"
+                style={{
+                  fontSize: 12,
+                  padding: "4px 12px",
+                  display: "inline-block",
+                  whiteSpace: "normal",
+                }}
+              >
+                💪 {persona.strength}
+              </span>
+              <span
+                className="personaNeedsBadge"
+                style={{
+                  fontSize: 12,
+                  padding: "4px 12px",
+                  display: "inline-block",
+                  whiteSpace: "normal",
+                }}
+              >
+                🎯 {persona.painpoint}
+              </span>
+            </div>
+            {!personaExpanded && <div className="personaCardFade" aria-hidden />}
           </div>
+          <button
+            type="button"
+            onClick={() => setPersonaExpanded((v) => !v)}
+            style={{
+              width: "100%",
+              marginTop: 4,
+              marginBottom: 12,
+              padding: "10px 0 14px",
+              border: "none",
+              background: "none",
+              color: "var(--accent)",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+              textAlign: "center",
+            }}
+          >
+            {personaExpanded ? "접기 ▲" : "자세히 보기 ▼"}
+          </button>
         </div>
       )}
 
@@ -413,7 +484,7 @@ export default function CompletePage() {
         style={{
           fontSize: 20,
           fontWeight: 700,
-          margin: "32px 0 16px",
+          margin: "12px 0 12px",
           color: "var(--text)",
         }}
       >
@@ -452,10 +523,7 @@ export default function CompletePage() {
               <span className="ideaLabel">핵심 기능</span>
               <span>{firstIdea.core_feature}</span>
             </div>
-            <div className="ideaDetail">
-              <span className="ideaLabel">실제 작동 방식</span>
-              <span>{firstIdea.how_it_works}</span>
-            </div>
+            <IdeaWorkflowSection idea={firstIdea} />
           </div>
           <div className="ideaMetaTags">
             <span className="ideaMetaTag">🎯 {firstIdea.difficulty}</span>
@@ -469,63 +537,78 @@ export default function CompletePage() {
       <div className="promoSection">
         <h3
           style={{
-            fontSize: 18,
-            fontWeight: 700,
-            margin: "0 0 8px",
+            fontSize: 22,
+            fontWeight: 800,
+            margin: "0 0 20px",
             color: "var(--text)",
-            lineHeight: 1.5,
+            lineHeight: 1.45,
+            letterSpacing: -0.3,
           }}
         >
           지금 추천받은 &lsquo;{firstIdea?.name || "AI 서비스"}&rsquo;
           <br />
           2주 안에 직접 만들 수 있어요
         </h3>
-        <p
-          style={{
-            margin: "0 0 20px",
-            fontSize: 14,
-            lineHeight: 1.7,
-            color: "var(--textSecondary)",
-          }}
-        >
-          코딩 한 줄 없이, AI 툴로만 만들어요
-          <br />
-          4월 18일 토요일, 10명과 함께 시작해요
-        </p>
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            gap: 6,
-            alignItems: "center",
-            marginBottom: 16,
-            fontSize: 14,
-            color: "var(--text)",
+            justifyContent: "space-between",
+            gap: 8,
+            marginBottom: 20,
+            textAlign: "center",
           }}
         >
-          <span>✅ 코딩 지식 0이어도 OK</span>
-          <span>✅ 2주 안에 실제 배포까지</span>
-          <span>✅ 선착순 10명 · 지금 얼리버드 신청 중</span>
+          {[
+            { num: "2주", sub: "완성" },
+            { num: "0원", sub: "코딩 비용" },
+            { num: "10명", sub: "함께" },
+          ].map((cell) => (
+            <div key={cell.sub} style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: "var(--text)",
+                  letterSpacing: -0.5,
+                }}
+              >
+                {cell.num}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--textSecondary)",
+                  marginTop: 4,
+                  lineHeight: 1.35,
+                }}
+              >
+                {cell.sub}
+              </div>
+            </div>
+          ))}
         </div>
         <p
           style={{
             margin: "0 0 16px",
-            fontSize: 13,
-            lineHeight: 1.6,
+            fontSize: 15,
             color: "var(--textSecondary)",
+            lineHeight: 1.5,
           }}
         >
-          나도코딩은 아이디어 발굴부터 AI 서비스 배포까지
-          <br />
-          코딩 없이 2주 안에 완성하는 올인원 과정이에요.
+          어떻게 가능한지 궁금하다면?
         </p>
         <button
-          className="btn"
+          className="btnPrimary"
           type="button"
           onClick={() => router.push("/nadocoding")}
-          style={{ fontSize: 16, background: "var(--accent)" }}
+          style={{
+            width: "100%",
+            fontSize: 16,
+            fontWeight: 700,
+            padding: "14px 16px",
+          }}
         >
-          나도 코딩 1기 자세히 보기 →
+          나도코딩 1기 자세히 보기 →
         </button>
       </div>
 
@@ -628,6 +711,17 @@ export default function CompletePage() {
           올인원 나도코딩 1기 자세히 보기 →
         </button>
       </div>
+
+      {showScrollTop && (
+        <button
+          type="button"
+          className="scrollToTopBtn"
+          aria-label="맨 위로"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          ↑
+        </button>
+      )}
 
       {resendModalOpen && (
         <div className="modalOverlay" onClick={() => !resending && setResendModalOpen(false)}>
