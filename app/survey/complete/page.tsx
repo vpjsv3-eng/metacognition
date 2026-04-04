@@ -304,7 +304,7 @@ export default function CompletePage() {
 
   if (!result) {
     return (
-      <main className="resultContainer result-container">
+      <main className="result-page resultContainer result-container">
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
             AI가 아이디어를 분석하는 중...
@@ -324,7 +324,7 @@ export default function CompletePage() {
   const dDay = getEarlybirdDDay();
 
   return (
-    <main className="resultContainer resultWithBottomCta result-container">
+    <main className="result-page resultContainer resultWithBottomCta result-container">
       {isRestoredResult && (
         <div
           style={{

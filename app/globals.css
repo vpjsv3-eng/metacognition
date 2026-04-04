@@ -20,18 +20,20 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html {
   height: 100%;
   overflow-x: hidden;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
-  position: relative;
-  width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
 }
 
 body {
+  height: 100%;
+  overflow-x: hidden;
+  max-width: 100%;
+  position: relative;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -622,6 +624,26 @@ label {
 }
 
 /* ═══════════ CTA / Result page ═══════════ */
+
+.result-page {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.result-page > * {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.result-page .resultFixedCtaBar,
+.result-page .modalOverlay,
+.result-page .scrollToTopBtn {
+  max-width: none;
+  overflow-x: visible;
+}
 
 .resultContainer,
 .result-container {
@@ -1469,14 +1491,20 @@ label {
 /* ═══════════ First Idea Banner ═══════════ */
 
 .firstIdeaBanner {
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
   background: var(--accent);
   color: white;
-  text-align: center;
   padding: 8px 16px;
   border-radius: 14px 14px 0 0;
-  margin: -22px -22px 16px;
+  margin: 0 0 16px;
   font-size: 14px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .firstIdeaCard {
@@ -1484,6 +1512,13 @@ label {
   border: 2px solid #00c471 !important;
   border-radius: 14px;
   box-shadow: 0 4px 20px rgba(0, 196, 113, 0.15);
+  padding: 0 0 22px !important;
+  overflow: hidden;
+}
+
+.firstIdeaCard > *:not(.firstIdeaBanner) {
+  padding-left: 22px;
+  padding-right: 22px;
 }
 
 .firstIdeaReasonBg {
@@ -1585,7 +1620,7 @@ label {
   font-size: 13px;
   line-height: 1.5;
   color: #374151;
-  max-width: 100%;
+  max-width: min(100%, calc(100vw - 48px));
   overflow-x: scroll;
   overflow-y: hidden;
   scrollbar-gutter: stable;
