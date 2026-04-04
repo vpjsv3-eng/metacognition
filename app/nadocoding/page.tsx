@@ -397,16 +397,12 @@ export default function NadocodingPage() {
               kwColor: "#00C471" as const,
             },
           ].map((item, i) => (
-            <div
-              key={i}
-              className={i === 3 ? "heroStatBox heroStatBox--emphasis" : "heroStatBox"}
-              style={{ textAlign: "center" }}
-            >
+            <div key={i} className="heroStatBox" style={{ textAlign: "center" }}>
               <div
                 style={{
                   fontSize: 18,
                   fontWeight: 800,
-                  color: i === 3 ? "#00C471" : item.kwColor,
+                  color: item.kwColor,
                 }}
               >
                 {item.kw}
@@ -543,7 +539,7 @@ export default function NadocodingPage() {
       <section style={{ marginBottom: 24 }}>
         <div
           style={{
-            background: "#F8F9FA",
+            background: "#FFFFFF",
             borderRadius: 14,
             padding: "28px 20px 24px",
           }}

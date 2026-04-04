@@ -554,7 +554,7 @@ export default function CompletePage() {
         </h3>
         <div
           style={{
-            background: "#F3F4F6",
+            background: "#FFFFFF",
             border: "1px solid #E5E7EB",
             borderRadius: 12,
             padding: "16px 4px",
@@ -581,7 +581,6 @@ export default function CompletePage() {
                 />
               ) : null}
               <div
-                className={i === 2 ? "promoStatCell promoStatCell--emphasis" : "promoStatCell"}
                 style={{
                   flex: 1,
                   textAlign: "center",
