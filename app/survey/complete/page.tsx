@@ -3,18 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
+import { getEarlybirdDDay } from "../../lib/earlybird";
+import {
+  safeLocalStorageGet,
+  safeLocalStorageSet,
+  safeLocalStorageRemove,
+} from "../../lib/safeStorage";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
 const EMAIL_SENDING_KEY = "emailSending";
-
-const EARLYBIRD_DEADLINE = new Date("2026-04-06T23:59:59+09:00").getTime();
-
-function getEarlybirdDDay(): number {
-  const diff = EARLYBIRD_DEADLINE - Date.now();
-  if (diff <= 0) return 0;
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
 
 function getEmailId(email?: string): string {
   if (!email) return "사용자";
@@ -140,9 +138,9 @@ export default function CompletePage() {
   const [isRestoredResult, setIsRestoredResult] = useState(false);
 
   useEffect(() => {
-    localStorage.removeItem(SURVEY_STORAGE_KEY);
+    safeLocalStorageRemove(SURVEY_STORAGE_KEY);
 
-    const savedData = localStorage.getItem("diagnosis_result");
+    const savedData = safeLocalStorageGet("diagnosis_result");
     if (!savedData) {
       alert("진단 데이터가 없습니다. 다시 시작하세요.");
       router.push("/");
@@ -156,15 +154,15 @@ export default function CompletePage() {
       setResult(parsed);
       setResendEmail(parsed.profile?.email || "");
 
-      const savedAt = localStorage.getItem("diagnosis_result_savedAt");
+      const savedAt = safeLocalStorageGet("diagnosis_result_savedAt");
       if (savedAt) {
         setIsRestoredResult(true);
       }
-      localStorage.setItem("diagnosis_result_savedAt", new Date().toISOString());
+      safeLocalStorageSet("diagnosis_result_savedAt", new Date().toISOString());
     } catch {
       alert("진단 데이터가 손상되었습니다. 다시 시작하세요.");
-      localStorage.removeItem("diagnosis_result");
-      localStorage.removeItem("diagnosis_result_savedAt");
+      safeLocalStorageRemove("diagnosis_result");
+      safeLocalStorageRemove("diagnosis_result_savedAt");
       router.push("/");
     }
   }, []);
@@ -174,19 +172,15 @@ export default function CompletePage() {
     const emailAddr = result.profile?.email;
     if (!emailAddr) return;
 
-    try {
-      if (localStorage.getItem(EMAIL_SENT_KEY) === "true") {
-        setEmailStatus("sent");
-        return;
-      }
-      if (localStorage.getItem(EMAIL_SENDING_KEY) === "1") {
-        setEmailStatus("sending");
-        return;
-      }
-      localStorage.setItem(EMAIL_SENDING_KEY, "1");
-    } catch {
-      // localStorage 불가 시에도 발송 시도
+    if (safeLocalStorageGet(EMAIL_SENT_KEY) === "true") {
+      setEmailStatus("sent");
+      return;
     }
+    if (safeLocalStorageGet(EMAIL_SENDING_KEY) === "1") {
+      setEmailStatus("sending");
+      return;
+    }
+    safeLocalStorageSet(EMAIL_SENDING_KEY, "1");
 
     setEmailStatus("sending");
 
@@ -202,13 +196,9 @@ export default function CompletePage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        try {
-          localStorage.removeItem(EMAIL_SENDING_KEY);
-        } catch {}
+        safeLocalStorageRemove(EMAIL_SENDING_KEY);
         if (data.ok && !data.skipped) {
-          try {
-            localStorage.setItem(EMAIL_SENT_KEY, "true");
-          } catch {}
+          safeLocalStorageSet(EMAIL_SENT_KEY, "true");
           setEmailStatus("sent");
         } else if (data.skipped) {
           setEmailStatus("failed");
@@ -217,9 +207,7 @@ export default function CompletePage() {
         }
       })
       .catch(() => {
-        try {
-          localStorage.removeItem(EMAIL_SENDING_KEY);
-        } catch {}
+        safeLocalStorageRemove(EMAIL_SENDING_KEY);
         setEmailStatus("failed");
       });
   }, [result]);
@@ -299,12 +287,10 @@ export default function CompletePage() {
           <button
             type="button"
             onClick={() => {
-              localStorage.removeItem("diagnosis_result");
-              localStorage.removeItem("diagnosis_result_savedAt");
-              try {
-                localStorage.removeItem(EMAIL_SENT_KEY);
-                localStorage.removeItem(EMAIL_SENDING_KEY);
-              } catch {}
+              safeLocalStorageRemove("diagnosis_result");
+              safeLocalStorageRemove("diagnosis_result_savedAt");
+              safeLocalStorageRemove(EMAIL_SENT_KEY);
+              safeLocalStorageRemove(EMAIL_SENDING_KEY);
               router.push("/");
             }}
             style={{
@@ -639,7 +625,7 @@ export default function CompletePage() {
           className="resultFixedCtaBarBtn"
           onClick={() => router.push("/nadocoding")}
         >
-          바로 신청하기 →
+          올인원 나도코딩 1기 자세히 보기 →
         </button>
       </div>
 

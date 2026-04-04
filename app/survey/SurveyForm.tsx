@@ -10,6 +10,11 @@ import type {
   AnswersMap,
 } from "../lib/types";
 import { SURVEY_QUESTIONS, type SurveyQuestion } from "../lib/questions";
+import {
+  safeLocalStorageGet,
+  safeLocalStorageSet,
+  safeLocalStorageRemove,
+} from "../lib/safeStorage";
 
 const JOB_OPTIONS = [
   "직장인",
@@ -70,12 +75,11 @@ const LOADING_STEPS = [
 
 const EMAIL_SENT_KEY = "emailSent";
 
-/** 문항 전환 후 DOM 갱신 뒤 최상단으로 스크롤 (모바일 대응 포함) */
+/** 문항 전환 후 DOM 갱신 뒤 최상단으로 스크롤 (인앱 브라우저 호환) */
 function scrollSurveyToTop() {
   setTimeout(() => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, 0);
 }
 
@@ -126,7 +130,7 @@ export default function SurveyForm() {
         phase,
         savedAt: new Date().toISOString(),
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      safeLocalStorageSet(STORAGE_KEY, JSON.stringify(data));
     } catch {}
   }, [currentStep, answers, jobIndex, jobCustom, jobDetail, selectedKeywords, phase]);
 
@@ -134,7 +138,7 @@ export default function SurveyForm() {
     if (resumeChecked.current) return;
     resumeChecked.current = true;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = safeLocalStorageGet(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.answers && Object.keys(parsed.answers).length > 0) {
@@ -146,7 +150,7 @@ export default function SurveyForm() {
 
   function restoreProgress() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = safeLocalStorageGet(STORAGE_KEY);
       if (!saved) return;
       const parsed = JSON.parse(saved);
       if (parsed.job !== undefined) setJobIndex(parsed.job);
@@ -161,10 +165,8 @@ export default function SurveyForm() {
   }
 
   function clearProgress() {
-    localStorage.removeItem(STORAGE_KEY);
-    try {
-      localStorage.removeItem(EMAIL_SENT_KEY);
-    } catch {}
+    safeLocalStorageRemove(STORAGE_KEY);
+    safeLocalStorageRemove(EMAIL_SENT_KEY);
     setShowResumeModal(false);
   }
 
@@ -566,9 +568,7 @@ export default function SurveyForm() {
 
   async function onSubmit() {
     setError(null);
-    try {
-      localStorage.removeItem(EMAIL_SENT_KEY);
-    } catch {}
+    safeLocalStorageRemove(EMAIL_SENT_KEY);
     const profile = getProfile();
     const updatedProfile = { ...profile, email: email.trim() };
 
@@ -595,7 +595,7 @@ export default function SurveyForm() {
         throw new Error(text || `제출 실패 (HTTP ${res.status})`);
       }
       const data = (await res.json()) as { ok: true; result: DiagnosisResult };
-      localStorage.setItem("diagnosis_result", JSON.stringify(data.result));
+      safeLocalStorageSet("diagnosis_result", JSON.stringify(data.result));
       setApiDone(true);
     } catch (e) {
       setPhase("survey");

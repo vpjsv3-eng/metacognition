@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
+import { EARLYBIRD_DEADLINE_MS, getEarlybirdDDay } from "../lib/earlybird";
 
 type CurriculumItem = {
   label: string;
@@ -253,8 +254,6 @@ const FAQ_DATA: FaqCategory[] = [
   },
 ];
 
-const DEADLINE = new Date("2026-04-06T23:59:59+09:00").getTime();
-
 function useCountdown() {
   const [now, setNow] = useState(Date.now());
 
@@ -263,7 +262,7 @@ function useCountdown() {
     return () => clearInterval(id);
   }, []);
 
-  const diff = DEADLINE - now;
+  const diff = EARLYBIRD_DEADLINE_MS - now;
   if (diff <= 0) return null;
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -276,17 +275,18 @@ function useCountdown() {
 
 export default function NadocodingPage() {
   const formRef = useRef<HTMLDivElement>(null);
-  const curriculumRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<Set<number>>(new Set());
-  const [showSticky, setShowSticky] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const countdown = useCountdown();
+  const dDay = getEarlybirdDDay();
 
   useEffect(() => {
     function handleScroll() {
-      setShowSticky(window.scrollY > 600);
+      setShowScrollTop(window.scrollY > 300);
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -306,22 +306,33 @@ export default function NadocodingPage() {
   let faqFlatIdx = 0;
 
   return (
-    <main className="container" style={{ maxWidth: 600, paddingBottom: showSticky ? 140 : 80 }}>
+    <main className="container nadocodingPageWithBottomCta" style={{ maxWidth: 600 }}>
+      {showScrollTop && (
+        <button
+          type="button"
+          className="scrollToTopBtn"
+          aria-label="맨 위로"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          ↑
+        </button>
+      )}
+
       {/* ① 히어로 섹션 */}
       <section style={{ textAlign: "center", padding: "40px 0 44px" }}>
         <div
           style={{
             display: "inline-block",
-            padding: "8px 18px",
+            padding: "10px 20px",
             borderRadius: 999,
-            background: "#EF4444",
-            color: "white",
-            fontSize: 15,
+            background: "var(--accent)",
+            color: "#ffffff",
+            fontSize: 16,
             fontWeight: 700,
             marginBottom: 20,
           }}
         >
-          🔥 얼리버드 마감 D-{countdown ? countdown.days : 0} · 선착순 10명
+          나도 코딩 부트캠프 1기 모집
         </div>
 
         <h1
@@ -348,38 +359,58 @@ export default function NadocodingPage() {
         >
           아이디어 발굴부터 실제 서비스 배포까지
           <br />
-          올인원 과정
+          코딩 없이 2주 완성 올인원 과정
         </p>
 
-        {/* 숫자 강조 4개 */}
+        {/* 4개 박스 */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: "repeat(2, 1fr)",
             gap: 12,
             marginBottom: 28,
           }}
         >
           {[
-            { num: "2주", label: "과정 기간" },
-            { num: "10명", label: "소수 정예" },
-            { num: "2회", label: "오프라인 세션" },
-            { num: "월 2~3만", label: "AI 툴 비용 전부" },
+            {
+              num: "2주",
+              label: "기획→구현→배포\n한 사이클 완성",
+            },
+            {
+              num: "10명",
+              label: "소수 정예로\n밀착 관리해요",
+            },
+            {
+              num: "2회",
+              label: "오프라인 세션\n혼자 안 해도 돼요",
+            },
+            {
+              num: "월 2~3만",
+              label: "AI 툴 비용\n그게 전부예요",
+            },
           ].map((item, i) => (
             <div
               key={i}
               style={{
-                padding: "16px 8px",
+                padding: "14px 10px",
                 borderRadius: 12,
                 border: "1px solid var(--border)",
                 background: "var(--surface)",
                 textAlign: "center",
               }}
             >
-              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--accent)" }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "var(--accent)" }}>
                 {item.num}
               </div>
-              <div style={{ fontSize: 11, color: "var(--textSecondary)", marginTop: 4 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--textSecondary)",
+                  marginTop: 6,
+                  lineHeight: 1.45,
+                  whiteSpace: "pre-line",
+                }}
+              >
                 {item.label}
               </div>
             </div>
@@ -420,35 +451,10 @@ export default function NadocodingPage() {
           className="btnPrimary"
           type="button"
           onClick={scrollToForm}
-          style={{ fontSize: 16, marginBottom: 16 }}
+          style={{ fontSize: 16 }}
         >
           지금 얼리버드 신청하기
         </button>
-
-        {/* 미니 신청 폼 */}
-        <div
-          style={{
-            marginTop: 12,
-            padding: "20px",
-            borderRadius: 14,
-            border: "1px solid var(--border)",
-            background: "var(--surface)",
-            textAlign: "left",
-          }}
-        >
-          <p
-            style={{
-              margin: "0 0 12px",
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--text)",
-              textAlign: "center",
-            }}
-          >
-            지금 바로 자리 맡기
-          </p>
-          <CtaForm source="nadocoding_page" compact />
-        </div>
       </section>
 
       {/* ② 공감 후킹 섹션 */}
@@ -668,51 +674,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑥ 2주 커리큘럼 */}
-      <section ref={curriculumRef} style={{ marginBottom: 24 }}>
-        <div className="card" style={{ padding: 28 }}>
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              margin: "0 0 24px",
-              textAlign: "center",
-              color: "var(--text)",
-            }}
-          >
-            2주 커리큘럼
-          </h2>
-          <div className="timeline">
-            {CURRICULUM.map((item, i) => (
-              <div key={i} className="timelineItem">
-                <div className="timelineDot" />
-                <div className="timelineLabel">
-                  {item.label}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      marginLeft: 8,
-                      padding: "2px 8px",
-                      borderRadius: 999,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: item.mode === "offline" ? "var(--accent)" : "var(--surface)",
-                      color: item.mode === "offline" ? "#fff" : "var(--textSecondary)",
-                      border: item.mode === "offline" ? "none" : "1px solid var(--border)",
-                    }}
-                  >
-                    {item.mode === "offline" ? "오프라인" : "온라인"}
-                  </span>
-                </div>
-                <div className="timelineTitle">{item.title}</div>
-                <div className="timelineDesc">{item.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ⑦ 2주 후 내 모습 */}
+      {/* ⑥ 2주 후 내 모습 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -740,7 +702,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑧ 나도코딩이 다른 이유 */}
+      {/* ⑦ 나도코딩이 다른 이유 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -786,7 +748,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑨ 강사 소개 */}
+      {/* ⑧ 강사 소개 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -942,7 +904,7 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* ⑩ 수강 후기 */}
+      {/* ⑨ 수강 후기 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -991,6 +953,50 @@ export default function NadocodingPage() {
                 >
                   &ldquo;{review.text}&rdquo;
                 </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ⑩ 2주 커리큘럼 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              margin: "0 0 24px",
+              textAlign: "center",
+              color: "var(--text)",
+            }}
+          >
+            2주 커리큘럼
+          </h2>
+          <div className="timeline">
+            {CURRICULUM.map((item, i) => (
+              <div key={i} className="timelineItem">
+                <div className="timelineDot" />
+                <div className="timelineLabel">
+                  {item.label}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      marginLeft: 8,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background: item.mode === "offline" ? "var(--accent)" : "var(--surface)",
+                      color: item.mode === "offline" ? "#fff" : "var(--textSecondary)",
+                      border: item.mode === "offline" ? "none" : "1px solid var(--border)",
+                    }}
+                  >
+                    {item.mode === "offline" ? "오프라인" : "온라인"}
+                  </span>
+                </div>
+                <div className="timelineTitle">{item.title}</div>
+                <div className="timelineDesc">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -1098,21 +1104,12 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      {/* 스크롤 sticky 바 */}
-      {showSticky && (
-        <div className="stickyBar">
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
-            🔥 얼리버드 마감 D-{countdown ? countdown.days : 0}
-          </span>
-          <button
-            className="btnPrimary"
-            type="button"
-            onClick={scrollToForm}
-          >
-            무료로 사전 신청하기
-          </button>
-        </div>
-      )}
+      <div className="nadocodingFixedCtaBar" role="navigation" aria-label="사전 신청">
+        <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-{dDay}</span>
+        <button type="button" className="nadocodingFixedCtaBarBtn" onClick={scrollToForm}>
+          무료로 사전 신청하기 →
+        </button>
+      </div>
     </main>
   );
 }

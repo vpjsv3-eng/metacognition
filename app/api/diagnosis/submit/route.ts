@@ -5,7 +5,11 @@ import { getSupabase } from "../../../lib/supabase";
 import { generateIdeasFallback } from "../../../lib/aiReport";
 import { isRateLimited, getClientIp, isValidEmail } from "../../../lib/rateLimit";
 
-const SYSTEM_PROMPT = `당신은 AI 서비스 기획 전문가이자 창업 컨설턴트입니다.
+const SYSTEM_PROMPT = `반드시 모든 응답을 한국어로 작성하세요.
+영어 단어나 문장을 절대 사용하지 마세요.
+JSON 키는 영어로, 값은 반드시 한국어로 작성하세요.
+
+당신은 AI 서비스 기획 전문가이자 창업 컨설턴트입니다.
 사용자의 설문 응답을 깊이 분석해서
 그 사람만을 위한 맞춤형 진단 결과를 작성해주세요.
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { safeLocalStorageRemove } from "./lib/safeStorage";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -68,10 +69,8 @@ export default function LandingPage() {
           className="btn"
           type="button"
           onClick={() => {
-            try {
-              localStorage.removeItem("emailSent");
-              localStorage.removeItem("emailSending");
-            } catch {}
+            safeLocalStorageRemove("emailSent");
+            safeLocalStorageRemove("emailSending");
             router.push("/survey");
           }}
           style={{

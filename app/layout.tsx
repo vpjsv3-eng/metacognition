@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import InAppBrowserBanner from "./components/InAppBrowserBanner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko" style={{ overscrollBehavior: "none" }}>
-      <body>{children}</body>
+      <body>
+        <InAppBrowserBanner />
+        {children}
+      </body>
     </html>
   );
 }
