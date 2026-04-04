@@ -46,8 +46,7 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
             style={{
               display: "inline-flex",
               alignItems: "center",
-              flexWrap: "wrap",
-              minWidth: 0,
+              flexShrink: 0,
             }}
           >
             {i > 0 ? (
@@ -66,7 +65,10 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   return (
     <div className="ideaDetail">
       <span className="ideaLabel">실제 작동 방식</span>
-      <div className="toolFlowBox toolFlowBox--row">{rowContent}</div>
+      <div className="tool-flow-box">
+        <div className="tool-flow-box__inner">{rowContent}</div>
+      </div>
+      <p className="tool-flow-box-hint">← 밀어서 더 보기</p>
     </div>
   );
 }
@@ -565,7 +567,9 @@ export default function CompletePage() {
             padding: "16px 4px",
             marginBottom: 20,
             display: "flex",
+            flexWrap: "wrap",
             alignItems: "stretch",
+            minWidth: 0,
           }}
         >
           {[
@@ -654,7 +658,7 @@ export default function CompletePage() {
         </button>
         {firstStep && (
           <div className="encourageBox encourageBox--promo">
-            <p title={firstStep.encouragement}>{firstStep.encouragement}</p>
+            <p>{`💪 ${firstStep.encouragement}`}</p>
           </div>
         )}
       </div>
@@ -665,58 +669,6 @@ export default function CompletePage() {
           <AccordionIdea key={i} idea={idea} index={i} />
         ))}
       </div>
-
-      {/* ═══ PART 3: 지금 당장 시작하는 법 ═══ */}
-      {firstStep && (
-        <div className="firstStepSection">
-          <h2
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              margin: "0 0 8px",
-              color: "var(--text)",
-            }}
-          >
-            ✅ 지금 바로 시작해보세요
-          </h2>
-          <p style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text)" }}>
-            가장 추천하는 아이디어:{" "}
-            <strong style={{ color: "var(--accent)" }}>{firstStep.idea_name}</strong>
-          </p>
-          <p
-            style={{
-              margin: "0 0 20px",
-              fontSize: 14,
-              color: "var(--textSecondary)",
-              lineHeight: 1.6,
-            }}
-          >
-            {firstStep.reason}
-          </p>
-          <div className="stepsContainer">
-            {firstStep.steps.map((step, i) => (
-              <div key={i} className="stepItem">
-                <span className="stepNum">{i + 1}</span>
-                <span className="stepText">{step.replace(/^\d+단계:\s*/, "")}</span>
-              </div>
-            ))}
-          </div>
-          <button
-            className="btnAccent"
-            type="button"
-            onClick={() => router.push("/nadocoding")}
-            style={{
-              width: "100%",
-              marginTop: 20,
-              fontSize: 16,
-              fontWeight: 700,
-              padding: "14px 20px",
-            }}
-          >
-            나도 코딩 1기 자세히 보기
-          </button>
-        </div>
-      )}
 
       {/* 하단 버튼 */}
       <div

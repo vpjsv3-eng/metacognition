@@ -338,22 +338,16 @@ export default function NadocodingPage() {
         >
           나도 코딩 올인원 부트캠프 1기 모집
         </div>
-        <p
-          style={{
-            fontSize: 14,
-            color: "#6B7280",
-            margin: "8px 0 16px",
-            textAlign: "center",
-          }}
-        >
-          4월 18일 (토) ~ 4월 25일 (토)
-        </p>
+        <p className="nadocodingHeroDate">4월 18일 (토) ~ 4월 25일 (토)</p>
 
         <h1 className="nadocodingHeroTitle">
-          아이디어 발굴부터 실제 서비스 배포까지
+          아이디어 발굴부터
           <br />
-          코딩 없이 2주 완성 올인원 과정
+          <span className="nadocodingHeroTitleEm">실제 서비스 배포까지</span>
         </h1>
+        <p className="nadocodingHeroSubtitle">
+          ✦ 코딩 없이 2주 올인원 완성 과정 ✦
+        </p>
 
         {/* 4개 박스 */}
         <div
