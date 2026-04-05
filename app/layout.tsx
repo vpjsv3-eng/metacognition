@@ -1,6 +1,7 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import UtmCapture from "./components/UtmCapture";
+import ViewportMeta from "./components/ViewportMeta";
 import "./globals.css";
 
 const siteUrl =
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "나도코딩",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og",
         width: 1200,
         height: 630,
         alt: "나도코딩 AI 서비스 아이디어 진단",
@@ -34,23 +35,23 @@ export const metadata: Metadata = {
     title: "나만의 AI 서비스 아이디어 무료 진단",
     description:
       "아이디어도 코딩도 몰라도 괜찮아요. 3분이면 나만의 AI 서비스를 찾을 수 있어요.",
-    images: [`${siteUrl}/og-image.png`],
+    images: [`${siteUrl}/og`],
   },
-};
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 5,
-  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko" style={{ overscrollBehavior: "none" }}>
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
+        />
+      </head>
       <body>
         <div id="__next">
           <UtmCapture />
+          <ViewportMeta />
           {children}
         </div>
       </body>

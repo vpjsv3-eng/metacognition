@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
+import InAppCtaAdjust from "../components/InAppCtaAdjust";
 import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
 type CurriculumAccordionItem = {
@@ -329,9 +330,10 @@ export default function NadocodingPage() {
 
   return (
     <main
-      className="container nadocodingPageWithBottomCta nadocoding-container nadocoding-page"
+      className="container page-container nadocodingPageWithBottomCta nadocoding-container nadocoding-page"
       style={{ maxWidth: "min(600px, 100%)", width: "100%" }}
     >
+      <InAppCtaAdjust />
       {showScrollTop && (
         <button
           type="button"

@@ -9,6 +9,7 @@ import {
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
+import InAppCtaAdjust from "../../components/InAppCtaAdjust";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -331,7 +332,8 @@ export default function CompletePage() {
 
   if (!result) {
     return (
-      <main className="result-page resultContainer result-container">
+      <main className="result-page page-container resultContainer result-container">
+        <InAppCtaAdjust />
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
             AI가 아이디어를 분석하는 중...
@@ -349,7 +351,8 @@ export default function CompletePage() {
   const otherIdeas = result.ideas.slice(1);
 
   return (
-    <main className="result-page resultContainer resultWithBottomCta result-container">
+    <main className="result-page page-container resultContainer resultWithBottomCta result-container">
+      <InAppCtaAdjust />
       {isRestoredResult && (
         <div
           style={{
