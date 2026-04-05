@@ -1142,7 +1142,11 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      <div className="nadocodingFixedCtaBar sticky-bar" role="navigation" aria-label="사전 신청">
+      <div
+        className="nadocodingFixedCtaBar sticky-bar sticky-cta-bar"
+        role="navigation"
+        aria-label="사전 신청"
+      >
         <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button type="button" className="nadocodingFixedCtaBarBtn" onClick={scrollToForm}>
           무료로 사전 신청하기 →

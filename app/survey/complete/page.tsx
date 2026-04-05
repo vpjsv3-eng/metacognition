@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 import {
@@ -9,7 +9,6 @@ import {
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
-import CtaForm from "../../components/CtaForm";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -60,7 +59,7 @@ function ideaToolsLabel(idea: ServiceIdea): string {
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   const raw = idea.tool_flow?.trim();
   const fallback = (raw || idea.how_it_works || "").trim();
-  const parts =
+  const steps =
     raw && raw.includes("→")
       ? raw
           .split(/\s*→\s*/)
@@ -69,21 +68,22 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
       : null;
 
   const content =
-    parts && parts.length > 0 ? (
-      <>
-        {parts.map((part, i) => (
-          <span key={i} className="tool-flow-segment">
-            {i > 0 ? (
-              <span className="tool-flow-arrow-down" aria-hidden>
-                ↓
+    steps && steps.length > 0 ? (
+      <span className="tool-flow-inline">
+        {steps.map((step, i) => (
+          <Fragment key={i}>
+            <span>{step}</span>
+            {i < steps.length - 1 ? (
+              <span className="tool-flow-arrow-inline" aria-hidden>
+                {" "}
+                →{" "}
               </span>
             ) : null}
-            <span className="tool-flow-step">{part}</span>
-          </span>
+          </Fragment>
         ))}
-      </>
+      </span>
     ) : (
-      <span className="tool-flow-step">{fallback}</span>
+      <span className="tool-flow-inline">{fallback}</span>
     );
 
   return (
@@ -712,24 +712,6 @@ export default function CompletePage() {
         >
           어떻게 가능한지 궁금하다면?
         </p>
-        <p
-          style={{
-            margin: "0 0 10px",
-            fontSize: 14,
-            fontWeight: 700,
-            color: "var(--text)",
-          }}
-        >
-          얼리버드 사전 신청 (결과 페이지)
-        </p>
-        <div style={{ marginBottom: 20 }}>
-          <CtaForm
-            compact
-            source="result_page"
-            surveyId={result.surveyId}
-            defaultEmail={email}
-          />
-        </div>
         <button
           className="btnPrimary"
           type="button"
@@ -797,7 +779,7 @@ export default function CompletePage() {
 
       {/* 결과지 다시 받기 모달 */}
       <div
-        className="resultFixedCtaBar"
+        className="resultFixedCtaBar sticky-cta-bar"
         role="navigation"
         aria-label="얼리버드 신청"
       >

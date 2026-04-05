@@ -212,8 +212,8 @@ export default function SurveyForm() {
       setSelectedKeywords((prev) => prev.filter((k) => k !== kw));
       return;
     }
-    if (selectedKeywords.length >= 2) {
-      setToastMessage("최대 2개까지 선택할 수 있어요");
+    if (selectedKeywords.length >= 3) {
+      setToastMessage("최대 3개까지 선택할 수 있어요");
       return;
     }
     setSelectedKeywords((prev) => [...prev, kw]);
@@ -856,11 +856,11 @@ export default function SurveyForm() {
             <h2 className="questionTitle">
               나를 가장 잘 설명하는 키워드를 골라주세요
             </h2>
-            <span className="multiBadge">최대 2개 선택</span>
+            <span className="multiBadge">최대 3개 선택</span>
             <div className="keywordGrid">
               {KEYWORD_OPTIONS.map((kw) => {
                 const selected = selectedKeywords.includes(kw);
-                const disabled = !selected && selectedKeywords.length >= 2;
+                const disabled = !selected && selectedKeywords.length >= 3;
                 return (
                   <button
                     key={kw}
@@ -876,7 +876,7 @@ export default function SurveyForm() {
               })}
             </div>
             {selectedKeywords.length > 0 && (
-              <p className="help">선택: {selectedKeywords.length}/2</p>
+              <p className="help">선택: {selectedKeywords.length}/3</p>
             )}
             {profileError && <p className="errorText">{profileError}</p>}
             <div className="navArea">

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import InAppBrowserBanner from "./components/InAppBrowserBanner";
 import UtmCapture from "./components/UtmCapture";
 import "./globals.css";
 
@@ -43,6 +42,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -51,7 +51,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <div id="__next">
           <UtmCapture />
-          <InAppBrowserBanner />
           {children}
         </div>
       </body>
