@@ -17,24 +17,20 @@ export default function InAppCtaAdjust() {
     const ctaBars = document.querySelectorAll(".sticky-cta-bar");
     ctaBars.forEach((bar) => {
       const el = bar as HTMLElement;
-      el.style.boxSizing = "border-box";
-      el.style.bottom = "12px";
-      el.style.paddingBottom = "44px";
-      el.style.minHeight = "80px";
-      el.style.zIndex = "99999";
+      el.style.paddingTop = "10px";
+      el.style.paddingBottom = "10px";
+      el.style.minHeight = "56px";
     });
 
-    document.body.style.paddingBottom = "140px";
+    document.body.style.paddingBottom = "76px";
 
     return () => {
       document.body.style.paddingBottom = "";
       ctaBars.forEach((bar) => {
         const el = bar as HTMLElement;
-        el.style.removeProperty("box-sizing");
-        el.style.removeProperty("bottom");
+        el.style.removeProperty("padding-top");
         el.style.removeProperty("padding-bottom");
         el.style.removeProperty("min-height");
-        el.style.removeProperty("z-index");
       });
     };
   }, []);

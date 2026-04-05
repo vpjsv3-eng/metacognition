@@ -783,21 +783,21 @@ label {
   right: 0 !important;
   z-index: 99999 !important;
   min-height: 56px !important;
-  padding-top: 12px !important;
-  padding-bottom: max(
-    env(safe-area-inset-bottom, 20px),
-    20px
-  ) !important;
+  height: auto !important;
+  padding-top: 10px !important;
+  padding-bottom: env(safe-area-inset-bottom, 10px) !important;
   background: #111827 !important;
+  display: flex !important;
+  align-items: center !important;
   box-sizing: border-box !important;
 }
 
 @supports (-webkit-touch-callout: none) {
   /* iOS 전용 */
   .sticky-cta-bar {
-    padding-bottom: max(
-      env(safe-area-inset-bottom, 24px),
-      24px
+    padding-bottom: env(
+      safe-area-inset-bottom,
+      10px
     ) !important;
   }
 }
@@ -839,7 +839,7 @@ label {
 }
 
 .resultWithBottomCta.page-container {
-  padding-bottom: 120px !important;
+  padding-bottom: 76px !important;
 }
 
 .resultFixedCtaBar {
@@ -901,7 +901,7 @@ label {
 }
 
 .nadocodingPageWithBottomCta.page-container {
-  padding-bottom: 120px !important;
+  padding-bottom: 76px !important;
 }
 
 .nadocodingFixedCtaBar {
