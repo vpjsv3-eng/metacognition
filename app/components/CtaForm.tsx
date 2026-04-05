@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import confetti from "canvas-confetti";
+import { readUtmForApi } from "../lib/utm";
 
 type Props = {
   surveyId?: string;
   onGreenBg?: boolean;
+  /** `result_page` | `nadocoding_page` — waitlist.source 저장용 */
   source?: string;
   compact?: boolean;
+  /** 진단 결과 이메일 등 미리 채움 (선택 입력으로도 수정 가능) */
+  defaultEmail?: string;
 };
 
 function fireConfetti() {
@@ -26,13 +30,24 @@ function fireConfetti() {
   });
 }
 
-export default function CtaForm({ surveyId, onGreenBg, source, compact }: Props) {
+export default function CtaForm({
+  surveyId,
+  onGreenBg,
+  source,
+  compact,
+  defaultEmail,
+}: Props) {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
+  const [emailField, setEmailField] = useState(defaultEmail ?? "");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
+
+  useEffect(() => {
+    if (defaultEmail) setEmailField(defaultEmail);
+  }, [defaultEmail]);
 
   function handlePhoneChange(value: string) {
     const raw = value.replace(/[^0-9]/g, "").slice(0, 8);
@@ -52,26 +67,44 @@ export default function CtaForm({ surveyId, onGreenBg, source, compact }: Props)
     if (!canSubmit) return;
     setSubmitting(true);
     try {
-      await fetch("/api/subscribe", {
+      const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
           phone: fullPhone,
+          email: emailField.trim() || undefined,
           surveyId: surveyId || undefined,
           source: source || "nadocoding_page",
           timestamp: new Date().toISOString(),
-          privacy_consent: consent,
+          privacy_consent: true,
+          utm: readUtmForApi(),
         }),
       });
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        saved?: Record<string, unknown> | null;
+      };
+      if (!res.ok || !json.ok) {
+        alert(
+          typeof json.error === "string"
+            ? json.error
+            : "신청에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+        );
+        return;
+      }
+      if (process.env.NODE_ENV === "development" && json.saved) {
+        console.log("waitlist 저장 성공 (클라이언트 확인)", json.saved);
+      }
       setSubmitted(true);
       fireConfetti();
     } catch {
-      alert("신청 중 오류가 발생했습니다. 다시 시도해주세요.");
+      alert("신청 중 오류가 발생했습니다. 다시 시도해 주세요.");
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, name, fullPhone, surveyId, source]);
+  }, [canSubmit, name, fullPhone, emailField, surveyId, source]);
 
   if (submitted) {
     return (
@@ -112,6 +145,14 @@ export default function CtaForm({ surveyId, onGreenBg, source, compact }: Props)
           inputMode="numeric"
         />
       </div>
+
+      <input
+        type="email"
+        value={emailField}
+        onChange={(e) => setEmailField(e.target.value)}
+        placeholder="이메일 (선택, 알림 받을 주소)"
+        autoComplete="email"
+      />
 
       {/* 개인정보 동의 */}
       <div style={{ marginTop: compact ? 2 : 4 }}>

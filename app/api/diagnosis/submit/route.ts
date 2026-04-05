@@ -201,7 +201,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { profile, answers, answersMap } = payload ?? ({} as DiagnosisPayload);
+  const { profile, answers, answersMap, utm } = payload ?? ({} as DiagnosisPayload);
 
   if (!profile || !Array.isArray(answers) || answers.length < 10) {
     return NextResponse.json(
@@ -232,6 +232,9 @@ export async function POST(req: Request) {
       const insertData: Record<string, unknown> = {
         email: profile.email || null,
         gpt_result: JSON.stringify(gptResult),
+        utm_source: utm?.source ?? "direct",
+        utm_medium: utm?.medium ?? "organic",
+        utm_campaign: utm?.campaign ?? "",
       };
 
       const { data, error } = await sb
@@ -241,9 +244,14 @@ export async function POST(req: Request) {
         .single();
 
       if (error) {
-        console.error("저장 실패", error);
+        console.error("survey_responses 저장 실패", error);
       } else {
         surveyId = data?.id;
+        console.log("survey_responses 저장 성공", {
+          id: data?.id,
+          email: insertData.email,
+          gpt_result_length: String(insertData.gpt_result).length,
+        });
       }
     }
   } catch (e) {

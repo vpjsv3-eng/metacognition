@@ -20,6 +20,7 @@ import {
   safeLocalStorageSet,
   safeLocalStorageRemove,
 } from "../lib/safeStorage";
+import { readUtmForApi } from "../lib/utm";
 
 const JOB_OPTIONS = [
   "직장인",
@@ -119,6 +120,9 @@ export default function SurveyForm() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [apiDone, setApiDone] = useState(false);
+  const [loadingSlowHint, setLoadingSlowHint] = useState(false);
+  const [loadingFailed, setLoadingFailed] = useState(false);
+  const submitAbortRef = useRef<AbortController | null>(null);
 
   const [email, setEmail] = useState("");
   const [emailConsent, setEmailConsent] = useState(false);
@@ -312,12 +316,20 @@ export default function SurveyForm() {
     const interval = setInterval(() => {
       setLoadingProgress((prev) => {
         if (apiDone) return 100;
+        if (loadingFailed) return prev;
         if (prev < 85) return prev + Math.random() * 8;
         return prev;
       });
     }, 400);
     return () => clearInterval(interval);
-  }, [phase, apiDone]);
+  }, [phase, apiDone, loadingFailed]);
+
+  useEffect(() => {
+    if (phase !== "loading" || apiDone || loadingFailed) return;
+    setLoadingSlowHint(false);
+    const t = window.setTimeout(() => setLoadingSlowHint(true), 30_000);
+    return () => window.clearTimeout(t);
+  }, [phase, apiDone, loadingFailed]);
 
   useEffect(() => {
     if (apiDone && loadingProgress >= 100) {
@@ -657,30 +669,38 @@ export default function SurveyForm() {
       profile: updatedProfile,
       answers: buildAnswerList(),
       answersMap: buildAnswersMap(),
+      utm: readUtmForApi(),
     };
+
+    submitAbortRef.current?.abort();
+    const ac = new AbortController();
+    submitAbortRef.current = ac;
 
     setSubmitting(true);
     setPhase("loading");
     setLoadingStep(0);
     setLoadingProgress(0);
     setApiDone(false);
+    setLoadingSlowHint(false);
+    setLoadingFailed(false);
 
     try {
       const res = await fetch("/api/diagnosis/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: ac.signal,
       });
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `제출 실패 (HTTP ${res.status})`);
+        setLoadingFailed(true);
+        return;
       }
       const data = (await res.json()) as { ok: true; result: DiagnosisResult };
       safeLocalStorageSet("diagnosis_result", JSON.stringify(data.result));
       setApiDone(true);
     } catch (e) {
-      setPhase("survey");
-      setError(e instanceof Error ? e.message : "제출 중 오류가 발생했습니다.");
+      if (e instanceof Error && e.name === "AbortError") return;
+      setLoadingFailed(true);
     } finally {
       setSubmitting(false);
     }
@@ -1138,12 +1158,29 @@ export default function SurveyForm() {
               style={{
                 fontSize: 20,
                 fontWeight: 800,
-                margin: "0 0 24px",
+                margin: "0 0 12px",
                 color: "var(--text)",
+                lineHeight: 1.45,
+                textAlign: "center",
               }}
             >
-              AI가 답변을 분석하고 있어요
+              {loadingFailed || loadingSlowHint
+                ? "네트워크 상태를 확인해주세요."
+                : "분석에 시간이 걸리고 있어요 🙏"}
             </h2>
+            <p
+              style={{
+                margin: "0 0 24px",
+                fontSize: 15,
+                color: "var(--textSecondary)",
+                lineHeight: 1.6,
+                textAlign: "center",
+              }}
+            >
+              {loadingFailed || loadingSlowHint
+                ? "새로고침 후 다시 시도해보세요."
+                : "잠시만 기다려주세요..."}
+            </p>
 
             <div
               style={{
@@ -1154,6 +1191,7 @@ export default function SurveyForm() {
                 background: "var(--border)",
                 marginBottom: 28,
                 overflow: "hidden",
+                opacity: loadingFailed ? 0.35 : 1,
               }}
             >
               <div
@@ -1167,7 +1205,14 @@ export default function SurveyForm() {
               />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                opacity: loadingFailed ? 0.4 : 1,
+              }}
+            >
               {LOADING_STEPS.map((text, i) => (
                 <p
                   key={i}
@@ -1192,6 +1237,18 @@ export default function SurveyForm() {
                 </p>
               ))}
             </div>
+
+            {(loadingSlowHint || loadingFailed) && (
+              <button
+                type="button"
+                className="btnPrimary"
+                style={{ marginTop: 24, minWidth: 200 }}
+                disabled={submitting}
+                onClick={() => onSubmit()}
+              >
+                다시 시도하기
+              </button>
+            )}
           </div>
         </div>
       </>

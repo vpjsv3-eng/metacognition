@@ -9,6 +9,7 @@ import {
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
+import CtaForm from "../../components/CtaForm";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -58,6 +59,7 @@ function ideaToolsLabel(idea: ServiceIdea): string {
 
 function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
   const raw = idea.tool_flow?.trim();
+  const fallback = (raw || idea.how_it_works || "").trim();
   const parts =
     raw && raw.includes("→")
       ? raw
@@ -66,38 +68,28 @@ function IdeaWorkflowSection({ idea }: { idea: ServiceIdea }) {
           .filter(Boolean)
       : null;
 
-  const rowContent =
-    parts && parts.length >= 2 ? (
+  const content =
+    parts && parts.length > 0 ? (
       <>
         {parts.map((part, i) => (
-          <span
-            key={i}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
+          <span key={i} className="tool-flow-segment">
             {i > 0 ? (
-              <span className="toolFlowArrowInline" aria-hidden>
-                →
+              <span className="tool-flow-arrow-down" aria-hidden>
+                ↓
               </span>
             ) : null}
-            <span className="toolFlowStepInline">{part}</span>
+            <span className="tool-flow-step">{part}</span>
           </span>
         ))}
       </>
     ) : (
-      <span className="toolFlowStepInline">{raw || idea.how_it_works}</span>
+      <span className="tool-flow-step">{fallback}</span>
     );
 
   return (
     <div className="ideaDetail">
       <span className="ideaLabel idea-section-label">실제 작동 방식</span>
-      <div className="tool-flow-box">
-        <div className="tool-flow-box__inner">{rowContent}</div>
-      </div>
-      <p className="tool-flow-box-hint">← 밀어서 더 보기</p>
+      <div className="tool-flow-box">{content}</div>
     </div>
   );
 }
@@ -299,27 +291,6 @@ export default function CompletePage() {
         safeLocalStorageRemove(EMAIL_SENDING_KEY);
         setEmailStatus("failed");
       });
-  }, [result]);
-
-  useEffect(() => {
-    if (!result) return;
-    const boxes = document.querySelectorAll(".tool-flow-box");
-    const cleanups: (() => void)[] = [];
-    boxes.forEach((box) => {
-      const onTouchStart = (e: Event) => {
-        e.stopPropagation();
-      };
-      const onTouchMove = (e: Event) => {
-        e.stopPropagation();
-      };
-      box.addEventListener("touchstart", onTouchStart, { passive: true });
-      box.addEventListener("touchmove", onTouchMove, { passive: true });
-      cleanups.push(() => {
-        box.removeEventListener("touchstart", onTouchStart);
-        box.removeEventListener("touchmove", onTouchMove);
-      });
-    });
-    return () => cleanups.forEach((fn) => fn());
   }, [result]);
 
   async function handleResend() {
@@ -741,6 +712,24 @@ export default function CompletePage() {
         >
           어떻게 가능한지 궁금하다면?
         </p>
+        <p
+          style={{
+            margin: "0 0 10px",
+            fontSize: 14,
+            fontWeight: 700,
+            color: "var(--text)",
+          }}
+        >
+          얼리버드 사전 신청 (결과 페이지)
+        </p>
+        <div style={{ marginBottom: 20 }}>
+          <CtaForm
+            compact
+            source="result_page"
+            surveyId={result.surveyId}
+            defaultEmail={email}
+          />
+        </div>
         <button
           className="btnPrimary"
           type="button"

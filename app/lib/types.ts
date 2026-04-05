@@ -56,8 +56,16 @@ export type DiagnosisResult = {
   surveyId?: string;
 };
 
+/** 광고 UTM (sessionStorage → 설문 제출 시 전달) */
+export type UtmAttribution = {
+  source: string;
+  medium: string;
+  campaign: string;
+};
+
 export type DiagnosisPayload = {
   profile: Profile;
   answers: SurveyAnswer[];
   answersMap: AnswersMap;
+  utm?: UtmAttribution;
 };

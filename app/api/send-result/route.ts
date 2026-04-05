@@ -186,40 +186,55 @@ export async function POST(req: Request) {
   const resend = new Resend(apiKey);
   const displayName = getDisplayName(trimmedEmail);
 
-  try {
+  const html = buildEmailHtml(trimmedEmail, persona, ideas, first_step);
+
+  async function sendEmailOnce() {
     const { data, error } = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: trimmedEmail,
       subject: `[나도코딩] ${displayName}님의 AI 서비스 아이디어 진단 결과가 도착했어요`,
-      html: buildEmailHtml(trimmedEmail, persona, ideas, first_step),
+      html,
     });
-
     if (error) {
-      const errorMsg = typeof error === "object" ? JSON.stringify(error, null, 2) : String(error);
-      console.error("[send-result] 이메일 발송 실패:", errorMsg);
+      throw error;
+    }
+    return data;
+  }
 
-      const statusCode = (error as { statusCode?: number }).statusCode;
+  try {
+    const data = await sendEmailOnce();
+    console.log("[send-result] 이메일 발송 성공:", JSON.stringify(data));
+    return NextResponse.json({ ok: true, data });
+  } catch (error) {
+    console.error("1차 발송 실패, 재시도:", error);
+    await new Promise((r) => setTimeout(r, 2000));
+    try {
+      const data = await sendEmailOnce();
+      console.log("2차 발송 성공");
+      return NextResponse.json({ ok: true, data });
+    } catch (error2) {
+      console.error("2차 발송도 실패:", error2);
+      const errMessage =
+        error2 instanceof Error ? error2.message : String(error2);
+      const statusCode = (error2 as { statusCode?: number }).statusCode;
       if (statusCode === 429) {
         return NextResponse.json(
-          { ok: false, error: "일일 발송 한도를 초과했습니다. 잠시 후 다시 시도해주세요.", errorDetail: "rate_limit" },
+          {
+            ok: false,
+            error: "일일 발송 한도를 초과했습니다. 잠시 후 다시 시도해주세요.",
+            errorDetail: "rate_limit",
+          },
           { status: 429 },
         );
       }
-
       return NextResponse.json(
-        { ok: false, error: "이메일 발송에 실패했습니다.", errorDetail: errorMsg },
+        {
+          ok: false,
+          error: "이메일 발송에 실패했습니다.",
+          errorDetail: errMessage,
+        },
         { status: 500 },
       );
     }
-
-    console.log("[send-result] 이메일 발송 성공:", JSON.stringify(data));
-    return NextResponse.json({ ok: true, data });
-  } catch (e) {
-    const errMessage = e instanceof Error ? e.message : String(e);
-    console.error("[send-result] Resend 오류:", errMessage, e);
-    return NextResponse.json(
-      { ok: false, error: "이메일 발송 중 오류가 발생했습니다.", errorDetail: errMessage },
-      { status: 500 },
-    );
   }
 }

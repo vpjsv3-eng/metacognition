@@ -20,8 +20,18 @@ export async function POST(req: Request) {
       source?: string;
       timestamp: string;
       privacy_consent?: boolean;
+      utm?: { source?: string; medium?: string; campaign?: string };
     };
-    const { name, phone, email, surveyId, source, timestamp, privacy_consent } = body;
+    const {
+      name,
+      phone,
+      email,
+      surveyId,
+      source,
+      timestamp,
+      privacy_consent,
+      utm,
+    } = body;
 
     if (!name?.trim() || !phone?.trim()) {
       return NextResponse.json(
@@ -44,12 +54,23 @@ export async function POST(req: Request) {
       );
     }
 
+    if (privacy_consent !== true) {
+      return NextResponse.json(
+        { ok: false, error: "개인정보 수집 및 이용에 동의해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    const consentAt = new Date().toISOString();
+
     const sb = getSupabase();
     if (sb) {
       const insertData: Record<string, unknown> = {
         name: name.trim(),
         phone: phone.trim(),
-        source: source || "nadocoding_page",
+        source: source === "result_page" ? "result_page" : "nadocoding_page",
+        privacy_consent: true,
+        privacy_consent_at: consentAt,
       };
       if (email?.trim()) {
         insertData.email = email.trim();
@@ -57,21 +78,45 @@ export async function POST(req: Request) {
       if (surveyId) {
         insertData.survey_id = surveyId;
       }
-      if (privacy_consent) {
-        insertData.privacy_consent = true;
-        insertData.privacy_consent_at = new Date().toISOString();
-      }
+      insertData.utm_source = utm?.source ?? "direct";
+      insertData.utm_medium = utm?.medium ?? "organic";
+      insertData.utm_campaign = utm?.campaign ?? "";
 
-      const { error } = await sb.from("waitlist").insert(insertData);
+      const { data, error } = await sb
+        .from("waitlist")
+        .insert(insertData)
+        .select(
+          "id, name, phone, email, source, privacy_consent, privacy_consent_at, created_at, survey_id, utm_source, utm_medium, utm_campaign",
+        )
+        .single();
 
       if (error) {
-        console.error("[Supabase waitlist 저장 실패]", error);
+        console.error("waitlist 저장 실패", error);
+        return NextResponse.json(
+          { ok: false, error: "사전 신청 저장에 실패했습니다. 잠시 후 다시 시도해 주세요." },
+          { status: 500 },
+        );
       }
+
+      console.log("waitlist 저장 성공", data);
+      return NextResponse.json({ ok: true, saved: data });
     } else {
-      console.log("[나도코딩 1기 사전신청]", { name, phone, email, source, surveyId, timestamp });
+      console.log("[waitlist — Supabase 미설정, 로컬 로그만]", {
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email?.trim(),
+        source: source === "result_page" ? "result_page" : "nadocoding_page",
+        surveyId,
+        privacy_consent: true,
+        privacy_consent_at: consentAt,
+        timestamp,
+        utm_source: utm?.source ?? "direct",
+        utm_medium: utm?.medium ?? "organic",
+        utm_campaign: utm?.campaign ?? "",
+      });
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, saved: null });
   } catch {
     return NextResponse.json(
       { ok: false, error: "Invalid request" },
