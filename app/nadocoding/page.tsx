@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
-import { EARLYBIRD_DEADLINE_MS, getEarlybirdDDay } from "../lib/earlybird";
 import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
 type CurriculumAccordionItem = {
@@ -155,7 +154,7 @@ const SERVICE_EXAMPLES = [
 const REVIEWS = [
   {
     name: "김O진 · 직장인",
-    text: "솔직히 처음엔 2주 만에 뭘 만들겠어 싶었어요. 근데 OT 날 처음으로 배포 성공하고 나서 생각이 완전히 바뀌었어요. 나도 할 수 있구나 싶었달까요.",
+    text: "솔직히 처음엔 2주 만에 뭘 만들겠어 싶었어요. 근데 OT 날 처음으로 배포 성공하고 나서 생각이 완전히 바뀌었어요. 나도 할 수 있구나 싶었어요.",
   },
   {
     name: "박O현 · 프리랜서",
@@ -207,7 +206,7 @@ const FAQ_DATA: FaqCategory[] = [
       },
       {
         q: "막히면 어떻게 하나요?",
-        a: "디스코드에서 바로 질문하시면 돼요!\n운영진이 실시간으로 답변드려요.",
+        a: "디스코드에서 바로 질문하시면 돼요!\n강사가 실시간으로 답변드려요.",
       },
     ],
   },
@@ -260,23 +259,29 @@ const FAQ_DATA: FaqCategory[] = [
   },
 ];
 
-function useCountdown() {
-  const [now, setNow] = useState(Date.now());
+/** 히어로 얼리버드 카운트다운: 마운트 시점 기준 23시간, 종료 후 "마감됐어요" */
+function useHeroDeadlineCountdown() {
+  const deadlineRef = useRef<number | null>(null);
+  if (deadlineRef.current === null) {
+    const d = new Date();
+    d.setHours(d.getHours() + 23);
+    deadlineRef.current = d.getTime();
+  }
 
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const diff = EARLYBIRD_DEADLINE_MS - now;
-  if (diff <= 0) return null;
+  const diff = deadlineRef.current - now;
+  if (diff <= 0) return { expired: true as const };
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((diff / (1000 * 60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
-
-  return { days, hours, minutes, seconds };
+  return { expired: false as const, days, hours, minutes, seconds };
 }
 
 export default function NadocodingPage() {
@@ -285,8 +290,7 @@ export default function NadocodingPage() {
   const [openCurriculum, setOpenCurriculum] = useState<Set<number>>(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const countdown = useCountdown();
-  const dDay = getEarlybirdDDay();
+  const countdown = useHeroDeadlineCountdown();
 
   useBlockHorizontalTouchScroll();
 
@@ -364,7 +368,7 @@ export default function NadocodingPage() {
           <span className="nadocodingHeroTitleEm">실제 서비스 배포까지</span>
         </h1>
         <p className="nadocodingHeroSubtitle subtitle">
-          ✦ 코딩 없이 2주 올인원 완성 과정 ✦
+          ✦ 코딩 없이 2주 완성 올인원 과정 ✦
         </p>
 
         {/* 4개 박스 */}
@@ -395,7 +399,7 @@ export default function NadocodingPage() {
             },
             {
               kw: "온+오프",
-              label: "온라인 + 오프라인\n완벽한 밀착 관리",
+              label: "온·오프라인\n완벽 밀착 관리",
               kwColor: "var(--accent)" as const,
             },
             {
@@ -442,11 +446,11 @@ export default function NadocodingPage() {
           ))}
         </div>
 
-        {/* 카운트다운 */}
+        {/* 카운트다운 (페이지 진입 시점 +23시간) */}
         <div className="countdownTimer countdown-text" style={{ marginBottom: 20, maxWidth: "100%" }}>
-          {countdown
-            ? `⏰ 얼리버드 마감까지 ${countdown.days}일${String(countdown.hours).padStart(2, "0")}시간${String(countdown.minutes).padStart(2, "0")}분${String(countdown.seconds).padStart(2, "0")}초`
-            : "얼리버드가 종료됐어요"}
+          {countdown.expired
+            ? "⏰ 마감됐어요"
+            : `⏰ 얼리버드 마감까지 ${countdown.days}일${String(countdown.hours).padStart(2, "0")}시간${String(countdown.minutes).padStart(2, "0")}분${String(countdown.seconds).padStart(2, "0")}초`}
         </div>
 
         {/* 가격 */}
@@ -476,7 +480,7 @@ export default function NadocodingPage() {
         </button>
       </section>
 
-      {/* ② 통합: 공감 + 대상 */}
+      {/* ② 공감 훅 (히어로 직후) */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -516,43 +520,10 @@ export default function NadocodingPage() {
               </div>
             ))}
           </div>
-          <hr
-            style={{
-              border: "none",
-              borderTop: "1px solid var(--border)",
-              margin: "24px 0",
-            }}
-          />
-          <p
-            style={{
-              margin: "0 0 20px",
-              textAlign: "center",
-              fontSize: 15,
-              fontWeight: 600,
-              color: "var(--text)",
-              lineHeight: 1.6,
-            }}
-          >
-            이 중 하나라도 해당된다면
-            <br />
-            나도코딩 1기가 딱 맞아요 👇
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
-              { icon: "🤔", text: "AI에 관심은 있지만\n뭘 만들어야 할지 모르는 분" },
-              { icon: "💻", text: "코딩을 전혀 몰라도\n내 서비스를 만들고 싶은 분" },
-              { icon: "🚀", text: "2주 안에 배포된\n내 AI 서비스를 갖고 싶은 분" },
-            ].map((item, i) => (
-              <div key={i} className="targetCard">
-                <span className="targetIcon">{item.icon}</span>
-                <span style={{ whiteSpace: "pre-line" }}>{item.text}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ③ AI 시대 — 라이트 VS */}
+      {/* ③ AI 시대 — VS */}
       <section style={{ marginBottom: 24, maxWidth: "100%" }}>
         <div
           style={{
@@ -603,11 +574,10 @@ export default function NadocodingPage() {
               }}
             >
               <div className="nadocodingVsCardTitle">😰 AI를 쓰는 사람</div>
-              <div className="nadocodingVsCardBody">
-                남이 만든 서비스 사용
-                <br />
-                트렌드를 따라가기 바쁜 사람
-              </div>
+              <ul className="nadocodingVsBulletList">
+                <li className="nadocodingVsBulletItem">남이 만든 서비스 사용</li>
+                <li className="nadocodingVsBulletItem">트렌드를 따라가기 바쁜 사람</li>
+              </ul>
             </div>
             <div className="nadocodingVsDivider">VS</div>
             <div
@@ -619,17 +589,52 @@ export default function NadocodingPage() {
               }}
             >
               <div className="nadocodingVsCardTitle">🚀 AI로 만드는 사람</div>
-              <div className="nadocodingVsCardBody">
-                직접 서비스를 만드는 사람
-                <br />
-                트렌드를 이끄는 사람
-              </div>
+              <ul className="nadocodingVsBulletList">
+                <li className="nadocodingVsBulletItem nadocodingVsBulletItem--emphasis">
+                  직접 서비스를 만드는 사람
+                </li>
+                <li className="nadocodingVsBulletItem nadocodingVsBulletItem--emphasis">
+                  트렌드를 이끄는 사람
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ④ 수강생이 만들게 될 서비스 예시 */}
+      {/* ④ 대상 안내 */}
+      <section style={{ marginBottom: 24 }}>
+        <div className="card" style={{ padding: 28 }}>
+          <p
+            style={{
+              margin: "0 0 20px",
+              textAlign: "center",
+              fontSize: 15,
+              fontWeight: 600,
+              color: "var(--text)",
+              lineHeight: 1.6,
+            }}
+          >
+            이 중 하나라도 해당된다면
+            <br />
+            나도코딩 1기가 딱 맞아요 👇
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[
+              { icon: "🤔", text: "AI에 관심은 있지만\n뭘 만들어야 할지 모르는 분" },
+              { icon: "💻", text: "코딩을 전혀 몰라도\n내 서비스를 만들고 싶은 분" },
+              { icon: "🚀", text: "2주 안에 배포된\n내 AI 서비스를 갖고 싶은 분" },
+            ].map((item, i) => (
+              <div key={i} className="targetCard">
+                <span className="targetIcon">{item.icon}</span>
+                <span style={{ whiteSpace: "pre-line" }}>{item.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ⑤ 수강생이 만들게 될 서비스 예시 */}
       <section style={{ marginBottom: 24 }}>
         <div className="card" style={{ padding: 28 }}>
           <h2
@@ -1138,7 +1143,7 @@ export default function NadocodingPage() {
       </section>
 
       <div className="nadocodingFixedCtaBar sticky-bar" role="navigation" aria-label="사전 신청">
-        <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-{dDay}</span>
+        <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button type="button" className="nadocodingFixedCtaBarBtn" onClick={scrollToForm}>
           무료로 사전 신청하기 →
         </button>

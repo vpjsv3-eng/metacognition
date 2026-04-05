@@ -39,9 +39,9 @@ export default function LandingPage() {
           style={{
             fontSize: 28,
             fontWeight: 800,
-            margin: "0 0 14px",
+            margin: "0 0 8px",
             letterSpacing: -0.5,
-            lineHeight: 1.4,
+            lineHeight: 1.45,
             color: "var(--text)",
           }}
         >
@@ -50,10 +50,10 @@ export default function LandingPage() {
           무료로 찾아드려요
         </h1>
 
-        {/* 부제 */}
+        {/* 부제 (제목과 구분) */}
         <p
           style={{
-            margin: "0 0 40px",
+            margin: "12px 0 40px",
             fontSize: 16,
             lineHeight: 1.6,
             color: "var(--textSecondary)",

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
-import { getEarlybirdDDay } from "../../lib/earlybird";
 import {
   safeLocalStorageGet,
   safeLocalStorageSet,
@@ -327,7 +326,7 @@ export default function CompletePage() {
     if (!result || resending) return;
     const trimmed = resendEmail.trim();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      alert("올바른 이메일을 입력해주세요.");
+      alert("올바른 이메일을 입력해 주세요.");
       return;
     }
     setResending(true);
@@ -377,8 +376,6 @@ export default function CompletePage() {
   const firstStep = result.first_step;
   const firstIdea = result.ideas[0];
   const otherIdeas = result.ideas.slice(1);
-
-  const dDay = getEarlybirdDDay();
 
   return (
     <main className="result-page resultContainer resultWithBottomCta result-container">
@@ -815,9 +812,7 @@ export default function CompletePage() {
         role="navigation"
         aria-label="얼리버드 신청"
       >
-        <span className="resultFixedCtaBarLabel">
-          🔥 얼리버드 마감 D-{dDay}
-        </span>
+        <span className="resultFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button
           type="button"
           className="resultFixedCtaBarBtn"

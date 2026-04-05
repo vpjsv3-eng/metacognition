@@ -39,6 +39,18 @@ const JOB_DETAIL_PLACEHOLDERS: Record<string, string> = {
 
 const STORAGE_KEY = "survey_progress";
 
+/** 복수 선택 시 최대 2개로 제한하는 본 설문 문항 (Q11은 단일 선택이라 미포함) */
+const MULTI_MAX_TWO_QUESTION_IDS = new Set([
+  "Q1",
+  "Q2",
+  "Q3",
+  "Q4",
+  "Q6",
+  "Q7",
+  "Q9",
+  "Q12",
+]);
+
 const KEYWORD_OPTIONS = [
   "재테크 / 절약",
   "배우는 걸 좋아해요",
@@ -124,7 +136,15 @@ export default function SurveyForm() {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const resumeChecked = useRef(false);
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   const isCustomJob = jobIndex >= 0 && JOB_OPTIONS[jobIndex].startsWith("기타");
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const t = setTimeout(() => setToastMessage(null), 2000);
+    return () => clearTimeout(t);
+  }, [toastMessage]);
 
   const saveProgress = useCallback(() => {
     try {
@@ -184,11 +204,15 @@ export default function SurveyForm() {
   }
 
   function toggleKeyword(kw: string) {
-    setSelectedKeywords((prev) => {
-      if (prev.includes(kw)) return prev.filter((k) => k !== kw);
-      if (prev.length >= 3) return prev;
-      return [...prev, kw];
-    });
+    if (selectedKeywords.includes(kw)) {
+      setSelectedKeywords((prev) => prev.filter((k) => k !== kw));
+      return;
+    }
+    if (selectedKeywords.length >= 2) {
+      setToastMessage("최대 2개까지 선택할 수 있어요");
+      return;
+    }
+    setSelectedKeywords((prev) => [...prev, kw]);
   }
 
   const visibleQuestions = useMemo(() => {
@@ -343,14 +367,25 @@ export default function SurveyForm() {
   function toggleMultiOption(idx: number) {
     const q = currentQ;
     if (!q || q.type !== "multi") return;
+    const maxTwo = MULTI_MAX_TWO_QUESTION_IDS.has(q.id);
+    const exclusive = q.exclusiveAloneIndices ?? [];
+    const curr = currentAnswer?.selectedIndices || [];
+
+    if (!exclusive.includes(idx)) {
+      const base = curr.filter((i) => !exclusive.includes(i));
+      if (!base.includes(idx) && maxTwo && base.length >= 2) {
+        setToastMessage("최대 2개까지 선택할 수 있어요");
+        return;
+      }
+    }
+
     setAnswers((prev) => {
-      const exclusive = q.exclusiveAloneIndices ?? [];
-      const curr = prev[q.id]?.selectedIndices || [];
+      const prevCurr = prev[q.id]?.selectedIndices || [];
       let next: number[];
       if (exclusive.includes(idx)) {
-        next = curr.includes(idx) ? [] : [idx];
+        next = prevCurr.includes(idx) ? [] : [idx];
       } else {
-        const base = curr.filter((i) => !exclusive.includes(i));
+        const base = prevCurr.filter((i) => !exclusive.includes(i));
         next = base.includes(idx)
           ? base.filter((i) => i !== idx)
           : [...base, idx];
@@ -651,10 +686,19 @@ export default function SurveyForm() {
     }
   }
 
+  const surveyToast =
+    toastMessage != null ? (
+      <div className="surveyToast" role="status" aria-live="polite">
+        {toastMessage}
+      </div>
+    ) : null;
+
   // ── Resume modal ──
   if (showResumeModal) {
     return (
-      <div className="modalOverlay">
+      <>
+        {surveyToast}
+        <div className="modalOverlay">
         <div className="modalContent">
           <h3
             style={{
@@ -685,6 +729,7 @@ export default function SurveyForm() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
@@ -695,6 +740,7 @@ export default function SurveyForm() {
 
     return (
       <>
+        {surveyToast}
         <div className="progressBar">
           <div className="progressFill" style={{ width: "0%" }} />
         </div>
@@ -781,6 +827,7 @@ export default function SurveyForm() {
   if (phase === "profile_keywords") {
     return (
       <>
+        {surveyToast}
         <div className="progressBar">
           <div className="progressFill" style={{ width: "0%" }} />
         </div>
@@ -789,11 +836,11 @@ export default function SurveyForm() {
             <h2 className="questionTitle">
               나를 가장 잘 설명하는 키워드를 골라주세요
             </h2>
-            <span className="multiBadge">최대 3개 선택</span>
+            <span className="multiBadge">최대 2개 선택</span>
             <div className="keywordGrid">
               {KEYWORD_OPTIONS.map((kw) => {
                 const selected = selectedKeywords.includes(kw);
-                const disabled = !selected && selectedKeywords.length >= 3;
+                const disabled = !selected && selectedKeywords.length >= 2;
                 return (
                   <button
                     key={kw}
@@ -809,7 +856,7 @@ export default function SurveyForm() {
               })}
             </div>
             {selectedKeywords.length > 0 && (
-              <p className="help">선택: {selectedKeywords.length}/3</p>
+              <p className="help">선택: {selectedKeywords.length}/2</p>
             )}
             {profileError && <p className="errorText">{profileError}</p>}
             <div className="navArea">
@@ -853,6 +900,7 @@ export default function SurveyForm() {
   if (phase === "email_input") {
     return (
       <>
+        {surveyToast}
         <div className="progressBar">
           <div className="progressFill" style={{ width: "100%" }} />
         </div>
@@ -870,7 +918,7 @@ export default function SurveyForm() {
                   color: "var(--text)",
                 }}
               >
-                결과지를 받을 이메일을 입력해주세요
+                결과지를 받을 이메일을 입력해 주세요
               </h2>
               <p
                 style={{
@@ -999,6 +1047,7 @@ export default function SurveyForm() {
   if (phase === "email_confirm") {
     return (
       <>
+        {surveyToast}
         <div className="progressBar">
           <div className="progressFill" style={{ width: "100%" }} />
         </div>
@@ -1060,6 +1109,7 @@ export default function SurveyForm() {
   if (phase === "loading") {
     return (
       <>
+        {surveyToast}
         <div className="progressBar">
           <div className="progressFill" style={{ width: "100%" }} />
         </div>
@@ -1174,6 +1224,7 @@ export default function SurveyForm() {
 
     return (
       <>
+        {surveyToast}
         <div className="surveyProgressSticky">
           <div className="surveyProgressStickyRow">
             <span className="questionCounter">
@@ -1280,7 +1331,11 @@ export default function SurveyForm() {
               )}
 
               {currentQ.type === "multi" && (
-                <span className="multiBadge">복수 선택 가능</span>
+                <span className="multiBadge">
+                  {MULTI_MAX_TWO_QUESTION_IDS.has(currentQ.id)
+                    ? "최대 2개 선택"
+                    : "복수 선택 가능"}
+                </span>
               )}
 
               {currentQ.type === "text" ? (

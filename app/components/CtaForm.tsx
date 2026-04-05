@@ -100,7 +100,7 @@ export default function CtaForm({ surveyId, onGreenBg, source, compact }: Props)
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="이름을 입력해주세요"
+        placeholder="이름을 입력해 주세요"
       />
       <div className="phoneInputWrapper">
         <span className="phonePrefix">010</span>

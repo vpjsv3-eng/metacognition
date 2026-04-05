@@ -16,13 +16,14 @@ export function useBlockHorizontalTouchScroll() {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
-      const deltaX = Math.abs(e.touches[0].clientX - startX);
-      const deltaY = Math.abs(e.touches[0].clientY - startY);
-
       const target = e.target;
       if (!(target instanceof Element)) return;
+      if (target.closest(".tool-flow-box")) return;
 
-      if (deltaX > deltaY && !target.closest(".tool-flow-box")) {
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - startX);
+      const deltaY = Math.abs(touch.clientY - startY);
+      if (deltaX > deltaY) {
         e.preventDefault();
       }
     };
