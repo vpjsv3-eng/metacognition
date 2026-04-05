@@ -10,7 +10,11 @@ import {
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
 import InAppCtaAdjust from "../../components/InAppCtaAdjust";
-import { fixedCtaBarInlineStyle } from "../../lib/fixedCtaBarStyle";
+import {
+  fixedCtaBarInlineStyle,
+  resultCtaBarLabelInlineStyle,
+  resultCtaBarButtonInlineStyle,
+} from "../../lib/fixedCtaBarStyle";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -794,10 +798,13 @@ export default function CompletePage() {
         aria-label="얼리버드 신청"
         style={fixedCtaBarInlineStyle}
       >
-        <span className="resultFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
+        <span className="resultFixedCtaBarLabel" style={resultCtaBarLabelInlineStyle}>
+          🔥 얼리버드 마감 D-1
+        </span>
         <button
           type="button"
           className="resultFixedCtaBarBtn"
+          style={resultCtaBarButtonInlineStyle}
           onClick={() => router.push("/nadocoding")}
         >
           올인원 나도코딩 1기 자세히 보기 →
