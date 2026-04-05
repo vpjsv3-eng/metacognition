@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
 import InAppCtaAdjust from "../components/InAppCtaAdjust";
+import { fixedCtaBarInlineStyle } from "../lib/fixedCtaBarStyle";
 import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
 type CurriculumAccordionItem = {
@@ -331,7 +332,11 @@ export default function NadocodingPage() {
   return (
     <main
       className="container page-container nadocodingPageWithBottomCta nadocoding-container nadocoding-page"
-      style={{ maxWidth: "min(600px, 100%)", width: "100%" }}
+      style={{
+        maxWidth: "min(600px, 100%)",
+        width: "100%",
+        paddingBottom: "80px",
+      }}
     >
       <InAppCtaAdjust />
       {showScrollTop && (
@@ -1148,6 +1153,7 @@ export default function NadocodingPage() {
         className="nadocodingFixedCtaBar sticky-bar sticky-cta-bar"
         role="navigation"
         aria-label="사전 신청"
+        style={fixedCtaBarInlineStyle}
       >
         <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button type="button" className="nadocodingFixedCtaBarBtn" onClick={scrollToForm}>

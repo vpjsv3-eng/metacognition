@@ -14,24 +14,11 @@ export default function InAppCtaAdjust() {
 
     if (!isInApp) return;
 
-    const ctaBars = document.querySelectorAll(".sticky-cta-bar");
-    ctaBars.forEach((bar) => {
-      const el = bar as HTMLElement;
-      el.style.paddingTop = "10px";
-      el.style.paddingBottom = "10px";
-      el.style.minHeight = "56px";
-    });
-
-    document.body.style.paddingBottom = "76px";
+    /* CTA 바는 React 인라인 스타일로 고정 — 여기서 덮어쓰지 않음 */
+    document.body.style.paddingBottom = "80px";
 
     return () => {
       document.body.style.paddingBottom = "";
-      ctaBars.forEach((bar) => {
-        const el = bar as HTMLElement;
-        el.style.removeProperty("padding-top");
-        el.style.removeProperty("padding-bottom");
-        el.style.removeProperty("min-height");
-      });
     };
   }, []);
 

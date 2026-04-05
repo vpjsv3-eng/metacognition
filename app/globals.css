@@ -838,10 +838,6 @@ label {
   max-width: 100%;
 }
 
-.resultWithBottomCta.page-container {
-  padding-bottom: 76px !important;
-}
-
 .resultFixedCtaBar {
   position: fixed;
   bottom: 0;
@@ -900,10 +896,6 @@ label {
   transform: scale(0.98);
 }
 
-.nadocodingPageWithBottomCta.page-container {
-  padding-bottom: 76px !important;
-}
-
 .nadocodingFixedCtaBar {
   position: fixed;
   bottom: 0;
@@ -956,7 +948,7 @@ label {
   position: fixed;
   right: 16px;
   bottom: calc(64px + max(0px, env(safe-area-inset-bottom, 0px)));
-  z-index: 100000;
+  z-index: 1000000;
   width: 44px;
   height: 44px;
   padding: 0;

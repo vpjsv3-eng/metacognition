@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useId } from "react";
 import confetti from "canvas-confetti";
 import { readUtmForApi } from "../lib/utm";
 
@@ -44,6 +44,7 @@ export default function CtaForm({
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
+  const privacyAgreeId = useId();
 
   useEffect(() => {
     if (defaultEmail) setEmailField(defaultEmail);
@@ -154,35 +155,41 @@ export default function CtaForm({
         autoComplete="email"
       />
 
-      {/* 개인정보 동의 */}
+      {/* 개인정보 동의 — 네이티브 checkbox */}
       <div style={{ marginTop: compact ? 2 : 4 }}>
-        <label
+        <div
           style={{
             display: "flex",
-            alignItems: "flex-start",
-            gap: 8,
-            fontSize: 13,
-            color: onGreenBg ? "rgba(255,255,255,0.9)" : "var(--text)",
+            alignItems: "center",
+            gap: "8px",
             cursor: "pointer",
           }}
         >
           <input
             type="checkbox"
+            id={privacyAgreeId}
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
             style={{
-              width: 16,
-              height: 16,
-              marginTop: 2,
-              accentColor: onGreenBg ? "white" : "var(--accent)",
-              flexShrink: 0,
+              width: "20px",
+              height: "20px",
+              minWidth: "20px",
+              accentColor: "#00C471",
+              cursor: "pointer",
             }}
           />
-          <span>
-            개인정보 수집 및 이용에 동의합니다.{" "}
-            <span style={{ color: onGreenBg ? "#FFD700" : "var(--error)" }}>(필수)</span>
-          </span>
-        </label>
+          <label
+            htmlFor={privacyAgreeId}
+            style={{
+              fontSize: "14px",
+              color: onGreenBg ? "rgba(255,255,255,0.95)" : "#374151",
+              cursor: "pointer",
+            }}
+          >
+            개인정보 수집 및 이용에 동의합니다.
+            <span style={{ color: "#EF4444" }}> (필수)</span>
+          </label>
+        </div>
         <button
           type="button"
           onClick={() => setConsentOpen((v) => !v)}
@@ -193,7 +200,7 @@ export default function CtaForm({
             fontSize: 12,
             cursor: "pointer",
             marginTop: 2,
-            marginLeft: 24,
+            marginLeft: 28,
             padding: 0,
           }}
         >

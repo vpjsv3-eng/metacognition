@@ -1,6 +1,13 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback, useRef } from "react";
+import {
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useId,
+} from "react";
 import { useRouter } from "next/navigation";
 import type {
   Profile,
@@ -128,6 +135,7 @@ export default function SurveyForm() {
   const [emailConsent, setEmailConsent] = useState(false);
   const [emailConsentOpen, setEmailConsentOpen] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const emailPrivacyAgreeId = useId();
 
   const pulseTriggered = useRef(false);
   const [showPulse, setShowPulse] = useState(false);
@@ -968,33 +976,39 @@ export default function SurveyForm() {
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <label
+              <div
                 style={{
                   display: "flex",
-                  alignItems: "flex-start",
-                  gap: 8,
-                  fontSize: 14,
-                  color: "var(--text)",
+                  alignItems: "center",
+                  gap: "8px",
                   cursor: "pointer",
                 }}
               >
                 <input
                   type="checkbox"
+                  id={emailPrivacyAgreeId}
                   checked={emailConsent}
                   onChange={(e) => setEmailConsent(e.target.checked)}
                   style={{
-                    width: 18,
-                    height: 18,
-                    marginTop: 2,
-                    accentColor: "var(--accent)",
-                    flexShrink: 0,
+                    width: "20px",
+                    height: "20px",
+                    minWidth: "20px",
+                    accentColor: "#00C471",
+                    cursor: "pointer",
                   }}
                 />
-                <span>
-                  개인정보 수집 및 이용에 동의합니다.{" "}
-                  <span style={{ color: "var(--error)" }}>(필수)</span>
-                </span>
-              </label>
+                <label
+                  htmlFor={emailPrivacyAgreeId}
+                  style={{
+                    fontSize: "14px",
+                    color: "#374151",
+                    cursor: "pointer",
+                  }}
+                >
+                  개인정보 수집 및 이용에 동의합니다.
+                  <span style={{ color: "#EF4444" }}> (필수)</span>
+                </label>
+              </div>
               <button
                 type="button"
                 onClick={() => setEmailConsentOpen((v) => !v)}
@@ -1005,7 +1019,7 @@ export default function SurveyForm() {
                   fontSize: 13,
                   cursor: "pointer",
                   marginTop: 4,
-                  marginLeft: 26,
+                  marginLeft: 28,
                   padding: 0,
                 }}
               >

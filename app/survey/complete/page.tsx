@@ -10,6 +10,7 @@ import {
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
 import InAppCtaAdjust from "../../components/InAppCtaAdjust";
+import { fixedCtaBarInlineStyle } from "../../lib/fixedCtaBarStyle";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -332,7 +333,10 @@ export default function CompletePage() {
 
   if (!result) {
     return (
-      <main className="result-page page-container resultContainer result-container">
+      <main
+        className="result-page page-container resultContainer result-container"
+        style={{ paddingBottom: "80px" }}
+      >
         <InAppCtaAdjust />
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
@@ -351,7 +355,10 @@ export default function CompletePage() {
   const otherIdeas = result.ideas.slice(1);
 
   return (
-    <main className="result-page page-container resultContainer resultWithBottomCta result-container">
+    <main
+      className="result-page page-container resultContainer resultWithBottomCta result-container"
+      style={{ paddingBottom: "80px" }}
+    >
       <InAppCtaAdjust />
       {isRestoredResult && (
         <div
@@ -785,6 +792,7 @@ export default function CompletePage() {
         className="resultFixedCtaBar sticky-cta-bar"
         role="navigation"
         aria-label="얼리버드 신청"
+        style={fixedCtaBarInlineStyle}
       >
         <span className="resultFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button
