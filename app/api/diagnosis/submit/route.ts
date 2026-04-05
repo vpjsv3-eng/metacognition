@@ -228,6 +228,11 @@ export async function POST(req: Request) {
   let surveyId: string | undefined;
   try {
     const sb = getSupabase();
+    if (!sb) {
+      console.warn(
+        "[survey_responses] Supabase 클라이언트 null — insert 스킵, 환경변수 확인",
+      );
+    }
     if (sb) {
       const insertData: Record<string, unknown> = {
         email: profile.email || null,
@@ -243,8 +248,16 @@ export async function POST(req: Request) {
         .select("id")
         .single();
 
+      console.log("survey_responses insert 결과:", { data, error });
       if (error) {
-        console.error("survey_responses 저장 실패", error);
+        console.error("survey_responses 에러 코드:", error.code);
+        console.error("survey_responses 에러 메시지:", error.message);
+        console.error("survey_responses 에러 상세:", error.details);
+        console.error("survey_responses 에러 힌트:", error.hint);
+        console.error(
+          "survey_responses 전체 error 객체:",
+          JSON.stringify(error, null, 2),
+        );
       } else {
         surveyId = data?.id;
         console.log("survey_responses 저장 성공", {

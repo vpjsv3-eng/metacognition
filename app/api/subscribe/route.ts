@@ -64,6 +64,9 @@ export async function POST(req: Request) {
     const consentAt = new Date().toISOString();
 
     const sb = getSupabase();
+    if (!sb) {
+      console.warn("[waitlist] Supabase 클라이언트 null — insert 스킵, 환경변수 확인");
+    }
     if (sb) {
       const insertData: Record<string, unknown> = {
         name: name.trim(),
@@ -90,8 +93,13 @@ export async function POST(req: Request) {
         )
         .single();
 
+      console.log("waitlist insert 결과:", { data, error });
       if (error) {
-        console.error("waitlist 저장 실패", error);
+        console.error("waitlist 에러 코드:", error.code);
+        console.error("waitlist 에러 메시지:", error.message);
+        console.error("waitlist 에러 상세:", error.details);
+        console.error("waitlist 에러 힌트:", error.hint);
+        console.error("waitlist 전체 error 객체:", JSON.stringify(error, null, 2));
         return NextResponse.json(
           { ok: false, error: "사전 신청 저장에 실패했습니다. 잠시 후 다시 시도해 주세요." },
           { status: 500 },
