@@ -2,8 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
-import { fixedCtaBarInlineStyle } from "../lib/fixedCtaBarStyle";
-import { useInAppBrowser } from "../lib/useInAppBrowser";
+import { bottomFixedCtaBarStyle } from "../lib/fixedCtaBarStyle";
 import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
 type CurriculumAccordionItem = {
@@ -288,36 +287,22 @@ function useHeroDeadlineCountdown() {
 
 export default function NadocodingPage() {
   const formRef = useRef<HTMLDivElement>(null);
-  const inAppScrollRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<Set<number>>(new Set());
   const [openCurriculum, setOpenCurriculum] = useState<Set<number>>(new Set());
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const inApp = useInAppBrowser();
   const countdown = useHeroDeadlineCountdown();
 
   useBlockHorizontalTouchScroll();
 
   useEffect(() => {
     function handleScroll() {
-      const el = inAppScrollRef.current;
-      const y = inApp && el ? el.scrollTop : window.scrollY;
-      setShowScrollTop(y > 300);
+      setShowScrollTop(window.scrollY > 300);
     }
-
-    if (inApp) {
-      const el = inAppScrollRef.current;
-      if (el) {
-        el.addEventListener("scroll", handleScroll, { passive: true });
-        handleScroll();
-        return () => el.removeEventListener("scroll", handleScroll);
-      }
-    }
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [inApp]);
+  }, []);
 
   function scrollToForm() {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -343,52 +328,26 @@ export default function NadocodingPage() {
 
   let faqFlatIdx = 0;
 
-  const ctaBarStyle = {
-    ...fixedCtaBarInlineStyle,
-    ...(inApp
-      ? {
-          position: "sticky" as const,
-          bottom: 0,
-          left: "auto",
-          right: "auto",
-          width: "100%",
-          zIndex: 99999,
-          backgroundColor: "#111827",
-        }
-      : {}),
-  };
-
   return (
     <main
-      className={`container page-container nadocodingPageWithBottomCta nadocoding-container nadocoding-page${inApp ? " in-app-cta-page" : ""}`}
+      className="container page-container nadocodingPageWithBottomCta nadocoding-container nadocoding-page"
       style={{
         maxWidth: "min(600px, 100%)",
         width: "100%",
-        paddingBottom: inApp ? 0 : "80px",
-        ...(inApp
-          ? {
-              display: "flex",
-              flexDirection: "column" as const,
-              minHeight: "100vh",
-            }
-          : {}),
+        paddingBottom: "70px",
       }}
     >
-      <div
-        ref={inAppScrollRef}
-        className={inApp ? "in-app-cta-scroll" : undefined}
-        style={
-          inApp
-            ? {
-                flex: 1,
-                minHeight: 0,
-                overflowX: "hidden",
-                overflowY: "auto",
-                WebkitOverflowScrolling: "touch",
-              }
-            : { display: "contents" }
-        }
-      >
+      {showScrollTop && (
+        <button
+          type="button"
+          className="scrollToTopBtn"
+          aria-label="맨 위로"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          ↑
+        </button>
+      )}
+
       {/* ① 히어로 섹션 */}
       <section className="nadocodingHero nadocoding-hero">
         <div
@@ -1188,37 +1147,17 @@ export default function NadocodingPage() {
         </div>
       </section>
 
-      </div>
-
       <div
         className="nadocodingFixedCtaBar sticky-bar sticky-cta-bar"
         role="navigation"
         aria-label="사전 신청"
-        style={ctaBarStyle}
+        style={bottomFixedCtaBarStyle}
       >
         <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button type="button" className="nadocodingFixedCtaBarBtn" onClick={scrollToForm}>
           무료로 사전 신청하기 →
         </button>
       </div>
-
-      {showScrollTop && (
-        <button
-          type="button"
-          className="scrollToTopBtn"
-          aria-label="맨 위로"
-          onClick={() => {
-            const el = inAppScrollRef.current;
-            if (inApp && el) {
-              el.scrollTo({ top: 0, behavior: "smooth" });
-            } else {
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-          }}
-        >
-          ↑
-        </button>
-      )}
     </main>
   );
 }

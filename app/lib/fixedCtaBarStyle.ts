@@ -1,23 +1,18 @@
 import type { CSSProperties } from "react";
 
-/** 하단 고정 CTA 컨테이너 — 결과·상세 공통 */
-export const fixedCtaBarInlineStyle: CSSProperties = {
+/** 하단 고정 CTA 바 — 결과·상세 공통 (인라인으로 그대로 전달) */
+export const bottomFixedCtaBarStyle: CSSProperties = {
   position: "fixed",
   bottom: 0,
   left: 0,
   right: 0,
-  zIndex: 999999,
+  zIndex: 99999,
   backgroundColor: "#111827",
-  paddingTop: "8px",
-  paddingBottom: "8px",
-  paddingLeft: "12px",
-  paddingRight: "12px",
+  padding: "10px 12px",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: "8px",
-  minHeight: "48px",
-  height: "auto",
 };
 
 /** 결과 페이지 CTA 왼쪽 라벨 */
