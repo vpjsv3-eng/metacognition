@@ -796,6 +796,7 @@ label {
 }
 
 .result-page .resultFixedCtaBar,
+.result-page .nadocodingFixedCtaBar,
 .result-page .modalOverlay,
 .result-page .scrollToTopBtn {
   max-width: none;
@@ -2450,7 +2451,8 @@ label {
     font-size: 18px !important;
   }
 
-  .result-page .resultFixedCtaBarBtn {
+  .result-page .resultFixedCtaBarBtn,
+  .result-page .nadocodingFixedCtaBarBtn {
     font-size: 14px !important;
     padding: 10px 14px !important;
     min-height: auto !important;

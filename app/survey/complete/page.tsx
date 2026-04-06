@@ -9,11 +9,7 @@ import {
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
-import {
-  bottomFixedCtaBarStyle,
-  resultCtaBarLabelInlineStyle,
-  resultCtaBarButtonInlineStyle,
-} from "../../lib/fixedCtaBarStyle";
+import { bottomFixedCtaBarStyle } from "../../lib/fixedCtaBarStyle";
 import {
   initFunnelSession,
   logFunnel,
@@ -350,7 +346,7 @@ export default function CompletePage() {
     return (
       <main
         className="result-page page-container resultContainer result-container"
-        style={{ paddingBottom: "70px" }}
+        style={{ paddingBottom: "80px" }}
       >
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
@@ -371,7 +367,7 @@ export default function CompletePage() {
   return (
     <main
       className="result-page page-container resultContainer resultWithBottomCta result-container"
-      style={{ paddingBottom: "70px" }}
+      style={{ paddingBottom: "80px" }}
     >
       {isRestoredResult && (
         <div
@@ -801,18 +797,15 @@ export default function CompletePage() {
       )}
 
       <div
-        className="resultFixedCtaBar sticky-cta-bar"
+        className="nadocodingFixedCtaBar sticky-bar sticky-cta-bar"
         role="navigation"
         aria-label="얼리버드 신청"
         style={bottomFixedCtaBarStyle}
       >
-        <span className="resultFixedCtaBarLabel" style={resultCtaBarLabelInlineStyle}>
-          🔥 얼리버드 마감 D-1
-        </span>
+        <span className="nadocodingFixedCtaBarLabel">🔥 얼리버드 마감 D-1</span>
         <button
           type="button"
-          className="resultFixedCtaBarBtn"
-          style={resultCtaBarButtonInlineStyle}
+          className="nadocodingFixedCtaBarBtn"
           onClick={() => router.push("/nadocoding")}
         >
           올인원 나도코딩 1기 자세히 보기 →

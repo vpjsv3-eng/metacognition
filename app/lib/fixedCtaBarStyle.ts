@@ -14,24 +14,3 @@ export const bottomFixedCtaBarStyle: CSSProperties = {
   justifyContent: "space-between",
   gap: "8px",
 };
-
-/** 결과 페이지 CTA 왼쪽 라벨 */
-export const resultCtaBarLabelInlineStyle: CSSProperties = {
-  whiteSpace: "nowrap",
-  fontSize: "13px",
-  flexShrink: 0,
-  color: "white",
-};
-
-/** 결과 페이지 CTA 오른쪽 버튼 */
-export const resultCtaBarButtonInlineStyle: CSSProperties = {
-  whiteSpace: "nowrap",
-  fontSize: "13px",
-  flexShrink: 0,
-  padding: "8px 12px",
-  backgroundColor: "#00C471",
-  color: "white",
-  borderRadius: "8px",
-  border: "none",
-  cursor: "pointer",
-};
