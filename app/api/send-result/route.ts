@@ -1,7 +1,30 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import type { ServiceIdea, Persona, FirstStep } from "../../lib/types";
-import { isRateLimited, getClientIp, isValidEmail } from "../../lib/rateLimit";
+import { isRateLimited, getClientIp } from "../../lib/rateLimit";
+
+/** gmail / naver / kakao / daum 등 도메인 무관 */
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function logSendError(label: string, err: unknown): void {
+  console.error(`[send-result] ${label}:`, err);
+  if (err && typeof err === "object") {
+    try {
+      console.error(
+        `[send-result] ${label} JSON:`,
+        JSON.stringify(err, Object.getOwnPropertyNames(err as object)),
+      );
+    } catch {
+      console.error(`[send-result] ${label} stringify 실패`);
+    }
+  } else {
+    try {
+      console.error(`[send-result] ${label} JSON:`, JSON.stringify(err));
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 type SendResultBody = {
   email: string;
@@ -167,10 +190,10 @@ export async function POST(req: Request) {
   }
 
   const trimmedEmail = email.trim();
-  if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+  if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
     console.error("[send-result] 이메일 유효성 검사 실패:", trimmedEmail);
     return NextResponse.json(
-      { ok: false, error: "올바른 이메일 형식이 아닙니다." },
+      { ok: false, error: "이메일 형식이 올바르지 않아요" },
       { status: 400 },
     );
   }
@@ -189,8 +212,9 @@ export async function POST(req: Request) {
   const html = buildEmailHtml(trimmedEmail, persona, ideas, first_step);
 
   async function sendEmailOnce() {
+    // `to`에 도메인 필터 없음 (naver/kakao/daum 등 동일). Resend 대시보드·플랜별 수신 제한은 별도.
     const { data, error } = await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "hello@nadocoding.ai.kr",
       to: trimmedEmail,
       subject: `[나도코딩] ${displayName}님의 AI 서비스 아이디어 진단 결과가 도착했어요`,
       html,
@@ -203,17 +227,20 @@ export async function POST(req: Request) {
 
   try {
     const data = await sendEmailOnce();
-    console.log("[send-result] 이메일 발송 성공:", JSON.stringify(data));
+    console.log("[send-result] 발송 성공:", JSON.stringify({ data, to: trimmedEmail }));
     return NextResponse.json({ ok: true, data });
   } catch (error) {
-    console.error("1차 발송 실패, 재시도:", error);
+    logSendError("1차 발송 실패, 재시도 전", error);
     await new Promise((r) => setTimeout(r, 2000));
     try {
       const data = await sendEmailOnce();
-      console.log("2차 발송 성공");
+      console.log(
+        "[send-result] 2차 발송 성공:",
+        JSON.stringify({ data, to: trimmedEmail }),
+      );
       return NextResponse.json({ ok: true, data });
     } catch (error2) {
-      console.error("2차 발송도 실패:", error2);
+      logSendError("2차 발송도 실패", error2);
       const errMessage =
         error2 instanceof Error ? error2.message : String(error2);
       const statusCode = (error2 as { statusCode?: number }).statusCode;
