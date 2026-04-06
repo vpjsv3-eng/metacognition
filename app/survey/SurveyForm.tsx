@@ -210,18 +210,50 @@ export default function SurveyForm() {
   }, [phase]);
 
   useEffect(() => {
-    const onBeforeUnload = () => {
+    const lastExitBeaconAt = { current: 0 };
+    const EXIT_DEBOUNCE_MS = 800;
+
+    function sendExitBeacon() {
+      const now = Date.now();
+      if (now - lastExitBeaconAt.current < EXIT_DEBOUNCE_MS) return;
+
       const currentStep = safeSessionStorageGet(FUNNEL_CURRENT_STEP_KEY);
       const sessionId = safeSessionStorageGet(FUNNEL_SESSION_KEY);
       if (!currentStep || !sessionId) return;
+      if (typeof navigator === "undefined" || !navigator.sendBeacon) return;
+
       const blob = new Blob(
         [JSON.stringify({ sessionId, step: currentStep, action: "exit" })],
         { type: "application/json" },
       );
-      navigator.sendBeacon("/api/funnel", blob);
+      if (navigator.sendBeacon("/api/funnel", blob)) {
+        lastExitBeaconAt.current = now;
+      }
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        sendExitBeacon();
+      }
+    }
+
+    function handlePageHide() {
+      sendExitBeacon();
+    }
+
+    function handleBeforeUnload() {
+      sendExitBeacon();
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, []);
 
   const saveProgress = useCallback(() => {

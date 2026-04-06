@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { DiagnosisResult, ServiceIdea } from "../../lib/types";
 import {
@@ -9,7 +9,7 @@ import {
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
-import InAppCtaAdjust from "../../components/InAppCtaAdjust";
+import { useInAppBrowser } from "../../lib/useInAppBrowser";
 import {
   fixedCtaBarInlineStyle,
   resultCtaBarLabelInlineStyle,
@@ -218,16 +218,31 @@ export default function CompletePage() {
   const [personaExpanded, setPersonaExpanded] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  const inApp = useInAppBrowser();
+  const inAppScrollRef = useRef<HTMLDivElement>(null);
+
   useBlockHorizontalTouchScroll();
 
   useEffect(() => {
     function onScroll() {
-      setShowScrollTop(window.scrollY > 300);
+      const el = inAppScrollRef.current;
+      const y = inApp && el ? el.scrollTop : window.scrollY;
+      setShowScrollTop(y > 300);
     }
+
+    if (inApp) {
+      const el = inAppScrollRef.current;
+      if (el) {
+        el.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+        return () => el.removeEventListener("scroll", onScroll);
+      }
+    }
+
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [inApp, result]);
 
   useEffect(() => {
     safeLocalStorageRemove(SURVEY_STORAGE_KEY);
@@ -353,7 +368,6 @@ export default function CompletePage() {
         className="result-page page-container resultContainer result-container"
         style={{ paddingBottom: "80px" }}
       >
-        <InAppCtaAdjust />
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
             AI가 아이디어를 분석하는 중...
@@ -370,12 +384,51 @@ export default function CompletePage() {
   const firstIdea = result.ideas[0];
   const otherIdeas = result.ideas.slice(1);
 
+  const mainInAppClass = inApp ? " in-app-cta-page" : "";
+  const ctaBarStyle = {
+    ...fixedCtaBarInlineStyle,
+    ...(inApp
+      ? {
+          position: "sticky" as const,
+          bottom: 0,
+          left: "auto",
+          right: "auto",
+          width: "100%",
+          zIndex: 99999,
+          backgroundColor: "#111827",
+        }
+      : {}),
+  };
+
   return (
     <main
-      className="result-page page-container resultContainer resultWithBottomCta result-container"
-      style={{ paddingBottom: "80px" }}
+      className={`result-page page-container resultContainer resultWithBottomCta result-container${mainInAppClass}`}
+      style={{
+        paddingBottom: inApp ? 0 : "80px",
+        ...(inApp
+          ? {
+              display: "flex",
+              flexDirection: "column" as const,
+              minHeight: "100vh",
+            }
+          : {}),
+      }}
     >
-      <InAppCtaAdjust />
+      <div
+        ref={inAppScrollRef}
+        className={inApp ? "in-app-cta-scroll" : undefined}
+        style={
+          inApp
+            ? {
+                flex: 1,
+                minHeight: 0,
+                overflowX: "hidden",
+                overflowY: "auto",
+                WebkitOverflowScrolling: "touch",
+              }
+            : { display: "contents" }
+        }
+      >
       {isRestoredResult && (
         <div
           style={{
@@ -803,12 +856,13 @@ export default function CompletePage() {
         </div>
       )}
 
-      {/* 결과지 다시 받기 모달 */}
+      </div>
+
       <div
         className="resultFixedCtaBar sticky-cta-bar"
         role="navigation"
         aria-label="얼리버드 신청"
-        style={fixedCtaBarInlineStyle}
+        style={ctaBarStyle}
       >
         <span className="resultFixedCtaBarLabel" style={resultCtaBarLabelInlineStyle}>
           🔥 얼리버드 마감 D-1
@@ -828,7 +882,14 @@ export default function CompletePage() {
           type="button"
           className="scrollToTopBtn"
           aria-label="맨 위로"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          onClick={() => {
+            const el = inAppScrollRef.current;
+            if (inApp && el) {
+              el.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
         >
           ↑
         </button>

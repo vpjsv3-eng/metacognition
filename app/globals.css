@@ -775,6 +775,28 @@ label {
 
 /* ═══════════ CTA / Result page ═══════════ */
 
+/* 인스타·카카오·FB 인앱: 하단 네비가 fixed CTA를 가려 flex + 문서 흐름 sticky 사용 */
+.in-app-cta-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.in-app-cta-page .sticky-cta-bar {
+  position: sticky !important;
+  bottom: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  z-index: 99999 !important;
+  flex-shrink: 0;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.in-app-cta-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* 인앱·노치 대응: 하단 고정 CTA (인라인과 동기) */
 .sticky-cta-bar {
   position: fixed !important;
