@@ -26,3 +26,22 @@ export function safeLocalStorageRemove(key: string): void {
     console.warn("localStorage 사용 불가:", e);
   }
 }
+
+export function safeSessionStorageGet(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch (e) {
+    console.warn("sessionStorage 사용 불가:", e);
+    return null;
+  }
+}
+
+export function safeSessionStorageSet(key: string, value: string): boolean {
+  try {
+    sessionStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.warn("sessionStorage 사용 불가:", e);
+    return false;
+  }
+}

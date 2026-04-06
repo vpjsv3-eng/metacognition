@@ -26,8 +26,18 @@ import {
   safeLocalStorageGet,
   safeLocalStorageSet,
   safeLocalStorageRemove,
+  safeSessionStorageGet,
 } from "../lib/safeStorage";
 import { readUtmForApi } from "../lib/utm";
+import {
+  initFunnelSession,
+  logFunnel,
+  setFunnelCurrentStep,
+  FUNNEL_CURRENT_STEP_KEY,
+  FUNNEL_SESSION_KEY,
+} from "../lib/funnelClient";
+
+const USER_EMAIL_KEY = "userEmail";
 
 const JOB_OPTIONS = [
   "직장인",
@@ -136,6 +146,9 @@ export default function SurveyForm() {
   const [emailConsentOpen, setEmailConsentOpen] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const emailPrivacyAgreeId = useId();
+  const surveyStartLoggedRef = useRef(false);
+  const funnelLastQRef = useRef<string | null>(null);
+  const emailEnterLoggedRef = useRef(false);
 
   const pulseTriggered = useRef(false);
   const [showPulse, setShowPulse] = useState(false);
@@ -157,6 +170,59 @@ export default function SurveyForm() {
     const t = setTimeout(() => setToastMessage(null), 2000);
     return () => clearTimeout(t);
   }, [toastMessage]);
+
+  useEffect(() => {
+    initFunnelSession();
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "survey" || surveyStartLoggedRef.current) return;
+    surveyStartLoggedRef.current = true;
+    logFunnel("start", "enter");
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "profile_job") {
+      setFunnelCurrentStep("profile_job");
+    } else if (phase === "profile_keywords") {
+      setFunnelCurrentStep("profile_keywords");
+    } else if (phase === "loading") {
+      setFunnelCurrentStep("loading");
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === "email_input") {
+      if (funnelLastQRef.current) {
+        logFunnel(funnelLastQRef.current, "complete");
+        funnelLastQRef.current = null;
+      }
+      if (!emailEnterLoggedRef.current) {
+        emailEnterLoggedRef.current = true;
+        setFunnelCurrentStep("email");
+        logFunnel("email", "enter");
+      }
+      return;
+    }
+    if (phase === "email_confirm") {
+      setFunnelCurrentStep("email");
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      const currentStep = safeSessionStorageGet(FUNNEL_CURRENT_STEP_KEY);
+      const sessionId = safeSessionStorageGet(FUNNEL_SESSION_KEY);
+      if (!currentStep || !sessionId) return;
+      const blob = new Blob(
+        [JSON.stringify({ sessionId, step: currentStep, action: "exit" })],
+        { type: "application/json" },
+      );
+      navigator.sendBeacon("/api/funnel", blob);
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
 
   const saveProgress = useCallback(() => {
     try {
@@ -287,6 +353,20 @@ export default function SurveyForm() {
       setCurrentStep(total - 1);
     }
   }, [phase, total, currentStep]);
+
+  useEffect(() => {
+    if (phase !== "survey" || total <= 0) return;
+    const q = visibleQuestions[safeStep];
+    if (!q) return;
+    const qid = q.id;
+    if (funnelLastQRef.current === qid) return;
+    if (funnelLastQRef.current) {
+      logFunnel(funnelLastQRef.current, "complete");
+    }
+    funnelLastQRef.current = qid;
+    setFunnelCurrentStep(qid);
+    logFunnel(qid, "enter");
+  }, [phase, safeStep, total, visibleQuestions]);
 
   useEffect(() => {
     if (phase !== "survey") return;
@@ -441,6 +521,7 @@ export default function SurveyForm() {
 
   function goPrev() {
     if (phase === "survey" && safeStep === 0) {
+      funnelLastQRef.current = null;
       setPhase("profile_keywords");
       scrollSurveyToTop();
       return;
@@ -669,6 +750,8 @@ export default function SurveyForm() {
 
   async function onSubmit() {
     setError(null);
+    safeLocalStorageSet(USER_EMAIL_KEY, email.trim());
+    logFunnel("complete", "finish");
     safeLocalStorageRemove(EMAIL_SENT_KEY);
     const profile = getProfile();
     const updatedProfile = { ...profile, email: email.trim() };
@@ -1063,6 +1146,7 @@ export default function SurveyForm() {
               className="btnGhost"
               type="button"
               onClick={() => {
+                emailEnterLoggedRef.current = false;
                 setPhase("survey");
                 setEmailError(null);
                 scrollSurveyToTop();

@@ -15,6 +15,11 @@ import {
   resultCtaBarLabelInlineStyle,
   resultCtaBarButtonInlineStyle,
 } from "../../lib/fixedCtaBarStyle";
+import {
+  initFunnelSession,
+  logFunnel,
+  setFunnelCurrentStep,
+} from "../../lib/funnelClient";
 
 const SURVEY_STORAGE_KEY = "survey_progress";
 const EMAIL_SENT_KEY = "emailSent";
@@ -253,6 +258,13 @@ export default function CompletePage() {
       router.push("/");
     }
   }, []);
+
+  useEffect(() => {
+    if (!result) return;
+    initFunnelSession();
+    setFunnelCurrentStep("result");
+    logFunnel("result", "enter");
+  }, [result]);
 
   useEffect(() => {
     if (!result) return;

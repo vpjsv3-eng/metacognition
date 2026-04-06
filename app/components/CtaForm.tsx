@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useId } from "react";
+import { useState, useCallback, useEffect, useId, useRef } from "react";
 import confetti from "canvas-confetti";
 import { readUtmForApi } from "../lib/utm";
+import { safeLocalStorageGet } from "../lib/safeStorage";
+
+const USER_EMAIL_KEY = "userEmail";
 
 type Props = {
   surveyId?: string;
@@ -39,15 +42,21 @@ export default function CtaForm({
 }: Props) {
   const [name, setName] = useState("");
   const [phoneDigits, setPhoneDigits] = useState("");
-  const [emailField, setEmailField] = useState(defaultEmail ?? "");
+  const [emailField, setEmailField] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
   const [consentOpen, setConsentOpen] = useState(false);
   const privacyAgreeId = useId();
+  const phoneRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (defaultEmail) setEmailField(defaultEmail);
+    const saved = safeLocalStorageGet(USER_EMAIL_KEY) || "";
+    if (defaultEmail?.trim()) {
+      setEmailField(defaultEmail.trim());
+    } else if (saved) {
+      setEmailField(saved);
+    }
   }, [defaultEmail]);
 
   function handlePhoneChange(value: string) {
@@ -135,10 +144,22 @@ export default function CtaForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="이름을 입력해 주세요"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            phoneRef.current?.focus();
+          }
+        }}
+        onBlur={() => {
+          if (name.trim().length > 0) {
+            phoneRef.current?.focus();
+          }
+        }}
       />
       <div className="phoneInputWrapper">
         <span className="phonePrefix">010</span>
         <input
+          ref={phoneRef}
           type="tel"
           value={phoneFormatted}
           onChange={(e) => handlePhoneChange(e.target.value)}
