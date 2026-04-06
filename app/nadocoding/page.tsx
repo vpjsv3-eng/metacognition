@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import CtaForm from "../components/CtaForm";
+import InstagramStickyCtaOffset from "../components/InstagramStickyCtaOffset";
 import { bottomFixedCtaBarStyle } from "../lib/fixedCtaBarStyle";
 import { useBlockHorizontalTouchScroll } from "../lib/useBlockHorizontalTouchScroll";
 
@@ -337,6 +338,7 @@ export default function NadocodingPage() {
         paddingBottom: "70px",
       }}
     >
+      <InstagramStickyCtaOffset />
       {showScrollTop && (
         <button
           type="button"

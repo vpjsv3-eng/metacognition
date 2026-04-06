@@ -9,6 +9,7 @@ import {
   safeLocalStorageRemove,
 } from "../../lib/safeStorage";
 import { useBlockHorizontalTouchScroll } from "../../lib/useBlockHorizontalTouchScroll";
+import InstagramStickyCtaOffset from "../../components/InstagramStickyCtaOffset";
 import { bottomFixedCtaBarStyle } from "../../lib/fixedCtaBarStyle";
 import {
   initFunnelSession,
@@ -348,6 +349,7 @@ export default function CompletePage() {
         className="result-page page-container resultContainer result-container"
         style={{ paddingBottom: "80px" }}
       >
+        <InstagramStickyCtaOffset />
         <div className="card" style={{ textAlign: "center", padding: 40 }}>
           <p style={{ fontSize: 16, color: "var(--textSecondary)" }}>
             AI가 아이디어를 분석하는 중...
@@ -369,6 +371,7 @@ export default function CompletePage() {
       className="result-page page-container resultContainer resultWithBottomCta result-container"
       style={{ paddingBottom: "80px" }}
     >
+      <InstagramStickyCtaOffset />
       {isRestoredResult && (
         <div
           style={{
