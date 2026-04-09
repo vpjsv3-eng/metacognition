@@ -16,7 +16,7 @@ type CurriculumAccordionItem = {
 const CURRICULUM_ACCORDION: CurriculumAccordionItem[] = [
   {
     mainBadge: { text: "과정 외 준비", variant: "outside" },
-    title: "4.13 월 ~ 4.17 금 | 사전 준비",
+    title: "4.27 월 ~ 5.1 금 | 사전 준비",
     subBadge: { text: "온라인", variant: "online" },
     detail: `· 사전 VOD 3편 시청
   - AI 시대에 왜 직접 만들어야 하는가 (15분)
@@ -28,7 +28,7 @@ const CURRICULUM_ACCORDION: CurriculumAccordionItem[] = [
   },
   {
     mainBadge: { text: "DAY 1", variant: "day" },
-    title: "4.18 토 | 개강 OT",
+    title: "5.2 토 | 개강 OT",
     subBadge: { text: "오프라인", variant: "offline" },
     detail: `· OT + 자기소개
 · 클론 바이브 코딩 실습 (첫 배포 경험)
@@ -36,7 +36,7 @@ const CURRICULUM_ACCORDION: CurriculumAccordionItem[] = [
   },
   {
     mainBadge: { text: "DAY 2-3", variant: "day" },
-    title: "4.19 일 ~ 4.20 월 | 기획안 작성",
+    title: "5.3 일 ~ 5.4 월 | 기획안 작성",
     subBadge: { text: "온라인", variant: "online" },
     detail: `· 기획안 템플릿 완성 + 제출
 · 강사 개별 피드백 제공
@@ -44,7 +44,7 @@ const CURRICULUM_ACCORDION: CurriculumAccordionItem[] = [
   },
   {
     mainBadge: { text: "DAY 4", variant: "day" },
-    title: "4.22 수 오후 8~10시 | 기획안 중간 점검",
+    title: "5.6 수 오후 8~10시 | 기획안 중간 점검",
     subBadge: { text: "온라인 세션", variant: "session" },
     detail: `· 기획안 피드백 반영 확인
 · 구현 방향 확정
@@ -53,25 +53,25 @@ const CURRICULUM_ACCORDION: CurriculumAccordionItem[] = [
   },
   {
     mainBadge: { text: "DAY 5-9", variant: "day" },
-    title: "4.23 목 ~ 4.27 월 | 구현 + 배포",
+    title: "5.7 목 ~ 5.11 월 | 구현 + 배포",
     subBadge: { text: "온라인", variant: "online" },
     detail: `· Lovable / Bolt로 서비스 구현
 · 디스코드 질문 → 강사 실시간 답변
-· 4.26 일 오후 2~4시
+· 5.10 일 오후 2~4시
   서비스 중간 점검 온라인 세션
   (진행 상황 공유 + 피드백 + 방향 수정)`,
   },
   {
     mainBadge: { text: "DAY 10-12", variant: "day" },
-    title: "4.28 화 ~ 4.30 목 | 서비스 완성",
+    title: "5.12 화 ~ 5.14 목 | 서비스 완성",
     subBadge: { text: "온라인", variant: "online" },
     detail: `· 핵심 기능 마무리
 · Vercel 최종 배포 완료
-· 5.1 금 발표 자료 제출 마감`,
+· 5.15 금 발표 자료 제출 마감`,
   },
   {
     mainBadge: { text: "DAY 13", variant: "day" },
-    title: "5.2 토 | 성과 공유회 + 수료식",
+    title: "5.16 토 | 성과 공유회 + 수료식",
     subBadge: { text: "오프라인", variant: "offline" },
     detail: `· 수강생 서비스 발표 (인당 5분)
 · 질의응답 + 피드백
@@ -187,7 +187,7 @@ const FAQ_DATA: FaqCategory[] = [
       },
       {
         q: "2주 안에 진짜 서비스가 만들어지나요?",
-        a: "네, 실제로 링크가 생겨요 🔗\n4.18 개강부터 5.2 수료까지\n기획 → 구현 → 배포 한 사이클을\n완성해드려요.",
+        a: "네, 실제로 링크가 생겨요 🔗\n5.2 개강부터 5.16 수료까지\n기획 → 구현 → 배포 한 사이클을\n완성해드려요.",
       },
       {
         q: "어떤 서비스를 만들게 되나요?",
@@ -200,7 +200,7 @@ const FAQ_DATA: FaqCategory[] = [
     items: [
       {
         q: "오프라인 참석이 꼭 필요한가요?",
-        a: "4.18(토) OT와 5.2(토) 성과공유회는 오프라인이에요.\n가능하면 참석을 권장드려요.\n불가피한 경우 개별 안내드릴게요.",
+        a: "5.2(토) OT와 5.16(토) 성과공유회는 오프라인이에요.\n가능하면 참석을 권장드려요.\n불가피한 경우 개별 안내드릴게요.",
       },
       {
         q: "직장인도 병행할 수 있나요?",
@@ -251,7 +251,7 @@ const FAQ_DATA: FaqCategory[] = [
       },
       {
         q: "수료증이 나오나요?",
-        a: "네! 5.2 성과공유회 당일 드려요.\n포트폴리오로도 활용할 수 있어요.",
+        a: "네! 5.16 성과공유회 당일 드려요.\n포트폴리오로도 활용할 수 있어요.",
       },
       {
         q: "수료 후에도 동료들과 연결되나요?",
@@ -367,7 +367,7 @@ export default function NadocodingPage() {
         >
           나도 코딩 올인원 부트캠프 1기 모집
         </div>
-        <p className="nadocodingHeroDate date">4월 18일 (토) ~ 5월 2일 (토)</p>
+        <p className="nadocodingHeroDate date">5월 2일 (토) ~ 5월 16일 (토)</p>
 
         <h1 className="nadocodingHeroTitle">
           아이디어 발굴부터
